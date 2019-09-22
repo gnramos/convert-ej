@@ -12,7 +12,6 @@ Dona Ros&#226;ngela est&#225; escrevendo um livro matem&#225;tico contendo apena
 
 Em seus estudos, Dona Ros&#226;ngela considera as seguintes opera&#231;&#245;es matem&#225;ticas bin&#225;rias:
 
-
 &lt;ul&gt;
 &lt;br /&gt; ^ (pot&#234;ncia);
 &lt;br /&gt; / (divis&#227;o);
@@ -26,21 +25,13 @@ Al&#233;m disso, os operandos podem ser representados por vari&#225;veis min&#25
 Por exemplo, a express&#227;o em nota&#231;&#227;o p&#243;s-fixa ab*cd+2^/ &#233; obtida a partir da convers&#227;o da express&#227;o em nota&#231;&#227;o infixa a*4/(c+d)^2. Ajude Dona Ros&#226;ngela nessa tarefa e elabore um programa que converta uma express&#227;o em nota&#231;&#227;o infixa para a nota&#231;&#227;o p&#243;s-fixa.
 
 
-
-
-Entradas:
-
-
+&lt;br /&gt;&lt;br /&gt;Entradas:&lt;br /&gt;&lt;br /&gt;
 A entrada consiste de uma express&#227;o matem&#225;tica  1 &amp;#8804; | s | &amp;#8804; 10^3  em nota&#231;&#227;o infixa.
 
-
-
-Sa&#237;das:
-
-
+&lt;br /&gt;&lt;br /&gt;Sa&#237;das:&lt;br /&gt;&lt;br /&gt;
 Imprima a express&#227;o correspondente em nota&#231;&#227;o p&#243;s-fixa.
 
-\Examples
+&lt;br /&gt;&lt;br /&gt;
 
 \begin{example}
 \exmpfile{example.01}{example.01.a}%
