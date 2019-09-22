@@ -1,0 +1,35 @@
+\begin{problem}{Infixa para pós-fixa}{standard input}{standard output}{1 second}{256 megabytes}
+
+Dona Rosângela está escrevendo um livro matemático contendo apenas em expressões matemáticas em notação pós-fixa. Sabemos que as expressões aritméticas que estudamos estão em notação infixa, isto é, em operações matemáticas binárias, o operador $y$ é apresentado entre dois operandos ($o_1$ e $o_2$), sob a forma $o_1 y o_2$.
+
+Em seus estudos, Dona Rosângela considera as seguintes operações matemáticas binárias:
+
+\begin{itemize}
+\item \^ (potência);
+\item / (divisão);
+\item * (multiplicação);
+\item - (subtração);
+\item + (soma).
+\end{itemize}
+
+Além disso, os operandos podem ser representados por variáveis minúsculas (de $a$ até $z$) ou constantes de um único dígito numérico. Nessas expressões, podem existir parênteses para preservar a prioridade de determinadas operações, uma vez que alguns operadores possuem prioridade na ausência de parênteses (por exemplo, multiplicação tem prioridade em relação à soma e subtração).
+
+Por exemplo, a expressão em notação pós-fixa ab*cd+2\^/ é obtida a partir da conversão da expressão em notação infixa a*4/(c+d)\^2. Ajude Dona Rosângela nessa tarefa e elabore um programa que converta uma expressão em notação infixa para a notação pós-fixa.
+
+
+\InputFile
+A entrada consiste de uma expressão matemática $1 \leq \arrowvert s \arrowvert \leq 10^3$ em notação infixa.
+
+\OutputFile
+Imprima a expressão correspondente em notação pós-fixa.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\end{example}
+
+\end{problem}
+

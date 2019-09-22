@@ -1,0 +1,727 @@
+<quiz>
+
+  <question type="coderunner">
+    <name>
+      <text>Infixa para p&#243;s-fixa
+</text>
+    </name>
+    <questiontext format="html">
+      <text>\begin{problem}{Infixa para p&#243;s-fixa}{standard input}{standard output}{1 second}{256 megabytes}
+
+Dona Ros&#226;ngela est&#225; escrevendo um livro matem&#225;tico contendo apenas em express&#245;es matem&#225;ticas em nota&#231;&#227;o p&#243;s-fixa. Sabemos que as express&#245;es aritm&#233;ticas que estudamos est&#227;o em nota&#231;&#227;o infixa, isto &#233;, em opera&#231;&#245;es matem&#225;ticas bin&#225;rias, o operador  y  &#233; apresentado entre dois operandos ( o_1  e  o_2 ), sob a forma  o_1 y o_2 .
+
+Em seus estudos, Dona Ros&#226;ngela considera as seguintes opera&#231;&#245;es matem&#225;ticas bin&#225;rias:
+
+
+&lt;ul&gt;
+&lt;br /&gt; ^ (pot&#234;ncia);
+&lt;br /&gt; / (divis&#227;o);
+&lt;br /&gt; * (multiplica&#231;&#227;o);
+&lt;br /&gt; - (subtra&#231;&#227;o);
+&lt;br /&gt; + (soma).
+&lt;/ul&gt;
+
+Al&#233;m disso, os operandos podem ser representados por vari&#225;veis min&#250;sculas (de  a  at&#233;  z ) ou constantes de um &#250;nico d&#237;gito num&#233;rico. Nessas express&#245;es, podem existir par&#234;nteses para preservar a prioridade de determinadas opera&#231;&#245;es, uma vez que alguns operadores possuem prioridade na aus&#234;ncia de par&#234;nteses (por exemplo, multiplica&#231;&#227;o tem prioridade em rela&#231;&#227;o &#224; soma e subtra&#231;&#227;o).
+
+Por exemplo, a express&#227;o em nota&#231;&#227;o p&#243;s-fixa ab*cd+2^/ &#233; obtida a partir da convers&#227;o da express&#227;o em nota&#231;&#227;o infixa a*4/(c+d)^2. Ajude Dona Ros&#226;ngela nessa tarefa e elabore um programa que converta uma express&#227;o em nota&#231;&#227;o infixa para a nota&#231;&#227;o p&#243;s-fixa.
+
+
+
+
+Entradas:
+
+
+A entrada consiste de uma express&#227;o matem&#225;tica  1 &amp;#8804; | s | &amp;#8804; 10^3  em nota&#231;&#227;o infixa.
+
+
+
+Sa&#237;das:
+
+
+Imprima a express&#227;o correspondente em nota&#231;&#227;o p&#243;s-fixa.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\end{example}
+
+\end{problem}
+
+</text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text />
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0</penalty>
+    <hidden>0</hidden>
+    <idnumber />
+    <coderunnertype>cpp_program</coderunnertype>
+    <prototypetype>0</prototypetype>
+    <allornothing>1</allornothing>
+    <penaltyregime>0, 0, 10, 20, ...</penaltyregime>
+    <precheck>0</precheck>
+    <showsource>0</showsource>
+    <answerboxlines>18</answerboxlines>
+    <answerboxcolumns>100</answerboxcolumns>
+    <answerpreload />
+    <useace />
+    <resultcolumns />
+    <template />
+    <iscombinatortemplate />
+    <allowmultiplestdins />
+    <answer>#include&lt;bits/stdc++.h&gt;
+
+using namespace std;
+
+map&lt;char,int&gt; op;
+
+void prioridade()
+{
+	op['+']=1;
+	op['-']=1;
+	op['/']=2;
+	op['*']=2;
+	op['^']=3;
+}
+
+void convertInfixa2PosFixa(char exp[])
+{
+    stack&lt;char&gt; pilha;
+
+    for(int i=0; exp[i] != '\0';i++)
+    {
+        if((exp[i] &gt;= 'a' &amp;&amp; exp[i] &lt;= 'z') || (exp[i] &gt;= '0' &amp;&amp; exp[i] &lt;= '9'))
+        {
+            printf("%c",exp[i]);
+        }
+        else
+        {
+            if(exp[i] == '+' || exp[i]== '-' || exp[i]== '*' || exp[i]== '/' || exp[i]== '^')
+            {
+                if(!pilha.empty())
+                {
+                    while(op[exp[i]] &lt;= op[pilha.top()])
+                    {
+                        printf("%c",(char) pilha.top());
+                        
+                        pilha.pop();
+                        
+                        if(pilha.empty())
+                            break;
+                    }
+                }
+		pilha.push(exp[i]);
+            }
+            else
+            {
+                if(exp[i]=='(')
+                {
+                    pilha.push('(');
+                }
+                else
+                {
+                    if(exp[i]==')')
+                    {
+                        while(pilha.top()!='(')
+                        {
+                            printf("%c",(char) pilha.top());
+                            pilha.pop();
+                        }
+                        pilha.pop();
+                    }
+                }
+            }
+        }
+    }
+    
+    while(!pilha.empty())
+    {
+        printf("%c",(char) pilha.top());
+        pilha.pop();
+    }
+
+    printf("\n");
+}
+
+int main()
+{
+    
+    prioridade();
+
+    char exp[101];
+    
+    scanf("%s",exp);
+
+    convertInfixa2PosFixa(exp);
+
+    return 0;
+}
+</answer>
+    <validateonsave>0</validateonsave>
+    <testsplitterre />
+    <language />
+    <acelang />
+    <sandbox />
+    <grader />
+    <cputimelimitsecs />
+    <memlimitmb />
+    <sandboxparams />
+    <templateparams />
+    <hoisttemplateparams>1</hoisttemplateparams>
+    <twigall>0</twigall>
+    <uiplugin />
+    <attachments>0</attachments>
+    <attachmentsrequired>0</attachmentsrequired>
+    <maxfilesize>10240</maxfilesize>
+    <filenamesregex />
+    <filenamesexplain />
+    <displayfeedback>1</displayfeedback>
+    <testcases>
+    <testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+      <testcode>
+                <text>(a*b+1)/(d+c*7)^(a-2+1+t*(a+b))+6-i^2^(t+3)-a*(c+d/2)
+</text>
+      </testcode>
+      <stdin>
+                <text />
+      </stdin>
+      <expected>
+                <text>ab*1+dc7*+a2-1+tab+*+^/6+i2^t3+^-acd2/+*-
+</text>
+      </expected>
+      <extra>
+                <text />
+      </extra>
+      <display>
+                <text>SHOW</text>
+      </display>
+    </testcase></testcases>
+  </question>
+
+</quiz>
