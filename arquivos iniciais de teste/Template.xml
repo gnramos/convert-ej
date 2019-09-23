@@ -3,10 +3,10 @@
 <!-- question: 391  -->
   <question type="coderunner">
     <name>
-      <text>Nome da questão</text>
+      <text>Name</text>
     </name>
     <questiontext format="html">
-      <text><![CDATA[<p>Texto da questão</p>]]></text>
+      <text><![CDATA[<p>Text</p>]]></text>
     </questiontext>
     <generalfeedback format="html">
       <text></text>
@@ -29,7 +29,7 @@
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer>Gabarito</answer>
+    <answer>Solution</answer>
     <validateonsave>0</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>
