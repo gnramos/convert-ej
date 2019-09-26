@@ -1,25 +1,26 @@
 import xml.etree.ElementTree as ET
 import os
+import re
 
 
-# Lida provisoriamente com a tradução do texto em tex
-# para html
-# Será substituido posteriormente por uma abordagem
-# utilizando expressões regulares
+def spacei():
+    return '\n\n<br /><br />'
+
+
+def spacef():
+    return '<br /><br />\n\n'
+
+
+# Lida parcialmente com a tradução do texto em tex para html
 def tex2html(s):
-    s = s.replace("\\begin{itemize}", "<ul>")
-    s = s.replace("\\end{itemize}", "</ul>")
-    s = s.replace("\\item", "<br />")
-    s = s.replace("\\InputFile", "<br /><br />Entradas:<br /><br />")
-    s = s.replace("\\OutputFile", "<br /><br />Saídas:<br /><br />")
-    s = s.replace("\\^", "^")
-    s = s.replace("\\ge", "&#8805;")
-    s = s.replace("\\geq", "&#8805;")
-    s = s.replace("\\leq", "&#8804;")
-    s = s.replace("\\le", "&#8804;")
-    s = s.replace("$", " ")
-    s = s.replace("\\arrowvert", "|")
-    s = s.replace("\\Examples", "<br /><br />")
+    s = re.sub(r"\\begin{itemize}", "<ul>", s)
+    s = re.sub(r"\\end{itemize}", "</ul>", s)
+    s = re.sub(r"\\ge", "&#8805;", s)
+    s = re.sub(r"\\geq", "&#8805;", s)
+    s = re.sub(r"\\le", "&#8804;", s)
+    s = re.sub(r"\\leq", "&#8804;", s)
+    s = re.sub(r"\\arrowvert", "|", s)
+    s = re.sub(r"\\^", "^", s)
 
     return s
 
@@ -33,17 +34,29 @@ testoroot = testtree.getroot()
 
 directory = 'ed'  # Nome do diretório
 
+texto = ''  # Texto da questão
+
 # Insere o nome da questão
 with open(directory+'/statement-sections/english/name.tex', 'r') as name:
-    xmlname = root.find("name")
-    xmltextname = xmlname.find("text")
-    xmltextname.text = name.read()
+    texto = name.read()
+    xmlname = root.find("name").find("text")
+    xmlname.text = texto
+    texto += spacef()
 
-# Modifica e insere o texto da questão
-with open(directory+'/statements/english/problem.tex', 'r') as question:
-    xmlquestion = root.find("questiontext")
-    xmltextquestion = xmlquestion.find("text")
-    xmltextquestion.text = tex2html(question.read())
+# Armazena e modifica os textos
+with open(directory+'/statement-sections/english/legend.tex', 'r') as question:
+    texto += spacei() + tex2html(question.read())
+
+with open(directory+'/statement-sections/english/input.tex', 'r') as question:
+    texto += spacei()+'Entrada:'+spacef() + tex2html(question.read())
+
+with open(directory+'/statement-sections/english/output.tex', 'r') as question:
+    texto += spacei()+'Saída:'+spacef() + tex2html(question.read())
+
+# Insere o texto
+xmlquestion = root.find("questiontext")
+xmltextquestion = xmlquestion.find("text")
+xmltextquestion.text = texto
 
 # Insere a solução na questão
 namesolution = 'ed-pilha-infix2posfix.cpp'
@@ -60,17 +73,15 @@ tests.sort()
 for arq in tests:
     if arq.endswith('.a'):
         with open(directory+'/tests/'+arq, 'r') as testoutput:
-            xmloutput = testoroot.find("expected")
-            xmltextoutput = xmloutput.find("text")
-            xmltextoutput.text = testoutput.read()
+            xmloutput = testoroot.find("expected").find("text")
+            xmloutput.text = testoutput.read()
 
             xmltestcases = root.find("testcases")
             xmltestcases.append(testoroot)
     else:
         with open(directory+'/tests/'+arq, 'r') as testinput:
-            xmlinput = testoroot.find("testcode")
-            xmltextinput = xmlinput.find("text")
-            xmltextinput.text = testinput.read()
+            xmlinput = testoroot.find("testcode").find("text")
+            xmlinput.text = testinput.read()
 
 # Gera o arquivo final da questão
 tree.write('Problem.xml')
