@@ -13,14 +13,53 @@ def spacef():
 
 # Lida parcialmente com a tradução do texto em tex para html
 def tex2html(s):
-    s = re.sub(r"\\begin{itemize}", "<ul>", s)
-    s = re.sub(r"\\end{itemize}", "</ul>", s)
-    s = re.sub(r"\\ge", "&#8805;", s)
-    s = re.sub(r"\\geq", "&#8805;", s)
-    s = re.sub(r"\\le", "&#8804;", s)
-    s = re.sub(r"\\leq", "&#8804;", s)
-    s = re.sub(r"\\arrowvert", "|", s)
-    s = re.sub(r"\\^", "^", s)
+    """
+    Return a string with syntax substitutions,
+    from latex format to html, performed on the
+    given input
+
+    rules -- dict with all the substiturion rules
+             for a specific format
+    s -- input string to be formated
+    """
+    rules1 = {
+        r'\\begin{itemize}': '<ul>',
+        r'\\end{itemize}': '</ul>',
+        r'\\lt': '&lt;',
+        r'\\le': '&le;',
+        r'\\gt': '&gt;',
+        r'\\ge': '&ge;',
+        r'\\arrowvert': '|',
+        r'\\\^': '^'
+    }
+
+    rules2 = {
+        r'\\emph': 'i',
+        r'\\textbf': 'b',
+        r'\\textit': 'i'
+        # r'\\textsc': '',
+        # r'\\texttt': '',
+        # r'\\textsf': '',
+        # r'\\textrm': '',
+        # r'\\textsl': ''
+    }
+
+    rules3 = {
+        r'\\item': 'li'
+    }
+
+    for l, h in rules1.items():
+        s = re.sub(l, h, s)
+
+    for l, h in rules2.items():
+        l_str = r'%s{([^}]*)}' % l
+        h_str = r'<%s>\1</%s>' % (h, h)
+        s = re.sub(l_str, h_str, s)
+
+    for l, h in rules3.items():
+        l_str = r'%s([^\n]*)' % l
+        h_str = r'<%s>\1</%s>' % (h, h)
+        s = re.sub(l_str, h_str, s)
 
     return s
 
@@ -41,7 +80,7 @@ with open(directory+'/statement-sections/english/name.tex', 'r') as name:
     texto = name.read()
     xmlname = root.find("name").find("text")
     xmlname.text = texto
-    texto += spacef()
+    texto = '<h1>'+texto+'</h1>'+spacef()
 
 # Armazena e modifica os textos
 with open(directory+'/statement-sections/english/legend.tex', 'r') as question:
