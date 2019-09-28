@@ -17,25 +17,25 @@ root = root[0]
 testtree = ET.parse('Testcase-Template.xml')
 testoroot = testtree.getroot()
 
-directory = 'ed'  # Nome do diretório
-
 texto = ''  # Texto da questão
+directory = 'ed'  # Nome do diretório
+stat_dir = '/statement-sections/english/'  # Diretório do texto
 
 # Insere o nome da questão
-with open(directory+'/statement-sections/english/name.tex', 'r') as name:
+with open(directory+stat_dir+'name.tex', 'r') as name:
     texto = name.read()
     xmlname = root.find("name").find("text")
     xmlname.text = texto
     texto = '<h1>'+texto+'</h1>'+space(1)
 
 # Armazena e modifica os textos
-with open(directory+'/statement-sections/english/legend.tex', 'r') as question:
+with open(directory+stat_dir+'legend.tex', 'r') as question:
     texto += space(0) + tex2html(question.read())
 
-with open(directory+'/statement-sections/english/input.tex', 'r') as question:
+with open(directory+stat_dir+'input.tex', 'r') as question:
     texto += space(0)+'Entrada:'+space(1) + tex2html(question.read())
 
-with open(directory+'/statement-sections/english/output.tex', 'r') as question:
+with open(directory+stat_dir+'output.tex', 'r') as question:
     texto += space(0)+'Saída:'+space(1) + tex2html(question.read())
 
 # Insere o texto
@@ -44,7 +44,11 @@ xmltextquestion = xmlquestion.find("text")
 xmltextquestion.text = texto
 
 # Insere a solução na questão
-namesolution = 'ed-pilha-infix2posfix.cpp'
+name_dir = os.listdir(directory+'/solutions/')
+for name in name_dir:
+    if name.endswith('.cpp'):
+        namesolution = name
+
 with open(directory+'/solutions/' + namesolution, 'r') as solution:
     xmlsolution = root.find("answer")
     xmlsolution.text = solution.read()
