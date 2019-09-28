@@ -3,12 +3,11 @@ import os
 from t2h import tex2html
 
 
-def spacei():
-    return '\n\n<br /><br />'
-
-
-def spacef():
-    return '<br /><br />\n\n'
+def space(k):
+    if k:
+        return '<br /><br />\n\n'
+    else:
+        return '\n\n<br /><br />'
 
 
 # Templates para a questão e para casos teste
@@ -27,17 +26,17 @@ with open(directory+'/statement-sections/english/name.tex', 'r') as name:
     texto = name.read()
     xmlname = root.find("name").find("text")
     xmlname.text = texto
-    texto = '<h1>'+texto+'</h1>'+spacef()
+    texto = '<h1>'+texto+'</h1>'+space(1)
 
 # Armazena e modifica os textos
 with open(directory+'/statement-sections/english/legend.tex', 'r') as question:
-    texto += spacei() + tex2html(question.read())
+    texto += space(0) + tex2html(question.read())
 
 with open(directory+'/statement-sections/english/input.tex', 'r') as question:
-    texto += spacei()+'Entrada:'+spacef() + tex2html(question.read())
+    texto += space(0)+'Entrada:'+space(1) + tex2html(question.read())
 
 with open(directory+'/statement-sections/english/output.tex', 'r') as question:
-    texto += spacei()+'Saída:'+spacef() + tex2html(question.read())
+    texto += space(0)+'Saída:'+space(1) + tex2html(question.read())
 
 # Insere o texto
 xmlquestion = root.find("questiontext")
