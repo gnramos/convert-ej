@@ -1,36 +1,33 @@
 <quiz>
-
   <question type="coderunner">
     <name>
       <text>Infixa para p&#243;s-fixa
 </text>
     </name>
     <questiontext format="html">
-      <text>Infixa para p&#243;s-fixa
-&lt;br /&gt;&lt;br /&gt;
+      <text>&lt;h1&gt;Infixa para p&#243;s-fixa
+&lt;/h1&gt;
 
-
-
-&lt;br /&gt;&lt;br /&gt;Dona Ros&#226;ngela est&#225; escrevendo um livro matem&#225;tico contendo apenas em express&#245;es matem&#225;ticas em nota&#231;&#227;o p&#243;s-fixa. Sabemos que as express&#245;es aritm&#233;ticas que estudamos est&#227;o em nota&#231;&#227;o infixa, isto &#233;, em opera&#231;&#245;es matem&#225;ticas bin&#225;rias, o operador  y  &#233; apresentado entre dois operandos ( o_1  e  o_2 ), sob a forma  o_1 y o_2 .
+&lt;br /&gt;&lt;br /&gt;Dona Ros&#226;ngela est&#225; escrevendo um livro matem&#225;tico contendo apenas em express&#245;es matem&#225;ticas em nota&#231;&#227;o p&#243;s-fixa. Sabemos que as express&#245;es aritm&#233;ticas que estudamos est&#227;o em nota&#231;&#227;o infixa, isto &#233;, em opera&#231;&#245;es matem&#225;ticas bin&#225;rias, o operador $y$ &#233; apresentado entre dois operandos ($o_1$ e $o_2$), sob a forma $o_1 y o_2$.
 
 Em seus estudos, Dona Ros&#226;ngela considera as seguintes opera&#231;&#245;es matem&#225;ticas bin&#225;rias:
 
 &lt;ul&gt;
-&lt;br /&gt; \^ (pot&#234;ncia);
-&lt;br /&gt; / (divis&#227;o);
-&lt;br /&gt; * (multiplica&#231;&#227;o);
-&lt;br /&gt; - (subtra&#231;&#227;o);
-&lt;br /&gt; + (soma).
+&lt;li&gt; ^ (pot&#234;ncia);&lt;/li&gt;
+&lt;li&gt; / (divis&#227;o);&lt;/li&gt;
+&lt;li&gt; * (multiplica&#231;&#227;o);&lt;/li&gt;
+&lt;li&gt; - (subtra&#231;&#227;o);&lt;/li&gt;
+&lt;li&gt; + (soma).&lt;/li&gt;
 &lt;/ul&gt;
 
-Al&#233;m disso, os operandos podem ser representados por vari&#225;veis min&#250;sculas (de  a  at&#233;  z ) ou constantes de um &#250;nico d&#237;gito num&#233;rico. Nessas express&#245;es, podem existir par&#234;nteses para preservar a prioridade de determinadas opera&#231;&#245;es, uma vez que alguns operadores possuem prioridade na aus&#234;ncia de par&#234;nteses (por exemplo, multiplica&#231;&#227;o tem prioridade em rela&#231;&#227;o &#224; soma e subtra&#231;&#227;o).
+Al&#233;m disso, os operandos podem ser representados por vari&#225;veis min&#250;sculas (de $a$ at&#233; $z$) ou constantes de um &#250;nico d&#237;gito num&#233;rico. Nessas express&#245;es, podem existir par&#234;nteses para preservar a prioridade de determinadas opera&#231;&#245;es, uma vez que alguns operadores possuem prioridade na aus&#234;ncia de par&#234;nteses (por exemplo, multiplica&#231;&#227;o tem prioridade em rela&#231;&#227;o &#224; soma e subtra&#231;&#227;o).
 
-Por exemplo, a express&#227;o em nota&#231;&#227;o p&#243;s-fixa ab*cd+2\^/ &#233; obtida a partir da convers&#227;o da express&#227;o em nota&#231;&#227;o infixa a*4/(c+d)\^2. Ajude Dona Ros&#226;ngela nessa tarefa e elabore um programa que converta uma express&#227;o em nota&#231;&#227;o infixa para a nota&#231;&#227;o p&#243;s-fixa.
+Por exemplo, a express&#227;o em nota&#231;&#227;o p&#243;s-fixa ab*cd+2^/ &#233; obtida a partir da convers&#227;o da express&#227;o em nota&#231;&#227;o infixa a*4/(c+d)^2. Ajude Dona Ros&#226;ngela nessa tarefa e elabore um programa que converta uma express&#227;o em nota&#231;&#227;o infixa para a nota&#231;&#227;o p&#243;s-fixa.
 
 
 &lt;br /&gt;&lt;br /&gt;Entrada:&lt;br /&gt;&lt;br /&gt;
 
-A entrada consiste de uma express&#227;o matem&#225;tica  1 &amp;#8804;q | s | &amp;#8804;q 10^3  em nota&#231;&#227;o infixa.
+A entrada consiste de uma express&#227;o matem&#225;tica $1 &amp;le; | s | &amp;le; 10^3$ em nota&#231;&#227;o infixa.
 
 
 &lt;br /&gt;&lt;br /&gt;Sa&#237;da:&lt;br /&gt;&lt;br /&gt;

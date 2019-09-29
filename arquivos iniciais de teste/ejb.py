@@ -1,6 +1,6 @@
 import argparse
 from xmlgenerator import xml_gen
-from xmlsgenerator import xmls_gen
+from dir_xmlgenerator import dir_xml_gen
 
 
 def main():
@@ -18,9 +18,9 @@ def main():
     args = parser.parse_args()
 
     if args.question:
-        xml_gen(args.question[0])
+        xml_gen(args.question[0], args.question[0])
     elif args.directory:
-        xmls_gen(args.directory[0])
+        dir_xml_gen(args.directory[0])
 
 
 if __name__ == "__main__":

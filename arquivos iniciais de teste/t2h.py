@@ -14,10 +14,12 @@ def tex2html(s):
     rules1 = {
         r'\\begin{itemize}': '<ul>',
         r'\\end{itemize}': '</ul>',
-        r'\\lt': '&lt;',
+        r'\\leq': '&le;',
         r'\\le': '&le;',
-        r'\\gt': '&gt;',
+        r'\\geq': '&ge;',
         r'\\ge': '&ge;',
+        r'\\lt': '&lt;',
+        r'\\gt': '&gt;',
         r'\\arrowvert': '|',
         r'\\\^': '^'
     }

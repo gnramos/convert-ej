@@ -10,7 +10,7 @@ def space(k):
         return '\n\n<br /><br />'
 
 
-def xml_gen(directory):
+def xml_gen(directory, question_name):
     # Templates para a questão e para casos teste
     tree = ET.parse('Template.xml')
     root = tree.getroot()
@@ -26,7 +26,7 @@ def xml_gen(directory):
         texto = name.read()
         xmlname = root.find("name").find("text")
         xmlname.text = texto
-        texto = '<h1>'+texto+'</h1>'+space(1)
+        texto = '<h1>'+texto+'</h1>'
 
     # Armazena e modifica os textos
     with open(directory+stat_dir+'legend.tex', 'r') as question:
@@ -73,4 +73,7 @@ def xml_gen(directory):
                 xmlinput.text = testinput.read()
 
     # Gera o arquivo final da questão
-    tree.write('Problem.xml')
+    files = 'XML Files'
+    if(not os.path.exists(files)):
+        os.mkdir(files)
+    tree.write(files + '/' + question_name + '.xml')
