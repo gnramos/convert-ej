@@ -2,6 +2,12 @@
 
 Tools for translating questions between electronic judges.
 
+## Installation
+
+```
+pip install -i https://test.pypi.org/simple/ EJ-Bridge
+```
+
 ## Usage
 
 The following commands will create a .xml file from a Codeforces question
