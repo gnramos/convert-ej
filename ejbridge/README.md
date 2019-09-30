@@ -10,14 +10,12 @@ pip install -i https://test.pypi.org/simple/ EJ-Bridge
 
 ## Usage
 
-The following commands will create a .xml file from a Codeforces question
-
-Creating a file from the name_dir_question directory
+Creating a xml file from the 'name_dir_question' question
 ```
 ejbridge -q name_dir_question
 ```
 
-Creating files from the folders inside the name_dir directory
+Creating files from the questions inside the 'name_dir' directory
 ```
 ejbridge -d name_dir
 ```
