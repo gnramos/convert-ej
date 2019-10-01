@@ -3,11 +3,14 @@ import os
 from .t2h import tex2html
 
 
-def space(k):
-    if k:
-        return '<br /><br />\n\n'
-    else:
-        return '\n\n<br /><br />'
+def name_section(sec_name, description):
+    return '\n<p>\n  <b>' + sec_name + '</b><br />\n' + description + '\n</p>\n'
+
+
+def get_section(file_name, sec_name):
+    with open(file_name, 'r') as section:
+        text = name_section(sec_name, tex2html(section.read()))
+    return text
 
 
 def xml_gen(directory, question_name):
@@ -20,24 +23,18 @@ def xml_gen(directory, question_name):
     testoroot = testtree.getroot()
 
     texto = ''  # Texto da questão
-    stat_dir = '/statement-sections/english/'  # Diretório do texto
+    dir_sec = directory + '/statement-sections/english/'  # Diretório do texto
 
-    # Insere o nome da questão
-    with open(directory+stat_dir+'name.tex', 'r') as name:
-        texto = name.read()
-        xmlname = root.find("name").find("text")
-        xmlname.text = texto
-        texto = '<h1>'+texto+'</h1>'
+    sections = {
+        'legend': '',
+        'input': 'Entrada',
+        'output': 'Saida',
+        'notes': 'Notas'
+    }
 
-    # Armazena e modifica os textos
-    with open(directory+stat_dir+'legend.tex', 'r') as question:
-        texto += space(0) + tex2html(question.read())
-
-    with open(directory+stat_dir+'input.tex', 'r') as question:
-        texto += space(0)+'Entrada:'+space(1) + tex2html(question.read())
-
-    with open(directory+stat_dir+'output.tex', 'r') as question:
-        texto += space(0)+'Saída:'+space(1) + tex2html(question.read())
+    for file_name, sec_name in sections:
+        if os.path.isfile(dir_sec + file_name + '.xml'):
+            texto += get_section(dir_sec + file_name + '.xml', sec_name)
 
     # Insere o texto
     xmlquestion = root.find("questiontext")
@@ -47,7 +44,7 @@ def xml_gen(directory, question_name):
     # Insere a solução na questão
     name_dir = os.listdir(directory+'/solutions/')
     for name in name_dir:
-        if name.endswith('.cpp'):
+        if name.endswith('.cpp') or name.endswith('.c'):
             namesolution = name
 
     with open(directory+'/solutions/' + namesolution, 'r') as solution:
@@ -68,13 +65,22 @@ def xml_gen(directory, question_name):
 
                 xmltestcases = root.find("testcases")
                 xmltestcases.append(testoroot)
+
+                testtree = ET.parse(package_dir + 'Testcase-Template.xml')
+                testoroot = testtree.getroot()
         else:
             with open(directory+'/tests/'+arq, 'r') as testinput:
-                xmlinput = testoroot.find("testcode").find("text")
+                xmlinput = testoroot.find("stdin").find("text")
                 xmlinput.text = testinput.read()
 
     # Gera o arquivo final da questão
-    files = 'XML Files'
+    files = 'files'
     if not os.path.exists(files):
         os.mkdir(files)
     tree.write(files + '/' + question_name + '.xml')
+
+
+def dir_xml_gen(directory):
+    questions = os.listdir(directory)
+    for name in questions:
+        xml_gen(directory + '/' + name, name)

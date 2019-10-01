@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: EJ-Bridge
-Version: 1.0.0
+Version: 1.0.6
 Summary: A Python package to translate questions                  between electronic judges
 Home-page: https://github.com/gnramos/ejtranslator
 Author: Tiago de Souza Fernandes
@@ -10,16 +10,20 @@ Description: # ejbridge
         
         Tools for translating questions between electronic judges.
         
+        ## Installation
+        
+        ```
+        pip install -i https://test.pypi.org/simple/ EJ-Bridge
+        ```
+        
         ## Usage
         
-        The following commands will create a .xml file from a Codeforces question
-        
-        Creating a file from the name_dir_question directory
+        Creating a xml file from the 'name_dir_question' question
         ```
         ejbridge -q name_dir_question
         ```
         
-        Creating files from the folders inside the name_dir directory
+        Creating files from the questions inside the 'name_dir' directory
         ```
         ejbridge -d name_dir
         ```
