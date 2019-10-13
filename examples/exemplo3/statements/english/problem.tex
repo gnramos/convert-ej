@@ -1,0 +1,46 @@
+\begin{problem}{Posto de Pesagem}{standard input}{standard output}{1 second}{256 megabytes}
+
+Na última estação chuvosa, uma rodovia do Distrito Federal ficou muito esburacada, sendo motivo de reclamação de diversos condutores que transitam nela diariamente. Tentando resolver o problema, os órgãos de trânsito competentes instalaram um posto de pesagem com o objetivo de fiscalizar se os pesos dos veículos ultrapassam um limite de peso $P$ (em kg) dessa rodovia.
+
+Os fiscais deste posto de pesagem sabem que é impossível abordar todos os veículos e, para isso, consideram um fator $F$ que denota uma amostragem dos veículos a serem pesados. Por exemplo, se $F=1$, os fiscais verificam todos os veículos. Para $F=2$, os veículos são fiscalizados alternadamente, isto é, se um veículo é fiscalizado, o próximo veículo é liberado para seguir viagem. Para $F=3$, a cada três veículos, um deles tem seu peso fiscalizado conforme a ordem que passam pelo posto de pesagem, isto é, o veículo $1$ é fiscalizado, os veículos $2$ e $3$ são diretamente liberados, em seguida o veículo $4$ é fiscalizado e os veículos $5$ e $6$ são diretamente liberados, e assim sucessivamente.
+
+Alguns caminheiros ``fora da lei'' tentam passar pelo posto de pesagem sem serem abordados pelos fiscais. No entanto, alguns deles são abordados na fiscalização e como estão mais pesados do que a rodovia permite, acabam por ser barrados pelos fiscais no posto de pesagem. Para contornar a situação e poder seguir viagem, esses caminhoneiros infratores tiveram a ideia de descartar $2kg$ da carga total do veículo e retornarem para o final da fila de veículos, visando tentar a sorte de não serem abordados pelos fiscais novamente.
+
+Sabe-se que a abordagem dos fiscais em cada veículo gasta um determinado tempo $t_i$ conforme as seguintes situações:
+
+\begin{itemize}
+\item Um veículo que não é abordado pelos fiscais, isto é, é diretamente liberado ao passar pelo posto, gasta um tempo $t_i=1$ para passar pelo posto de pesagem;
+\item Um veículo que é abordado, fiscalizado e está dentro do limite de peso da rodovia, gasta um tempo $t_i=5$ para passar pelo posto de pesagem;
+\item Um veículo que é abordado e fiscalizado, mas que ultrapassa o peso limite da rodovia, gasta um tempo $t_i=10$ para passar pelo posto de pesagem.
+\end{itemize}
+
+Elabore um programa que determine o tempo total gasto para que todos os $N$ veículos passem pelo posto de pesagem da rodovia. Os fiscais começam o processo de abordagem sempre do primeiro veículo que passa pelo posto.
+
+\InputFile
+A primeira linha da entrada contém três números inteiros separados por um espaço em branco $1 \leq N \leq 10^4$, $1 \leq F \leq 100$, $1 \leq P \leq 10^3$ indicando a quantidade de veículos, o fator de amostragem e o limite de peso (em kg) da rodovia, respectivamente. A próxima linha contém $N$ valores inteiros $a_1,...a_N$, em que cada $1 \leq a_i \leq 10^3$ está associado com o peso (em kg) do veículo $i$. 
+
+\OutputFile
+Imprima um valor inteiro associado ao tempo total para que todos os $N$ veículos passem pelo posto de pesagem.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\exmpfile{example.04}{example.04.a}%
+\end{example}
+
+\Note
+No primeiro caso de teste, o limite de peso da rodovia é $7$ e como $F=1$, cada veículo que passar pelo posto será fiscalizado, começando do primeiro veículo.
+
+Os veículos 1, 2, 3 e 4 estão dentro do limite de peso estabelecido, então eles são fiscalizados e liberados. O tempo total para isso = 5 + 5 + 5 + 5 = 20 minutos.
+
+O veículo $5$, possui $9kg$ está acima do limite do peso da rodovia. Ele descarta 2kg, e volta pra fila com o peso igual a $7kg$. O tempo total gasto nesse caso é 10 minutos. Como só existe esse veículo na fila, ele é fiscalizado novamente, e como está com o peso dentro do limite, ele é liberado, totalizando $5$ minutos.
+
+Logo, o tempo total foi 35 minutos.
+
+
+
+\end{problem}
+
