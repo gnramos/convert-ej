@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: EJ-Bridge
-Version: 1.1.0
+Version: 1.1.1
 Summary: A Python package to translate questions                  between electronic judges
 Home-page: https://github.com/gnramos/ejtranslator
 Author: Tiago de Souza Fernandes

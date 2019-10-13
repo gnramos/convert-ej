@@ -14,6 +14,8 @@ def tex2html(s):
     rules1 = {
         r'\\begin{itemize}': '<ul>',
         r'\\end{itemize}': '</ul>',
+        r'\`\`': '\"',
+        r'\'\'': '\"',
         #  r'\\leq': '&le;',
         #  r'\\le': '&le;',
         #  r'\\geq': '&ge;',

@@ -1,0 +1,117 @@
+<quiz>
+  <question type="coderunner">
+    <name>
+      <text>Fizz Bus&#227;o</text>
+    </name>
+    <questiontext format="html">
+      <text>
+<![CDATA[
+<p>
+<b></b><br />
+Jonnie Ruquer gastava muito tempo no translado entre sua casa e a universidade, e decidiu criar um novo passatempo baseado em um de seus jogos favoritos. A cada ve&#237;culo que passava, ele contava a frequ&#234;ncia do tipo e gritava um descritor. Para toda terceira ocorr&#234;ncia de qualquer ve&#237;culo, soltava "fizz" e a cada quinta ocorr&#234;ncia de um &#244;nibus, era "busao". A divers&#227;o era plena quando estas condi&#231;&#245;es coincidiam, e ele urrava "fizzbusao". Nos demais casos, ele simplesmente dizia a quantidade de ve&#237;culos e torcia pelo pr&#243;ximo grito. 
+
+Para verificar se ele est&#225; seguindo as regras, crie um programa que, dada uma sequ&#234;ncia de ve&#237;culos, imprima a sequ&#234;ncia de descritores conforme as regras dadas.
+</p>
+
+<p>
+<b>Entrada</b><br />
+A entrada consiste de uma linha contendo \( N \) (\( 1 \leq N \leq 1000 \)) caracteres cont&#237;guos, no alfabeto \( \{C, O\} \), indicando a ocorr&#234;ncia de um carro ou de um &#244;nibus, respectivamente.
+</p>
+
+<p>
+<b>Saida</b><br />
+A sa&#237;da deve ser composta por \( N \) linhas, cada uma apresentando o descritor da situa&#231;&#227;o de cada ve&#237;culo na mesma ordem em que s&#227;o dados.
+</p>
+
+<p>
+<b>Notas</b><br />
+No primeiro caso, como n&#227;o h&#225; &#244;nibus apenas a condi&#231;&#227;o de "fizz" &#233; atendida.
+
+No segundo exemplo, h&#225; ve&#237;culos suficientes para o "fizz", mas n&#227;o para o "busao".
+
+No &#250;ltimo exemplo, o d&#233;cimo &#244;nibus possibilita a o grito "busao", e a passagem do d&#233;cimo quinto ve&#237;culo permite que Jonnie finalmente solte seu urro.
+</p>
+]]>
+</text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text />
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0</penalty>
+    <hidden>0</hidden>
+    <idnumber />
+    <coderunnertype>cpp_program</coderunnertype>
+    <prototypetype>0</prototypetype>
+    <allornothing>1</allornothing>
+    <penaltyregime>0, 0, 10, 20, ...</penaltyregime>
+    <precheck>0</precheck>
+    <showsource>0</showsource>
+    <answerboxlines>18</answerboxlines>
+    <answerboxcolumns>100</answerboxcolumns>
+    <answerpreload />
+    <useace />
+    <resultcolumns />
+    <template />
+    <iscombinatortemplate />
+    <allowmultiplestdins />
+    <answer>
+<![CDATA[#include <bits/stdc++.h>
+
+using namespace std;
+
+
+int main(){
+   string s;
+   getline(cin,s);
+   int veiculo = 0;
+   int busao = 0;
+   for(int i=1;i<=s.size();i++){
+      if(s[i-1]=='O'){
+         busao++;
+      }
+      veiculo++;
+      if(veiculo == 3 && busao==5){
+         cout << "fizzbusao" << endl;
+         busao = 0;
+         veiculo = 0;
+      }
+      else if(veiculo == 3){
+         cout << "fizz" << endl;
+         veiculo = 0;
+      }
+      else if(busao == 5){
+         cout << "busao" << endl;
+         busao = 0;
+      }
+      else{
+         cout << i << endl;
+      }
+   }
+   return 0;
+}]]>
+</answer>
+    <validateonsave>1</validateonsave>
+    <testsplitterre />
+    <language />
+    <acelang />
+    <sandbox />
+    <grader />
+    <cputimelimitsecs />
+    <memlimitmb />
+    <sandboxparams />
+    <templateparams />
+    <hoisttemplateparams>1</hoisttemplateparams>
+    <twigall>0</twigall>
+    <uiplugin />
+    <attachments>0</attachments>
+    <attachmentsrequired>0</attachmentsrequired>
+    <maxfilesize>10240</maxfilesize>
+    <filenamesregex />
+    <filenamesexplain />
+    <displayfeedback>1</displayfeedback>
+    <testcases>
+    </testcases>
+  </question>
+
+</quiz>

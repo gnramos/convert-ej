@@ -1,0 +1,29 @@
+\begin{problem}{Fizz Busão}{standard input}{standard output}{1 second}{256 megabytes}
+
+Jonnie Ruquer gastava muito tempo no translado entre sua casa e a universidade, e decidiu criar um novo passatempo baseado em um de seus jogos favoritos. A cada veículo que passava, ele contava a frequência do tipo e gritava um descritor. Para toda terceira ocorrência de qualquer veículo, soltava ``fizz'' e a cada quinta ocorrência de um ônibus, era ``busao''. A diversão era plena quando estas condições coincidiam, e ele urrava ``fizzbusao''. Nos demais casos, ele simplesmente dizia a quantidade de veículos e torcia pelo próximo grito. 
+
+Para verificar se ele está seguindo as regras, crie um programa que, dada uma sequência de veículos, imprima a sequência de descritores conforme as regras dadas.
+
+\InputFile
+A entrada consiste de uma linha contendo $N$ ($1 \leq N \leq 1000$) caracteres contíguos, no alfabeto $\{C, O\}$, indicando a ocorrência de um carro ou de um ônibus, respectivamente.
+
+\OutputFile
+A saída deve ser composta por $N$ linhas, cada uma apresentando o descritor da situação de cada veículo na mesma ordem em que são dados.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\end{example}
+
+\Note
+No primeiro caso, como não há ônibus apenas a condição de ``fizz'' é atendida.
+
+No segundo exemplo, há veículos suficientes para o ``fizz'', mas não para o ``busao''.
+
+No último exemplo, o décimo ônibus possibilita a o grito ``busao'', e a passagem do décimo quinto veículo permite que Jonnie finalmente solte seu urro.
+
+\end{problem}
+
