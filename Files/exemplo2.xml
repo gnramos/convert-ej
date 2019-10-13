@@ -112,6 +112,8 @@ int main(){
     <displayfeedback>1</displayfeedback>
     <testcases>
     </testcases>
+    <tags>
+    <tag><text>adhoc</text></tag><tag><text>remainder</text></tag></tags>
   </question>
 
 </quiz>

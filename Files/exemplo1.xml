@@ -172,7 +172,7 @@ int main()
     <filenamesexplain />
     <displayfeedback>1</displayfeedback>
     <testcases>
-    <testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+    <testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="1">
       <testcode>
                 <text />
       </testcode>
@@ -190,7 +190,7 @@ int main()
       <display>
                 <text>SHOW</text>
       </display>
-    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="1">
       <testcode>
                 <text />
       </testcode>
@@ -208,7 +208,7 @@ int main()
       <display>
                 <text>SHOW</text>
       </display>
-    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="0">
+    </testcase><testcase hiderestiffail="0" mark="1.0000000" testtype="0" useasexample="1">
       <testcode>
                 <text />
       </testcode>
@@ -713,6 +713,8 @@ int main()
                 <text>SHOW</text>
       </display>
     </testcase></testcases>
+    <tags>
+    <tag><text>data structures</text></tag><tag><text>stacks</text></tag></tags>
   </question>
 
 </quiz>

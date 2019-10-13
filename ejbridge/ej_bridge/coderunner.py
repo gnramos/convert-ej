@@ -46,7 +46,6 @@ def xml_gen(directory, question_name):
 
     texto = ''  # Texto da questão
     dir_sec = directory + '/statement-sections/english/'  # Diretório do texto
-
     # Insere o nome
     with open(dir_sec+'name.tex', 'r') as name:
         xmlname = root.find("name").find("text")
@@ -81,6 +80,13 @@ def xml_gen(directory, question_name):
     tests = os.listdir(directory+'/tests/')
     tests.sort()
 
+    # Encontra os casos testes a serem visualizados pelo aluno
+    list_tests_show = []
+    tests_show = os.listdir(dir_sec)
+    for arq in tests_show:
+        if arq.endswith('.a'):
+            list_tests_show.append(arq[8:])
+
     # Insere as entradas e saídas de teste no template
     # e adiciona-o na questão
     for arq in tests:
@@ -88,6 +94,9 @@ def xml_gen(directory, question_name):
             with open(directory+'/tests/'+arq, 'r') as testoutput:
                 xmloutput = testoroot.find("expected").find("text")
                 xmloutput.text = testoutput.read()
+
+                if arq in list_tests_show:
+                    testoroot.set("useasexample", "1")
 
                 xmltestcases = root.find("testcases")
                 xmltestcases.append(testoroot)
@@ -98,6 +107,18 @@ def xml_gen(directory, question_name):
             with open(directory+'/tests/'+arq, 'r') as testinput:
                 xmlinput = testoroot.find("stdin").find("text")
                 xmlinput.text = testinput.read()
+
+    # Insere as tags
+    with open(directory+"/tags", 'r') as tagfile:
+        tagscontent = tagfile.readlines()
+    taglist = [x.strip() for x in tagscontent]
+
+    tags = root.find("tags")
+    for tagelement in taglist:
+        tag = ET.Element('tag')
+        tagtext = ET.SubElement(tag, 'text')
+        tagtext.text = tagelement
+        tags.append(tag)
 
     # Gera o arquivo final da questão
     files = 'Files'
