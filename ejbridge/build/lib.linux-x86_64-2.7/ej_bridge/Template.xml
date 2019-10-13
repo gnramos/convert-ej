@@ -2,10 +2,10 @@
 <quiz>
   <question type="coderunner">
     <name>
-      <text>Name</text>
+      <text></text>
     </name>
     <questiontext format="html">
-      <text><![CDATA[<p>Text</p>]]></text>
+      <text></text>
     </questiontext>
     <generalfeedback format="html">
       <text></text>
@@ -28,7 +28,7 @@
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer>Solution</answer>
+    <answer></answer>
     <validateonsave>1</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>

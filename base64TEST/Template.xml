@@ -2,7 +2,7 @@
 <quiz>
   <question type="coderunner">
     <name>
-      <text></text>
+      <text>Name</text>
     </name>
     <questiontext format="html">
       <text></text>
@@ -28,7 +28,7 @@
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer></answer>
+    <answer>Solution</answer>
     <validateonsave>1</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>

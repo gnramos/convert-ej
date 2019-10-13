@@ -3,14 +3,36 @@ import os
 from .t2h import tex2html
 
 
+# Conjunto de funções para inserir a secção CDATA no xml
+def CDATA(text=None):
+    element = ET.Element('![CDATA[')
+    element.text = text
+    return element
+
+
+ET._original_serialize_xml = ET._serialize_xml
+
+
+def _serialize_xml(write, elem, qnames, namespaces,
+                   short_empty_elements, **kwargs):
+    if elem.tag == '![CDATA[':
+        write("\n<{}{}]]>\n".format(elem.tag, elem.text))
+    else:
+        return ET._original_serialize_xml(
+            write, elem, qnames, namespaces, short_empty_elements, **kwargs)
+
+
+ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
+
+
 def name_section(sec_name, description):
     return '\n<p>\n<b>' + sec_name + '</b><br />\n' + description + '\n</p>\n'
 
 
 def get_section(file_name, sec_name):
     with open(file_name, 'r') as section:
-        texto = name_section(sec_name, tex2html(section.read()))
-    return texto
+        text = name_section(sec_name, tex2html(section.read()))
+    return text
 
 
 def xml_gen(directory, question_name):
@@ -43,7 +65,7 @@ def xml_gen(directory, question_name):
 
     # Insere o texto
     xmlquestion = root.find("questiontext").find("text")
-    xmlquestion.text = texto
+    xmlquestion.append(CDATA(texto))
 
     # Insere a solução na questão
     name_dir = os.listdir(directory+'/solutions/')
@@ -53,7 +75,7 @@ def xml_gen(directory, question_name):
 
     with open(directory+'/solutions/' + namesolution, 'r') as solution:
         xmlsolution = root.find("answer")
-        xmlsolution.text = solution.read()
+        xmlsolution.append(CDATA(solution.read()))
 
     # Faz uma busca por todos os arquivos de teste e os ordena
     tests = os.listdir(directory+'/tests/')

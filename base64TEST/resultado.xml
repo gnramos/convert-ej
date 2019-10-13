@@ -1,19 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <quiz>
   <question type="coderunner">
     <name>
-      <text></text>
+      <text>Name</text>
     </name>
     <questiontext format="html">
-      <text></text>
+      <text>
+<![CDATA[TESTE]]>
+</text>
     </questiontext>
     <generalfeedback format="html">
-      <text></text>
+      <text />
     </generalfeedback>
     <defaultgrade>1</defaultgrade>
     <penalty>0</penalty>
     <hidden>0</hidden>
-    <idnumber></idnumber>
+    <idnumber />
     <coderunnertype>cpp_program</coderunnertype>
     <prototypetype>0</prototypetype>
     <allornothing>1</allornothing>
@@ -22,31 +23,33 @@
     <showsource>0</showsource>
     <answerboxlines>18</answerboxlines>
     <answerboxcolumns>100</answerboxcolumns>
-    <answerpreload></answerpreload>
-    <useace></useace>
-    <resultcolumns></resultcolumns>
-    <template></template>
-    <iscombinatortemplate></iscombinatortemplate>
-    <allowmultiplestdins></allowmultiplestdins>
-    <answer></answer>
+    <answerpreload />
+    <useace />
+    <resultcolumns />
+    <template />
+    <iscombinatortemplate />
+    <allowmultiplestdins />
+    <answer>Solution
+<![CDATA[ola eu sou uma solu&#231;&#227;o]]>
+</answer>
     <validateonsave>1</validateonsave>
-    <testsplitterre></testsplitterre>
-    <language></language>
-    <acelang></acelang>
-    <sandbox></sandbox>
-    <grader></grader>
-    <cputimelimitsecs></cputimelimitsecs>
-    <memlimitmb></memlimitmb>
-    <sandboxparams></sandboxparams>
-    <templateparams></templateparams>
+    <testsplitterre />
+    <language />
+    <acelang />
+    <sandbox />
+    <grader />
+    <cputimelimitsecs />
+    <memlimitmb />
+    <sandboxparams />
+    <templateparams />
     <hoisttemplateparams>1</hoisttemplateparams>
     <twigall>0</twigall>
-    <uiplugin></uiplugin>
+    <uiplugin />
     <attachments>0</attachments>
     <attachmentsrequired>0</attachmentsrequired>
     <maxfilesize>10240</maxfilesize>
-    <filenamesregex></filenamesregex>
-    <filenamesexplain></filenamesexplain>
+    <filenamesregex />
+    <filenamesexplain />
     <displayfeedback>1</displayfeedback>
     <testcases>
     </testcases>
