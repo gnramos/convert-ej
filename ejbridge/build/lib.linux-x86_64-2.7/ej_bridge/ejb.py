@@ -15,8 +15,12 @@ def main():
     args = parser.parse_args()
 
     if args.question:
+        if(args.question[0].endswith('/')):
+            args.question[0] = args.question[0][:-1]
         xml_gen(args.question[0], args.question[0])
     elif args.directory:
+        if(args.directory[0].endswith('/')):
+            args.directory[0] = args.directory[0][:-1]
         dir_xml_gen(args.directory[0])
 
 

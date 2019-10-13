@@ -35,4 +35,4 @@ xmlsolution = root.find("answer")
 xmlquestion.append(CDATA(text))
 xmlsolution.append(CDATA(text2))
 
-tree.write('oi/resultado.xml')
+tree.write('resultado.xml')

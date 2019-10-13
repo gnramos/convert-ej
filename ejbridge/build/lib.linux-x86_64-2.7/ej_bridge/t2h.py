@@ -14,12 +14,12 @@ def tex2html(s):
     rules1 = {
         r'\\begin{itemize}': '<ul>',
         r'\\end{itemize}': '</ul>',
-        r'\\leq': '&le;',
-        r'\\le': '&le;',
-        r'\\geq': '&ge;',
-        r'\\ge': '&ge;',
-        r'\\lt': '&lt;',
-        r'\\gt': '&gt;',
+        #  r'\\leq': '&le;',
+        #  r'\\le': '&le;',
+        #  r'\\geq': '&ge;',
+        #  r'\\ge': '&ge;',
+        #  r'\\lt': '&lt;',
+        #  r'\\gt': '&gt;',
         r'\\arrowvert': '|',
         r'\\\^': '^'
     }
@@ -38,6 +38,9 @@ def tex2html(s):
     rules3 = {
         r'\\item': 'li'
     }
+
+    s = re.sub(r'\$([^\$]*)\$', r'\\( \1 \\)', s)
+    s = re.sub(r'\$\$([^\$]*)\$\$', r'<p><br />\\( \1 \\)<br /></p>', s)
 
     for l, h in rules1.items():
         s = re.sub(l, h, s)

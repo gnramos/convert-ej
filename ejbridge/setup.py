@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name="EJ-Bridge",
-    version="1.0.8",
+    version="1.1.0",
     description="A Python package to translate questions \
                  between electronic judges",
     long_description=readme(),
