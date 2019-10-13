@@ -1,0 +1,61 @@
+\begin{problem}{Jogo familiar}{standard input}{standard output}{1 second}{256 megabytes}
+
+Valdete e Drauzio elaboraram um jogo para entreter seus familiares no Natal. A ideia do jogo consiste em enfileirar todos os $N$ familiares e sortear $M$ números, que indicarão várias modificações na fila formada. Se um número sorteado $s$ for positivo e maior do que zero, são realizadas $s$ operações nessa fila, em que o familiar no início da fila é posicionado no final dela (um familiar por vez sai do início da fila e se desloca para o último lugar da fila). Caso o valor $s$ seja igual a -1, o familiar na primeira posição da fila é excluído do jogo. O vencedor do jogo será o familiar que, após finalizar o sorteio dos $M$ elementos, estiver na primeira posição da fila.
+
+Elabore um programa em linguagem C que determine o familiar de Valdete e Drauzio que vencerá o o jogo.
+
+
+\InputFile
+A primeira linha da entrada consiste em dois inteiros $2 \leq N \leq 10^4$ e $1 \leq M < N$. A próxima linha apresenta $M$ valores $s_1, s_2, ... , s_M$, em que cada $-N \leq s_i < N$ se refere ao i-ésimo número sorteado. Considere que cada familiar é representado por um número inteiro entre $1$ e $N$.
+
+
+\OutputFile
+Imprima o número inteiro associado ao familiar que vencerá o jogo proposto por Valdete e Drauzio.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\end{example}
+
+\Note
+*** No primeiro caso de teste, os familiares são inicialmente enumerados em:
+
+1 -> 2 -> 3 -> 4 -> 5 -> 6
+
+O primeiro número sorteado (2) indica que os familiares 1 e 2 devem ir para o final da fila, um por vez, resultando em:
+
+3 -> 4 -> 5 -> 6 -> 1 -> 2
+
+O segundo número sorteado (2) faz com que os familiares 3 e 4 vão para o final da fila, um por vez, resultando em:
+
+5 -> 6 -> 1 -> 2 -> 3 -> 4 
+
+Logo, o familiar número 5 foi o vencedor do jogo.
+
+*** No segundo caso de teste, os familiares também são enumerados e enfileirados em:
+
+1 -> 2 -> 3 -> 4 -> 5 -> 6
+
+O primeiro número sorteado (3) indica que os familiares 1, 2 e 3 devem ir para o final da fila, um por vez, resultando em:
+
+4 -> 5 -> 6 -> 1 -> 2 -> 3 
+
+O segundo número sorteado (-1) faz com que o familiar 4 seja excluído do jogo. A fila fica como:
+
+5 -> 6 -> 1 -> 2 -> 3 
+
+O terceiro número sorteado (-1) faz com que o familiar 5 seja excluído do jogo. A fila fica como:
+
+6 -> 1 -> 2 -> 3
+
+O terceiro número sorteado (-1) faz com que o familiar 6 seja excluído do jogo. A fila fica como:
+
+1 -> 2 -> 3
+
+Logo, o familiar número 1 foi o vencedor do jogo.
+
+\end{problem}
+

@@ -1,0 +1,33 @@
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <META content="no-cache" http-equiv="pragma">
+    <META content="-1" http-equiv="expires">
+    <META content="text/html;charset=UTF-8" http-equiv="content-type">
+    <LINK href="problem-statement.css" rel="stylesheet" type="text/css">
+    <TITLE>Plano de Conting&ecirc;ncia</TITLE>
+    <SCRIPT type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {inlineMath: [['$$$','$$$']], displayMath: [['$$$$$$','$$$$$$']]}
+        });
+        </SCRIPT>
+        <SCRIPT async="" src="https://polygon.codeforces.com/lib/MathJax/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript">
+    </SCRIPT>
+</HEAD><BODY>
+    <DIV class="problem-statement"><DIV class="header"><DIV class="title">Plano de Conting&ecirc;ncia</DIV><DIV class="time-limit"><DIV class="property-title">time limit per test</DIV>1 second</DIV><DIV class="memory-limit"><DIV class="property-title">memory limit per test</DIV>256 megabytes</DIV><DIV class="input-file"><DIV class="property-title">input</DIV>standard input</DIV><DIV class="output-file"><DIV class="property-title">output</DIV>standard output</DIV></DIV><DIV class="legend"><P>Uma crise na Nova Zel&acirc;ndia no &uacute;ltimo inverno, causada por uma longa estiagem e baixo n&iacute;vel de &aacute;gua das represas, levou o governo a adotar um esquema de conting&ecirc;ncia para economia de energia. Sabe-se que o pa&iacute;s &eacute; dividido em $$$N$$$ regi&otilde;es, sendo que cada uma &eacute; identificada por um valor inteiro entre $$$1$$$ e $$$N$$$. A estrat&eacute;gia de conting&ecirc;ncia determina que haja interrup&ccedil;&atilde;o da distribui&ccedil;&atilde;o de energia &agrave;s regi&otilde;es por um per&iacute;odo espec&iacute;fico, mas apenas uma regi&atilde;o de cada vez.</P><P>Para fazer isso, a energia da regi&atilde;o $$$1$$$ (Auckland) &eacute; sempre a primeira a ser cortada por ser a sede do Governo (precisam dar o exemplo &agrave; popula&ccedil;&atilde;o). A seguir, define-se um n&uacute;mero inteiro $$$M$$$ que determinar&aacute; qual ser&aacute; a pr&oacute;xima regi&atilde;o afetada. A escolha &eacute; simples, seguindo a ordem crescente dos n&uacute;meros, escolhe-se a $$$M$$$-&eacute;sima regi&atilde;o seguinte. Obviamente, as regi&otilde;es que j&aacute; foram afetadas n&atilde;o podem ser consideradas novamente neste processo. Por exemplo, se $$$N=17$$$ e $$$M=5$$$, a energia ser&aacute; desligada de acordo com a seguinte ordem: $$$1, 6, 11, 16, 5, 12, 2, 9, 17, 10, 4, 15, 14, 3, 8, 13, 7$$$.</P><P>Como a sede da Companhia de Energia El&eacute;trica da Nova Zel&acirc;ndia (100Z) est&aacute; localizada na regi&atilde;o de Wellington (identificada como $$$13$$$), esta deve ser, obrigatoriamente, desligada por &uacute;ltimo. Por isso, para um dado n&uacute;mero $$$N$$$, o n&uacute;mero $$$M$$$ precisa ser cuidadosamente escolhido de modo que a regi&atilde;o $$$13$$$ seja a &uacute;ltima regi&atilde;o afetada.</P><P>Escreva um programa que fa&ccedil;a a leitura do n&uacute;mero de regi&otilde;es $$$N$$$ e determine o menor n&uacute;mero $$$M$$$, garantindo que a regi&atilde;o de Wellington seja a &uacute;ltima a ser desligada.</P></DIV><P></P><P></P><DIV class="input-specification"><DIV class="section-title">Input</DIV><P></P><P>A entrada consiste de um n&uacute;mero inteiro $$$13 \leq N \leq 100$$$.</P></DIV><P></P><P></P><DIV class="output-specification"><DIV class="section-title">Output</DIV><P></P><P>Deve ser gerado como sa&iacute;da, um &uacute;nico valor $$$M$$$ conforme definido. &Eacute; garantido existe um valor $$$M &gt; 0$$$ tal em que a regi&atilde;o Wellington seja a &uacute;ltima regi&atilde;o afetada no processo.</P></DIV><P></P><P></P><DIV class="sample-tests"><DIV class="section-title">Examples</DIV><P></P><P></P><DIV class="sample-test"><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+13
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+1
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+15
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+10
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+17
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+7
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+70
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+129
+</PRE></DIV></DIV></DIV></DIV><P></P><P>  
+
+</P></BODY></HTML>

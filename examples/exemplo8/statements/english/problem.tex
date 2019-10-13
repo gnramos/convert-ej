@@ -1,0 +1,28 @@
+\begin{problem}{Atendimento}{standard input}{standard output}{1 second}{256 megabytes}
+
+Um supermercado tem $N$ funcionários que trabalham no caixa, identificados por números de $1$ a $N$. Assume-se que cada funcionário gasta $v_i$ segundos para processar um item de compra. Ou seja, se um cliente tem $c_j$ itens em sua cesta, um caixa levará $v_i*c_j$ segundos para processar todos os itens deste cliente.
+
+Ao entrar na fila do caixa para ser atendido, um cliente aguarda ser atendido por um caixa livre. Se mais de um caixa estiver livre ao mesmo tempo, o cliente será atendido pelo caixa que possuir o menor número de identificação. Tal caixa só estará livre novamente após processar todos os itens deste cliente.
+
+Há $M$ clientes na fila para serem atendidos, cada um com um determinado número de itens na sua cesta. Dadas as informações sobre os funcionários nos caixas e os clientes, o gerente pediu sua ajuda para descobrir quanto tempo levará para atender todos os clientes da fila do supermercado.
+
+\InputFile
+A primeira linha conterá dois inteiros $N$ e $M$, indicando o número de funcionários no caixa e o número de clientes, respectivamente $(1 \leq N \leq M \leq 10^4)$.
+
+A segunda linha descreve $N$ inteiros $v_i$, indicando quanto tempo leva para o $i$-ésimo funcionário processar um item $(1 \leq v_i \leq 100$, para todo $1 \leq i \leq N)$.
+
+A terceira linha apresenta $M$ inteiros $c_j$, indicando quantos itens o $j$-ésimo cliente tem em sua cesta $(1 \leq c_j \leq 100$, para todo $1 \leq j \leq M)$.
+
+\OutputFile
+Imprima uma linha contendo um valor inteiro, que expressa o tempo total gasto para que todos os clientes sejam atendidos.
+
+\Examples
+
+\begin{example}
+\exmpfile{example.01}{example.01.a}%
+\exmpfile{example.02}{example.02.a}%
+\exmpfile{example.03}{example.03.a}%
+\end{example}
+
+\end{problem}
+

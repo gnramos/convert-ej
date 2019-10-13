@@ -1,0 +1,32 @@
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <META content="no-cache" http-equiv="pragma">
+    <META content="-1" http-equiv="expires">
+    <META content="text/html;charset=UTF-8" http-equiv="content-type">
+    <LINK href="problem-statement.css" rel="stylesheet" type="text/css">
+    <TITLE>Jogo familiar</TITLE>
+    <SCRIPT type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {inlineMath: [['$$$','$$$']], displayMath: [['$$$$$$','$$$$$$']]}
+        });
+        </SCRIPT>
+        <SCRIPT async="" src="https://polygon.codeforces.com/lib/MathJax/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript">
+    </SCRIPT>
+</HEAD><BODY>
+    <DIV class="problem-statement"><DIV class="header"><DIV class="title">Jogo familiar</DIV><DIV class="time-limit"><DIV class="property-title">time limit per test</DIV>1 second</DIV><DIV class="memory-limit"><DIV class="property-title">memory limit per test</DIV>256 megabytes</DIV><DIV class="input-file"><DIV class="property-title">input</DIV>standard input</DIV><DIV class="output-file"><DIV class="property-title">output</DIV>standard output</DIV></DIV><DIV class="legend"><P>Valdete e Drauzio elaboraram um jogo para entreter seus familiares no Natal. A ideia do jogo consiste em enfileirar todos os $$$N$$$ familiares e sortear $$$M$$$ n&uacute;meros, que indicar&atilde;o v&aacute;rias modifica&ccedil;&otilde;es na fila formada. Se um n&uacute;mero sorteado $$$s$$$ for positivo e maior do que zero, s&atilde;o realizadas $$$s$$$ opera&ccedil;&otilde;es nessa fila, em que o familiar no in&iacute;cio da fila &eacute; posicionado no final dela (um familiar por vez sai do in&iacute;cio da fila e se desloca para o &uacute;ltimo lugar da fila). Caso o valor $$$s$$$ seja igual a -1, o familiar na primeira posi&ccedil;&atilde;o da fila &eacute; exclu&iacute;do do jogo. O vencedor do jogo ser&aacute; o familiar que, ap&oacute;s finalizar o sorteio dos $$$M$$$ elementos, estiver na primeira posi&ccedil;&atilde;o da fila.</P><P>Elabore um programa em linguagem C que determine o familiar de Valdete e Drauzio que vencer&aacute; o o jogo.</P></DIV><P></P><P></P><DIV class="input-specification"><DIV class="section-title">Input</DIV><P></P><P>A primeira linha da entrada consiste em dois inteiros $$$2 \leq N \leq 10^4$$$ e $$$1 \leq M &lt; N$$$. A pr&oacute;xima linha apresenta $$$M$$$ valores $$$s_1, s_2, ... , s_M$$$, em que cada $$$-N \leq s_i &lt; N$$$ se refere ao i-&eacute;simo n&uacute;mero sorteado. Considere que cada familiar &eacute; representado por um n&uacute;mero inteiro entre $$$1$$$ e $$$N$$$.</P></DIV><P></P><P></P><DIV class="output-specification"><DIV class="section-title">Output</DIV><P></P><P>Imprima o n&uacute;mero inteiro associado ao familiar que vencer&aacute; o jogo proposto por Valdete e Drauzio.</P></DIV><P></P><P></P><DIV class="sample-tests"><DIV class="section-title">Examples</DIV><P></P><P></P><DIV class="sample-test"><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+6 2
+2 2
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+5
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+6 4
+3 -1 -1 -1
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+1
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+5 3
+1 2 3
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+2
+</PRE></DIV></DIV></DIV><P></P><P></P><DIV class="note"><DIV class="section-title">Note</DIV><P></P><P>*** No primeiro caso de teste, os familiares s&atilde;o inicialmente enumerados em:</P><P>1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6</P><P>O primeiro n&uacute;mero sorteado (2) indica que os familiares 1 e 2 devem ir para o final da fila, um por vez, resultando em:</P><P>3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt; 1 -&gt; 2</P><P>O segundo n&uacute;mero sorteado (2) faz com que os familiares 3 e 4 v&atilde;o para o final da fila, um por vez, resultando em:</P><P>5 -&gt; 6 -&gt; 1 -&gt; 2 -&gt; 3 -&gt; 4 </P><P>Logo, o familiar n&uacute;mero 5 foi o vencedor do jogo.</P><P>*** No segundo caso de teste, os familiares tamb&eacute;m s&atilde;o enumerados e enfileirados em:</P><P>1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6</P><P>O primeiro n&uacute;mero sorteado (3) indica que os familiares 1, 2 e 3 devem ir para o final da fila, um por vez, resultando em:</P><P>4 -&gt; 5 -&gt; 6 -&gt; 1 -&gt; 2 -&gt; 3 </P><P>O segundo n&uacute;mero sorteado (-1) faz com que o familiar 4 seja exclu&iacute;do do jogo. A fila fica como:</P><P>5 -&gt; 6 -&gt; 1 -&gt; 2 -&gt; 3 </P><P>O terceiro n&uacute;mero sorteado (-1) faz com que o familiar 5 seja exclu&iacute;do do jogo. A fila fica como:</P><P>6 -&gt; 1 -&gt; 2 -&gt; 3</P><P>O terceiro n&uacute;mero sorteado (-1) faz com que o familiar 6 seja exclu&iacute;do do jogo. A fila fica como:</P><P>1 -&gt; 2 -&gt; 3</P><P>Logo, o familiar n&uacute;mero 1 foi o vencedor do jogo.</P></DIV></DIV><P></P><P>  
+
+</P></BODY></HTML>

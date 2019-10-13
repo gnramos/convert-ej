@@ -1,0 +1,29 @@
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <META content="no-cache" http-equiv="pragma">
+    <META content="-1" http-equiv="expires">
+    <META content="text/html;charset=UTF-8" http-equiv="content-type">
+    <LINK href="problem-statement.css" rel="stylesheet" type="text/css">
+    <TITLE>Ouro alien&iacute;gena</TITLE>
+    <SCRIPT type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {inlineMath: [['$$$','$$$']], displayMath: [['$$$$$$','$$$$$$']]}
+        });
+        </SCRIPT>
+        <SCRIPT async="" src="https://polygon.codeforces.com/lib/MathJax/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript">
+    </SCRIPT>
+</HEAD><BODY>
+    <DIV class="problem-statement"><DIV class="header"><DIV class="title">Ouro alien&iacute;gena</DIV><DIV class="time-limit"><DIV class="property-title">time limit per test</DIV>1 second</DIV><DIV class="memory-limit"><DIV class="property-title">memory limit per test</DIV>256 megabytes</DIV><DIV class="input-file"><DIV class="property-title">input</DIV>standard input</DIV><DIV class="output-file"><DIV class="property-title">output</DIV>standard output</DIV></DIV><DIV class="legend"><P>Tubertino &eacute; um sujeito aventureiro e um ex&iacute;mio ca&ccedil;ador de tesouros em ambientes hostis. Por isso, ele vive realizando trilhas em lugares perigosos atr&aacute;s de pedras preciosas para se tornar cada vez mais rico. Certo dia, Tubertino almo&ccedil;ou em um restaurante em Alto Para&iacute;so de Goi&aacute;s e ouviu de uma senhora que alien&iacute;genas deixaram uma grande quantidade de pedras preciosas em uma caverna, mas que nenhum aventureiro decidiu explor&aacute;-la devido ao risco de existirem alien&iacute;genas vigiando a localidade. </P><P>Tubertino decidiu ir at&eacute; essa caverna e ap&oacute;s uma caminhada de 4 dias, encontrou um enorme ba&uacute; com diversos objetos em seu interior. Em meio &agrave; escurid&atilde;o da caverna, Tubertino p&ocirc;de identificar sacos amarrados de diversos tamanhos e outros objetos espalhados que aparentemente n&atilde;o possu&iacute;am forma espec&iacute;fica de qualquer pedra preciosa conhecida. </P><P>Elabore um programa que, dada a configura&ccedil;&atilde;o dos objetos do ba&uacute;, determine a quantidade de pedras preciosas que Tubertino consegue identificar, isto &eacute;, a quantidade de objetos que est&atilde;o no interior dos sacos. Repare que alguns sacos podem estar inclu&iacute;dos em outros sacos e que podem haver peda&ccedil;os de sacos rasgados e espalhados pelo ba&uacute;.</P></DIV><P></P><P></P><DIV class="input-specification"><DIV class="section-title">Input</DIV><P></P><P>A entrada consiste de uma express&atilde;o $$$s$$$, em que $$$2 \leq \arrowvert s \arrowvert \leq 200$$$ contendo os <SPAN class="tex-font-style-bf">apenas</SPAN> s&iacute;mbolos $$$(,)$$$ e $$$*$$$, em que as extremidades do saco s&atilde;o identificadas exatamente por $$$($$$ e por $$$)$$$, enquanto que o s&iacute;mbolo $$$*$$$ est&aacute; relacionado com um objeto, que pode ser pedra preciosa ou n&atilde;o. Um objeto $$$*$$$ &eacute; considerado uma pedra preciosa somente se estiver dentro de um saco. Por exemplo, um saco vazio &eacute; representado por $$$()$$$, enquanto que um saco com pedras &eacute; definido por $$$(*)$$$, $$$(**)$$$ e assim sucessivamente.</P></DIV><P></P><P></P><DIV class="output-specification"><DIV class="section-title">Output</DIV><P></P><P>Imprima a quantidade de pedras preciosas que Tubertino encontrar&aacute; no ba&uacute;.</P></DIV><P></P><P></P><DIV class="sample-tests"><DIV class="section-title">Examples</DIV><P></P><P></P><DIV class="sample-test"><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+(**)
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+2
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+(*(**)*)*
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+4
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+())
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+0
+</PRE></DIV></DIV></DIV><P></P><P></P><DIV class="note"><DIV class="section-title">Note</DIV><P></P><P>No primeiro caso de teste, existe um saco no ba&uacute; que apresentam dois objetos. Como estes objetos est&atilde;o no interior do saco, s&atilde;o considerados pedras preciosas, logo, existem duas pedras preciosas.</P><P>No segundo caso de teste, o ba&uacute; apresenta dois sacos, sendo um saco externo que possui dois objetos e um outro saco interno, com outros dois objetos em seu interior. Por isso, podem ser contabilizadas 4 pedras preciosas. Existe um objeto externo que n&atilde;o &eacute; pedra preciosa, pois n&atilde;o est&aacute; no interior de um saco.</P><P>No terceiro caso de teste, o ba&uacute; apresenta apenas um saco, sem objetos em seu interior, e um peda&ccedil;o de saco. Logo, n&atilde;o existem pedras preciosas no ba&uacute;.</P></DIV></DIV><P></P><P>  
+
+</P></BODY></HTML>
