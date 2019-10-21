@@ -122,7 +122,7 @@ def xml_gen(directory, question_name):
     files = 'Files'
     if not os.path.exists(files):
         os.mkdir(files)
-    tree.write(files + '/' + question_name + '.xml')
+    tree.write(files + '/' + question_name + '.xml', 'UTF-8')
 
 
 def dir_xml_gen(directory):
