@@ -7,25 +7,23 @@ def tex2html(s):
     from latex format to html, performed on the
     given input
 
-    rules -- dict with all the substiturion rules
-             for a specific format
+    Arguments:
     s -- input string to be formated
     """
+
+    # Convert the mathematical equations
+    s = re.sub(r'\$([^\$]*)\$', r'\\( \1 \\)', s)
+    s = re.sub(r'\$\$([^\$]*)\$\$', r'<p><br />\\( \1 \\)<br /></p>', s)
+
+    # Dict with all the substitution rules for a specific format
     rules1 = {
         r'\\begin{itemize}': '<ul>',
         r'\\end{itemize}': '</ul>',
         r'\`\`': '\"',
         r'\'\'': '\"',
-        #  r'\\leq': '&le;',
-        #  r'\\le': '&le;',
-        #  r'\\geq': '&ge;',
-        #  r'\\ge': '&ge;',
-        #  r'\\lt': '&lt;',
-        #  r'\\gt': '&gt;',
         r'\\arrowvert': '|',
         r'\\\^': '^'
     }
-
     rules2 = {
         r'\\emph': 'i',
         r'\\textbf': 'b',
@@ -36,14 +34,11 @@ def tex2html(s):
         # r'\\textrm': '',
         # r'\\textsl': ''
     }
-
     rules3 = {
         r'\\item': 'li'
     }
 
-    s = re.sub(r'\$([^\$]*)\$', r'\\( \1 \\)', s)
-    s = re.sub(r'\$\$([^\$]*)\$\$', r'<p><br />\\( \1 \\)<br /></p>', s)
-
+    # Apply the rules to the string
     for l, h in rules1.items():
         s = re.sub(l, h, s)
 
