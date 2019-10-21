@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<problem revision="5" short-name="fizzbusao" url="https://polygon.codeforces.com/p8LcNk7/gnramos/fizzbusao">
+<problem revision="7" short-name="fizzbusao" url="https://polygon.codeforces.com/p8LcNk7/gnramos/fizzbusao">
     <names>
         <name language="english" value="Fizz Busão"/>
     </names>
@@ -8,6 +8,11 @@
         <statement charset="UTF-8" language="english" mathjax="true" path="statements/.html/english/problem.html" type="text/html"/>
         <statement language="english" path="statements/.pdf/english/problem.pdf" type="application/pdf"/>
     </statements>
+    <tutorials>
+        <tutorial charset="UTF-8" language="english" mathjax="true" path="statements/english/tutorial.tex" type="application/x-tex"/>
+        <tutorial charset="UTF-8" language="english" mathjax="true" path="statements/.html/english/tutorial.html" type="text/html"/>
+        <tutorial language="english" path="statements/.pdf/english/tutorial.pdf" type="application/pdf"/>
+    </tutorials>
     <judging cpu-name="Intel(R) Core(TM) i3-8100 CPU @ 3.60GHz" cpu-speed="3600" input-file="" output-file="">
         <testset name="tests">
             <time-limit>1000</time-limit>
@@ -43,22 +48,20 @@
             <file path="files/problem.tex"/>
             <file path="files/statements.ftl"/>
             <file path="files/testlib.h" type="h.g++"/>
+            <file path="files/tutorial.tex"/>
         </resources>
         <executables>
             <executable>
                 <source path="files/generator.py" type="python.3"/>
-                <binary path="files/generator.pys3" type="pythonx.3"/>
             </executable>
             <executable>
                 <source path="files/validator.cpp" type="cpp.g++17"/>
-                <binary path="files/validator.exe" type="exe.win32"/>
             </executable>
         </executables>
     </files>
     <assets>
         <checker name="std::lcmp.cpp" type="testlib">
             <source path="files/check.cpp" type="cpp.g++17"/>
-            <binary path="check.exe" type="exe.win32"/>
             <copy path="check.cpp"/>
             <testset>
                 <test-count>0</test-count>
@@ -71,7 +74,6 @@
         <validators>
             <validator>
                 <source path="files/validator.cpp" type="cpp.g++17"/>
-                <binary path="files/validator.exe" type="exe.win32"/>
                 <testset>
                     <test-count>6</test-count>
                     <input-path-pattern>files/tests/validator-tests/%02d</input-path-pattern>
@@ -89,11 +91,9 @@
         <solutions>
             <solution tag="accepted">
                 <source path="solutions/ac.cpp" type="cpp.g++17"/>
-                <binary path="solutions/ac.exe" type="exe.win32"/>
             </solution>
             <solution tag="main">
                 <source path="solutions/fizzbusao.py" type="python.3"/>
-                <binary path="solutions/fizzbusao.pys3" type="pythonx.3"/>
             </solution>
         </solutions>
     </assets>
