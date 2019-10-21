@@ -75,6 +75,11 @@ def xml_gen(directory, question_name):
         if name.endswith('.cpp') or name.endswith('.c'):
             namesolution = name
 
+    # Mudar quando a solução for encontrada em um formato específico
+    solutiontype = 'cpp_program'
+    # Insere a linguagem de programação utilizada
+    root.find("coderunnertype").text = solutiontype
+
     with open(directory+'/solutions/' + namesolution, 'r') as solution:
         root.find("answer").append(CDATA(solution.read()))
 
@@ -117,6 +122,14 @@ def xml_gen(directory, question_name):
         tag = ET.Element('tag')
         ET.SubElement(tag, 'text').text = tagelement
         tags.append(tag)
+
+    # Insere tempo e mémoria limite
+    treeproblem = ET.parse(directory + '/problem.xml')
+    rootproblem = treeproblem.getroot()
+    for data in rootproblem.iter("time-limit"):
+        root.find("cputimelimitsecs").text = str(int(int(data.text)/1000))
+    for data in rootproblem.iter("memory-limit"):
+        root.find("memlimitmb").text = str(int(int(data.text)/(1024*1024)))
 
     # Gera o arquivo final da questão
     files = 'Files'

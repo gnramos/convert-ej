@@ -14,7 +14,7 @@
     <penalty>0</penalty>
     <hidden>0</hidden>
     <idnumber></idnumber>
-    <coderunnertype>cpp_program</coderunnertype>
+    <coderunnertype></coderunnertype>
     <prototypetype>0</prototypetype>
     <allornothing>1</allornothing>
     <penaltyregime>0, 0, 10, 20, ...</penaltyregime>
