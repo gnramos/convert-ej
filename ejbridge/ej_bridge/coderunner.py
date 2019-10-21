@@ -48,8 +48,7 @@ def xml_gen(directory, question_name):
     dir_sec = directory + '/statement-sections/english/'  # Diretório do texto
     # Insere o nome
     with open(dir_sec+'name.tex', 'r') as name:
-        xmlname = root.find("name").find("text")
-        xmlname.text = name.read()
+        root.find("name").find("text").text = name.read()
 
     sections = {
         'legend': '',
@@ -63,8 +62,12 @@ def xml_gen(directory, question_name):
             texto += get_section(dir_sec + file_name + '.tex', sec_name)
 
     # Insere o texto
-    xmlquestion = root.find("questiontext").find("text")
-    xmlquestion.append(CDATA(texto))
+    root.find("questiontext").find("text").append(CDATA(texto))
+
+    # Insere tutorial
+    if os.path.isfile(dir_sec + 'tutorial.tex'):
+        with open(dir_sec + 'tutorial.tex', 'r') as t:
+            root.find("generalfeedback").find("text").text = tex2html(t.read())
 
     # Insere a solução na questão
     name_dir = os.listdir(directory+'/solutions/')
@@ -73,8 +76,7 @@ def xml_gen(directory, question_name):
             namesolution = name
 
     with open(directory+'/solutions/' + namesolution, 'r') as solution:
-        xmlsolution = root.find("answer")
-        xmlsolution.append(CDATA(solution.read()))
+        root.find("answer").append(CDATA(solution.read()))
 
     # Faz uma busca por todos os arquivos de teste e os ordena
     tests = os.listdir(directory+'/tests/')
@@ -91,22 +93,19 @@ def xml_gen(directory, question_name):
     # e adiciona-o na questão
     for arq in tests:
         if arq.endswith('.a'):
-            with open(directory+'/tests/'+arq, 'r') as testoutput:
-                xmloutput = testoroot.find("expected").find("text")
-                xmloutput.text = testoutput.read()
+            with open(directory+'/tests/'+arq, 'r') as testout:
+                testoroot.find("expected").find("text").text = testout.read()
 
                 if arq in list_tests_show:
                     testoroot.set("useasexample", "1")
 
-                xmltestcases = root.find("testcases")
-                xmltestcases.append(testoroot)
+                root.find("testcases").append(testoroot)
 
                 testtree = ET.parse(package_dir + 'Testcase-Template.xml')
                 testoroot = testtree.getroot()
         else:
             with open(directory+'/tests/'+arq, 'r') as testinput:
-                xmlinput = testoroot.find("stdin").find("text")
-                xmlinput.text = testinput.read()
+                testoroot.find("stdin").find("text").text = testinput.read()
 
     # Insere as tags
     with open(directory+"/tags", 'r') as tagfile:
@@ -116,8 +115,7 @@ def xml_gen(directory, question_name):
     tags = root.find("tags")
     for tagelement in taglist:
         tag = ET.Element('tag')
-        tagtext = ET.SubElement(tag, 'text')
-        tagtext.text = tagelement
+        ET.SubElement(tag, 'text').text = tagelement
         tags.append(tag)
 
     # Gera o arquivo final da questão
