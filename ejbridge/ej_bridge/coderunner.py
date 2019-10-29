@@ -69,14 +69,25 @@ def xml_gen(directory, question_name):
         with open(dir_sec + 'tutorial.tex', 'r') as t:
             root.find("generalfeedback").find("text").text = tex2html(t.read())
 
+    solutiontype = ''
     # Insere a solução na questão
     name_dir = os.listdir(directory+'/solutions/')
     for name in name_dir:
-        if name.endswith('.cpp') or name.endswith('.c'):
+        if name.endswith('.c'):
             namesolution = name
+            solutiontype = "c_program"
+            break
+    else:
+        for name in name_dir:
+            if name.endswith('.desc'):
+                with open(directory+'/solutions/'+name) as desc:
+                    if 'Tag: MAIN' in desc.read():
+                        namesolution = name[:-5]
+                        if namesolution.endswith('.py'):
+                            solutiontype = 'python3'
+                        elif namesolution.endswith('.cpp'):
+                            solutiontype = 'cpp_program'
 
-    # Mudar quando a solução for encontrada em um formato específico
-    solutiontype = 'cpp_program'
     # Insere a linguagem de programação utilizada
     root.find("coderunnertype").text = solutiontype
 

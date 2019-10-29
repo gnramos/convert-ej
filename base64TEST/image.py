@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-path = "lennaeye.jpg"
+path = "estacao.eps"
 
 with open(path, "rb") as image:
     encoded_string = b64encode(image.read())
