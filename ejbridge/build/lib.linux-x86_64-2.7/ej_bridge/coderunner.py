@@ -149,7 +149,7 @@ def xml_gen(directory, question_name):
     tree.write(files + '/' + question_name + '.xml', 'UTF-8')
 
 
-def dir_xml_gen(directory):
+def dir_cf_to_cr(directory):
     questions = os.listdir(directory)
     for name in questions:
         if os.path.isdir(directory + '/' + name):

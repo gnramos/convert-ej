@@ -1,27 +1,23 @@
 import argparse
-from .coderunner import xml_gen, dir_xml_gen
+from .coderunner import dir_cf_to_cr
 
 
 def main():
 
     parser = argparse.ArgumentParser(description="EJBridge")
 
-    parser.add_argument("-d", "--directory", type=str, nargs=1, default=None,
-                        help="Directory name with all the questions")
-
-    parser.add_argument("-q", "--question", type=str, nargs=1, default=None,
-                        help="Name of the question")
+    parser.add_argument("-cftocr", "--forcestorunner",
+                        type=str, nargs=1, default=None,
+                        help="Directory name with all the questions zip\
+                              files, to translate a codeforces question to the\
+                              coderunner format")
 
     args = parser.parse_args()
 
-    if args.question:
-        if(args.question[0].endswith('/')):
-            args.question[0] = args.question[0][:-1]
-        xml_gen(args.question[0], args.question[0])
-    elif args.directory:
-        if(args.directory[0].endswith('/')):
-            args.directory[0] = args.directory[0][:-1]
-        dir_xml_gen(args.directory[0])
+    if args.forcestorunner:
+        if(args.forcestorunner[0].endswith('/')):
+            args.forcestorunner[0] = args.forcestorunner[0][:-1]
+        dir_cf_to_cr(args.forcestorunner[0])
 
 
 if __name__ == "__main__":
