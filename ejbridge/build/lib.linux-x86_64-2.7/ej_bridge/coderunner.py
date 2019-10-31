@@ -26,7 +26,7 @@ ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
 
 
 def name_section(sec_name, description):
-    return '\n<p>\n<b>' + sec_name + '</b><br />\n' + description + '\n</p>\n'
+    return '\n<p>\n<b>' + sec_name + description + '\n</p>\n'
 
 
 def get_section(file_name, sec_name):
@@ -51,10 +51,10 @@ def xml_gen(directory, question_name):
         root.find("name").find("text").text = name.read()
 
     sections = {
-        'legend': '',
-        'input': 'Entrada',
-        'output': 'Saida',
-        'notes': 'Notas'
+        'legend': '</b>\n',
+        'input': 'Entrada</b><br />\n',
+        'output': 'Saida</b><br />\n',
+        'notes': 'Notas</b><br />\n'
     }
     # Formata os textos
     for file_name, sec_name in sections.items():
