@@ -152,7 +152,6 @@ def xml_gen(directory, question_name):
 
 
 def dir_cf_to_cr(directory):
-
     questions = os.listdir(directory)
     for name in questions:
         if name.endswith('.zip'):
