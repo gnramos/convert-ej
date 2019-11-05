@@ -21,7 +21,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
         write("\n<{}{}]]>\n".format(elem.tag, elem.text))
     else:
         return ET._original_serialize_xml(
-            write, elem, qnames, namespaces, short_empty_elements, **kwargs)
+               write, elem, qnames, namespaces, short_empty_elements, **kwargs)
 
 
 ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
@@ -35,6 +35,10 @@ def get_section(file_name, sec_name):
     with open(file_name, 'r') as section:
         text = name_section(sec_name, tex2html(section.read()))
     return text
+
+
+def inter_gen(directory):
+    return
 
 
 def xml_gen(directory, question_name):
