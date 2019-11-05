@@ -1,15 +1,3 @@
-Na última estação chuvosa, uma rodovia do Distrito Federal ficou muito esburacada, sendo motivo de reclamação de diversos condutores que transitam nela diariamente. Tentando resolver o problema, os órgãos de trânsito competentes instalaram um posto de pesagem com o objetivo de fiscalizar se os pesos dos veículos ultrapassam um limite de peso $P$ (em kg) dessa rodovia.
+Jonnie Ruquer gastava muito tempo no translado entre sua casa e a universidade, e decidiu criar um novo passatempo baseado em um de seus jogos favoritos. A cada veículo que passava, ele contava a frequência do tipo e gritava um descritor. Para toda terceira ocorrência de qualquer veículo, soltava ``fizz'' e a cada quinta ocorrência de um ônibus, era ``busao''. A diversão era plena quando estas condições coincidiam, e ele urrava ``fizzbusao''. Nos demais casos, ele simplesmente dizia a quantidade de veículos e torcia pelo próximo grito. 
 
-Os fiscais deste posto de pesagem sabem que é impossível abordar todos os veículos e, para isso, consideram um fator $F$ que denota uma amostragem dos veículos a serem pesados. Por exemplo, se $F=1$, os fiscais verificam todos os veículos. Para $F=2$, os veículos são fiscalizados alternadamente, isto é, se um veículo é fiscalizado, o próximo veículo é liberado para seguir viagem. Para $F=3$, a cada três veículos, um deles tem seu peso fiscalizado conforme a ordem que passam pelo posto de pesagem, isto é, o veículo $1$ é fiscalizado, os veículos $2$ e $3$ são diretamente liberados, em seguida o veículo $4$ é fiscalizado e os veículos $5$ e $6$ são diretamente liberados, e assim sucessivamente.
-
-Alguns caminheiros ``fora da lei'' tentam passar pelo posto de pesagem sem serem abordados pelos fiscais. No entanto, alguns deles são abordados na fiscalização e como estão mais pesados do que a rodovia permite, acabam por ser barrados pelos fiscais no posto de pesagem. Para contornar a situação e poder seguir viagem, esses caminhoneiros infratores tiveram a ideia de descartar $2kg$ da carga total do veículo e retornarem para o final da fila de veículos, visando tentar a sorte de não serem abordados pelos fiscais novamente.
-
-Sabe-se que a abordagem dos fiscais em cada veículo gasta um determinado tempo $t_i$ conforme as seguintes situações:
-
-\begin{itemize}
-\item Um veículo que não é abordado pelos fiscais, isto é, é diretamente liberado ao passar pelo posto, gasta um tempo $t_i=1$ para passar pelo posto de pesagem;
-\item Um veículo que é abordado, fiscalizado e está dentro do limite de peso da rodovia, gasta um tempo $t_i=5$ para passar pelo posto de pesagem;
-\item Um veículo que é abordado e fiscalizado, mas que ultrapassa o peso limite da rodovia, gasta um tempo $t_i=10$ para passar pelo posto de pesagem.
-\end{itemize}
-
-Elabore um programa que determine o tempo total gasto para que todos os $N$ veículos passem pelo posto de pesagem da rodovia. Os fiscais começam o processo de abordagem sempre do primeiro veículo que passa pelo posto.
+Para verificar se ele está seguindo as regras, crie um programa que, dada uma sequência de veículos, imprima a sequência de descritores conforme as regras dadas.
