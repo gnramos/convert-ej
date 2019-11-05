@@ -1,7 +1,5 @@
 import xml.etree.ElementTree as ET
 import os
-import zipfile
-import shutil
 from .t2h import tex2html
 
 
@@ -37,11 +35,7 @@ def get_section(file_name, sec_name):
     return text
 
 
-def inter_gen(directory):
-    return
-
-
-def xml_gen(directory, question_name):
+def intermediate_to_coderunner(directory, question_name):
     # Templates para a questão e para casos teste
     package_dir = os.path.abspath(os.path.dirname(__file__)) + '/'
     tree = ET.parse(package_dir + 'Template.xml')
@@ -153,13 +147,3 @@ def xml_gen(directory, question_name):
     if not os.path.exists(files):
         os.mkdir(files)
     tree.write(files + '/' + question_name + '.xml', 'UTF-8')
-
-
-def dir_cf_to_cr(directory):
-    questions = os.listdir(directory)
-    for name in questions:
-        if name.endswith('.zip'):
-            with zipfile.ZipFile(directory + '/' + name, 'r') as zip_ref:
-                zip_ref.extractall('tmp')
-            xml_gen('tmp', name[:-4])
-            shutil.rmtree('tmp')

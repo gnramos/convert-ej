@@ -1,5 +1,5 @@
 import argparse
-from .coderunner import dir_cf_to_cr
+from .translation_functions import dir_cf_to_cr
 
 
 def main():
