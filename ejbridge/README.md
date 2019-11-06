@@ -8,12 +8,7 @@ pip install -i https://test.pypi.org/simple/ EJ-Bridge
 
 ## Usage
 
-Creating a xml file from the 'name_dir_question' question
+Creating coderunner questions from the codeforces questions inside the 'name_dir' directory
 ```
-ejbridge -q name_dir_question
-```
-
-Creating files from the questions inside the 'name_dir' directory
-```
-ejbridge -d name_dir
+ejbridge -cftocr name_dir
 ```
