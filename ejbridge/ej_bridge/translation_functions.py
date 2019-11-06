@@ -1,6 +1,7 @@
 import os
 import zipfile
 import shutil
+from .codeforces import codeforces_to_intermediate
 from .coderunner import intermediate_to_coderunner
 
 
@@ -10,5 +11,7 @@ def dir_cf_to_cr(directory):
         if name.endswith('.zip'):
             with zipfile.ZipFile(directory + '/' + name, 'r') as zip_ref:
                 zip_ref.extractall('tmp')
-            intermediate_to_coderunner('tmp', name[:-4])
+            codeforces_to_intermediate('tmp', name[:-4])
+            intermediate_to_coderunner('intermadiate_files/' + name[:-4],
+                                       name[:-4])
             shutil.rmtree('tmp')
