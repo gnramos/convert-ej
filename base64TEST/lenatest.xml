@@ -7,7 +7,7 @@
     <questiontext format="html">
       <text>
         <![CDATA[
-          LENNA = <p><img src="@@PLUGINFILE@@/lenna.jpg" alt="" role="presentation" style="font-size: 0.9375rem;"><br></p>
+          LENNA = <p><img src="@@PLUGINFILE@@/lenna.jpg" alt="" role="presentation" style="font-size: 0.6rem;"><br></p>
           ]]>
       </text>
       <file name="lenna.jpg" path="/" encoding="base64">

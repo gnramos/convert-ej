@@ -4,8 +4,8 @@ import re
 def tex2html(s):
     """
     Return a string with syntax substitutions,
-    from latex format to html, performed on the
-    given input
+    from LaTeX format to html, performed on the
+    given input.
 
     Arguments:
     s -- input string to be formated
@@ -19,6 +19,8 @@ def tex2html(s):
     rules1 = {
         r'\\begin{itemize}': '<ul>',
         r'\\end{itemize}': '</ul>',
+        r'\\begin{center}': '<p style="text-align: center;">',
+        r'\\end{center}': '</p>',
         r'\`\`': '\"',
         r'\'\'': '\"',
         r'\\arrowvert': '|',
