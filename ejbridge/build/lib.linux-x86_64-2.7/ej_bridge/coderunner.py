@@ -26,7 +26,7 @@ ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
 
 
 def name_section(sec_name, description):
-    return '\n<p>\n<b>' + sec_name + description + '\n</p>\n'
+    return sec_name + description + '\n</p>\n'
 
 
 def get_section(file_name, sec_name):
@@ -51,10 +51,10 @@ def intermediate_to_coderunner(directory, question_name):
         root.find("name").find("text").text = name.read()
 
     sections = {
-        'legend': '</b>\n',
-        'input': 'Entrada</b><br />\n',
-        'output': 'Saida</b><br />\n',
-        'notes': 'Notas</b><br />\n'
+        'legend': '<p>',
+        'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
+        'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
+        'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
     }
     # Formata os textos
     for file_name, sec_name in sections.items():
