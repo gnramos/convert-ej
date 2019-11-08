@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
+from base64 import b64encode
 from .t2h import tex2html
 
 
@@ -60,6 +61,20 @@ def intermediate_to_coderunner(directory, question_name):
     for file_name, sec_name in sections.items():
         if os.path.isfile(dir_sec + file_name + '.tex'):
             texto += get_section(dir_sec + file_name + '.tex', sec_name)
+
+    files_sec = os.listdir(dir_sec)
+    for name in files_sec:
+        if name.endswith('.jpg') or name.endswith('.png'):
+            img = ET.Element('file')
+            img.set('name', name)
+            img.set('path', '/')
+            img.set('encoding', 'base64')
+
+            with open(dir_sec + '/' + name, "rb") as image:
+                encoded_string = str(b64encode(image.read()), 'utf-8')
+
+            img.text = encoded_string
+            root.find("questiontext").append(img)
 
     # Insere o texto
     root.find("questiontext").find("text").append(CDATA(texto))

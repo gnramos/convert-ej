@@ -15,6 +15,11 @@ def tex2html(s):
     s = re.sub(r'\$([^\$]*)\$', r'\\( \1 \\)', s)
     s = re.sub(r'\$\$([^\$]*)\$\$', r'<p><br />\\( \1 \\)<br /></p>', s)
 
+    # Image
+    s = re.sub(r'.eps', r'.png', s)
+    s = re.sub(r'\\includegraphics\[([^\]]*)\]\{([^\}]*)\}',
+               r'<img src="@@PLUGINFILE@@/\2"><br>', s)
+
     # Dict with all the substitution rules for a specific format
     rules1 = {
         r'\\begin{itemize}': '<ul>',
