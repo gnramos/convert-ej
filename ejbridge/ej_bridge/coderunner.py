@@ -36,7 +36,8 @@ def get_section(file_name, sec_name):
     return text
 
 
-def intermediate_to_coderunner(directory, question_name):
+def intermediate_to_coderunner(directory, question_name, penalty,
+                               all_or_nothing, language):
     # Templates para a questão e para casos teste
     package_dir = os.path.abspath(os.path.dirname(__file__))
     tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
@@ -146,6 +147,10 @@ def intermediate_to_coderunner(directory, question_name):
         root.find("cputimelimitsecs").text = time_file.read()
     with open(os.path.join(directory, 'memory'), 'r') as memory_file:
         root.find("memlimitmb").text = memory_file.read()
+
+    # Insere argumentos de penalidade e allornothing
+    root.find("penaltyregime").text = str(penalty)
+    root.find("allornothing").text = str(all_or_nothing)
 
     # Gera o arquivo final da questão
     files = 'Files'
