@@ -17,7 +17,8 @@ def create_paths(question_name):
     os.mkdir(i_s)
 
 
-def codeforces_to_intermediate(directory, question_name):
+def codeforces_to_intermediate(directory, question_name, language):
+
     create_paths(question_name)
 
     i_q = os.path.join('intermadiate_files', question_name)
@@ -29,23 +30,40 @@ def codeforces_to_intermediate(directory, question_name):
 
     shutil.copy(os.path.join(directory, 'tags'), i_q)
 
-    solutiontype = ''
     name_dir = os.listdir(os.path.join(directory, 'solutions'))
-    for name in name_dir:
-        if name.endswith('.c'):
-            namesolution = name
-            solutiontype = "c_program"
-            break
+
+    lan_type = {
+        'c': 'c_program',
+        'py': 'python3',
+        'cpp': 'cpp_program'
+    }
+
+    if language:
+        for name in name_dir:
+            if name.endswith('.' + language):
+                namesolution = name
+                solutiontype = lan_type[language]
+                break
+        else:
+            return 0
     else:
         for name in name_dir:
-            if name.endswith('.desc'):
-                with open(os.path.join(directory, 'solutions', name)) as desc:
-                    if 'Tag: MAIN' in desc.read():
-                        namesolution = name[:-5]
-                        if namesolution.endswith('.py'):
-                            solutiontype = 'python3'
-                        elif namesolution.endswith('.cpp'):
-                            solutiontype = 'cpp_program'
+            if name.endswith('.c'):
+                namesolution = name
+                solutiontype = 'c_program'
+                break
+        else:
+            for name in name_dir:
+                if name.endswith('.desc'):
+                    with open(os.path.join(directory, 'solutions', name)) \
+                            as desc:
+                        if 'Tag: MAIN' in desc.read():
+                            namesolution = name[:-5]
+                            if namesolution.endswith('.py'):
+                                solutiontype = 'python3'
+                            elif namesolution.endswith('.cpp'):
+                                solutiontype = 'cpp_program'
+
     with open(os.path.join(i_q, 'type'), 'w') as sol_file:
         sol_file.write(solutiontype)
 
@@ -62,3 +80,5 @@ def codeforces_to_intermediate(directory, question_name):
     for data in rootproblem.iter("memory-limit"):
         with open(os.path.join(i_q, 'memory'), 'w') as memory_file:
             memory_file.write(str(int(int(data.text)/(1024*1024))))
+
+    return 1

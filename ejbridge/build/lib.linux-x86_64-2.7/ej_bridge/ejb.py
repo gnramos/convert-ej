@@ -16,11 +16,12 @@ def main():
                         nargs=1, default=['0, 0, 10, 20, ...'],
                         help="Error penalty argument")
 
-    parser.add_argument("-an", "--allornothing", type=str,
+    parser.add_argument("-an", "--allornothing", type=str, choices=['0', '1'],
                         nargs=1, default=['1'], help="All or nothing argument")
 
     parser.add_argument("-sl", "--specificlanguage", type=str,
-                        nargs=1, default=[None], help="Argument for creating \
+                        choices=['c', 'cpp', 'py'], nargs=1,
+                        default=[None], help="Argument for creating \
                         only questions that have a specific language")
 
     args = parser.parse_args()
