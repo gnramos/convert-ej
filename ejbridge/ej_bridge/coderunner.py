@@ -5,8 +5,10 @@ from base64 import b64encode
 from .t2h import tex2html
 
 
-# Conjunto de funções para inserir a secção CDATA no xml
 def CDATA(text=None):
+    '''
+    Includes the CDATA tag
+    '''
     element = ET.Element('![CDATA[')
     element.text = text
     return element
@@ -17,6 +19,9 @@ ET._original_serialize_xml = ET._serialize_xml
 
 def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):
+    '''
+    New serializing function to deal with the CDATA tag
+    '''
     if elem.tag == '![CDATA[':
         write("\n<{}{}]]>\n".format(elem.tag, elem.text))
     else:
@@ -38,6 +43,9 @@ def get_section(file_name, sec_name):
 
 
 def get_templates(package_dir):
+    '''
+    Return the imported data opened from the templates
+    '''
     tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
     root = tree.getroot()
     root = root[0]
