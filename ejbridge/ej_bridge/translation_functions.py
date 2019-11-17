@@ -6,6 +6,10 @@ from .coderunner import intermediate_to_coderunner
 
 
 def dir_cf_to_cr(dir, penalty, all_or_nothing, language):
+    '''
+    Get all the information needed in a codeforces zip file,
+    and create a xml file for coderunner.
+    '''
     questions = os.listdir(dir)
     for name in questions:
         if name.endswith('.zip'):
