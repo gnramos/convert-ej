@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
+import subprocess
 from base64 import b64encode
 from .t2h import tex2html
 
@@ -64,6 +65,17 @@ def intermediate_to_coderunner(directory, question_name,
             texto += get_section(os.path.join(dir_sec, file_name + '.tex'),
                                  sec_name)
 
+    # Converte imagens em .eps para .png
+    files_sec = os.listdir(dir_sec)
+    for name in files_sec:
+        if name.endswith('.eps'):
+            # subprocess.Popen("ls", cwd="/")
+
+            subprocess.call(['convert', os.path.join(dir_sec, name),
+                             '+profile', '"*"',
+                             os.path.join(dir_sec, name[:-4] + '.png')])
+
+    # Transforma imagens .png e .jpg em base64 e as insere no xml
     files_sec = os.listdir(dir_sec)
     for name in files_sec:
         if name.endswith('.jpg') or name.endswith('.png'):
