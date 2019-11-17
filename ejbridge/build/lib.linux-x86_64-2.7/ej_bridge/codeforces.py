@@ -70,17 +70,24 @@ def get_solution(language, dir_name, directory):
     return [solutiontype, namesolution, close]
 
 
-def get_time_and_memory_limits(directory, inter_quest):
-    treeproblem = ET.parse(os.path.join(directory, 'problem.xml'))
-    rootproblem = treeproblem.getroot()
+def insert_memory_limit(root_problem, inter_quest):
+    for data in root_problem.iter("memory-limit"):
+        with open(os.path.join(inter_quest, 'memory'), 'w') as memory_file:
+            memory_file.write(str(int(int(data.text)/(1024*1024))))
 
-    for data in rootproblem.iter("time-limit"):
+
+def insert_time_limit(root_problem, inter_quest):
+    for data in root_problem.iter("time-limit"):
         with open(os.path.join(inter_quest, 'time'), 'w') as time_file:
             time_file.write(str(int(int(data.text)/1000)))
 
-    for data in rootproblem.iter("memory-limit"):
-        with open(os.path.join(inter_quest, 'memory'), 'w') as memory_file:
-            memory_file.write(str(int(int(data.text)/(1024*1024))))
+
+def get_limits(directory, inter_quest):
+    tree_problem = ET.parse(os.path.join(directory, 'problem.xml'))
+    root_problem = tree_problem.getroot()
+
+    insert_memory_limit(root_problem, inter_quest)
+    insert_time_limit(root_problem, inter_quest)
 
 
 def codeforces_to_intermediate(directory, question_name, language):
@@ -103,6 +110,6 @@ def codeforces_to_intermediate(directory, question_name, language):
 
     copy_files(dir_sol, dir_text, dir_tests, inter_quest, directory)
 
-    get_time_and_memory_limits(directory, inter_quest)
+    get_limits(directory, inter_quest)
 
     return 1

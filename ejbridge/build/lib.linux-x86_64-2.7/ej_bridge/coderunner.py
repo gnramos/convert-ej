@@ -37,35 +37,39 @@ def get_section(file_name, sec_name):
     return text
 
 
-def intermediate_to_coderunner(directory, question_name,
-                               penalty, all_or_nothing):
-    # Templates para a questão e para casos teste
-    package_dir = os.path.abspath(os.path.dirname(__file__))
+def get_templates(package_dir):
     tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
     root = tree.getroot()
     root = root[0]
-    testtree = ET.parse(os.path.join(package_dir, 'Testcase-Template.xml'))
-    testoroot = testtree.getroot()
+    test_tree = ET.parse(os.path.join(package_dir, 'Testcase-Template.xml'))
+    test_root = test_tree.getroot()
 
-    texto = ''  # Texto da questão
-    dir_sec = os.path.join(directory, 'text')  # Diretório do texto
-    # Insere o nome
+    return [tree, root, test_tree, test_root]
+
+
+def insert_name(dir_sec, root):
     with open(os.path.join(dir_sec, 'name.tex'), 'r') as name:
         root.find("name").find("text").text = name.read()
 
+
+def insert_texts(dir_sec, root):
     sections = {
         'legend': '<p>',
         'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
         'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
         'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
     }
-    # Formata os textos
+    texto = ''
+
     for file_name, sec_name in sections.items():
         if os.path.isfile(os.path.join(dir_sec, file_name + '.tex')):
             texto += get_section(os.path.join(dir_sec, file_name + '.tex'),
                                  sec_name)
 
-    # Converte imagens em .eps para .png
+    root.find("questiontext").find("text").append(CDATA(texto))
+
+
+def convert_eps_to_png(dir_sec):
     files_sec = os.listdir(dir_sec)
     for name in files_sec:
         if name.endswith('.eps'):
@@ -73,7 +77,8 @@ def intermediate_to_coderunner(directory, question_name,
                              '+profile', '"*"',
                              os.path.join(dir_sec, name[:-4] + '.png')])
 
-    # Transforma imagens .png e .jpg em base64 e as insere no xml
+
+def insert_images(dir_sec, root):
     files_sec = os.listdir(dir_sec)
     for name in files_sec:
         if name.endswith('.jpg') or name.endswith('.png'):
@@ -88,60 +93,66 @@ def intermediate_to_coderunner(directory, question_name,
             img.text = encoded_string
             root.find("questiontext").append(img)
 
-    # Insere o texto
-    root.find("questiontext").find("text").append(CDATA(texto))
 
-    # Insere tutorial
+def insert_tutorial(dir_sec, root):
     if os.path.isfile(os.path.join(dir_sec, 'tutorial.tex')):
         with open(os.path.join(dir_sec, 'tutorial.tex'), 'r') as t:
             root.find("generalfeedback").find("text").text = tex2html(t.read())
 
+
+def insert_solution_type(directory, root):
     with open(os.path.join(directory, 'type'), 'r') as sol_file:
         solutiontype = sol_file.read()
-    # Insere a solução na questão
-    name_dir = os.listdir(os.path.join(directory, 'solutions'))
-    namesolution = name_dir[0]
-
-    # Insere a linguagem de programação utilizada
     root.find("coderunnertype").text = solutiontype
 
+
+def insert_solution(directory, root):
+    name_dir = os.listdir(os.path.join(directory, 'solutions'))
+    namesolution = name_dir[0]
     with open(os.path.join(directory, 'solutions', namesolution), 'r') \
             as solution:
         root.find("answer").append(CDATA(solution.read()))
 
-    # Faz uma busca por todos os arquivos de teste e os ordena
-    tests = os.listdir(os.path.join(directory, 'testcases'))
-    tests.sort()
 
-    # Encontra os casos testes a serem visualizados pelo aluno
-    list_tests_show = []
+def get_example_testecases(dir_sec):
+    list_example_tests = []
     tests_show = os.listdir(dir_sec)
     for arq in tests_show:
         if arq.endswith('.a'):
-            list_tests_show.append(arq[8:])
+            list_example_tests.append(arq[8:])
 
-    # Insere as entradas e saídas de teste no template
-    # e adiciona-o na questão
+    return list_example_tests
+
+
+def insert_testcases(dir_sec, directory, root,
+                     test_root, package_dir):
+
+    tests = os.listdir(os.path.join(directory, 'testcases'))
+    tests.sort()
+
+    list_example_tests = get_example_testecases(dir_sec)
+
     for arq in tests:
         if arq.endswith('.a'):
             with open(os.path.join(directory, 'testcases', arq), 'r') \
                     as testout:
-                testoroot.find("expected").find("text").text = testout.read()
+                test_root.find("expected").find("text").text = testout.read()
 
-                if arq in list_tests_show:
-                    testoroot.set("useasexample", "1")
+                if arq in list_example_tests:
+                    test_root.set("useasexample", "1")
 
-                root.find("testcases").append(testoroot)
+                root.find("testcases").append(test_root)
 
-                testtree = ET.parse(os.path.join(package_dir,
-                                                 'Testcase-Template.xml'))
-                testoroot = testtree.getroot()
+                test_tree = ET.parse(os.path.join(package_dir,
+                                                  'Testcase-Template.xml'))
+                test_root = test_tree.getroot()
         else:
             with open(os.path.join(directory, 'testcases', arq), 'r') \
                     as testinput:
-                testoroot.find("stdin").find("text").text = testinput.read()
+                test_root.find("stdin").find("text").text = testinput.read()
 
-    # Insere as tags
+
+def insert_tags(directory, root):
     with open(os.path.join(directory, "tags"), 'r') as tagfile:
         tagscontent = tagfile.readlines()
     taglist = [x.strip() for x in tagscontent]
@@ -152,18 +163,77 @@ def intermediate_to_coderunner(directory, question_name,
         ET.SubElement(tag, 'text').text = tagelement
         tags.append(tag)
 
-    # Insere tempo e mémoria limite
+
+def insert_time_limit(directory, root):
     with open(os.path.join(directory, 'time'), 'r') as time_file:
         root.find("cputimelimitsecs").text = time_file.read()
+
+
+def insert_memory_limit(directory, root):
     with open(os.path.join(directory, 'memory'), 'r') as memory_file:
         root.find("memlimitmb").text = memory_file.read()
 
-    # Insere argumentos de penalidade e allornothing
+
+def insert_penalty(root, penalty):
     root.find("penaltyregime").text = str(penalty)
+
+
+def insert_all_or_nothing(root, all_or_nothing):
     root.find("allornothing").text = str(all_or_nothing)
 
-    # Gera o arquivo final da questão
+
+def write_xml_file(tree, question_name):
     files = 'files'
     if not os.path.exists(files):
         os.mkdir(files)
     tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
+
+
+def intermediate_to_coderunner(directory, question_name,
+                               penalty, all_or_nothing):
+
+    # Templates para a questão e para casos teste
+    package_dir = os.path.abspath(os.path.dirname(__file__))
+    [tree, root, test_tree, test_root] = get_templates(package_dir)
+
+    dir_sec = os.path.join(directory, 'text')  # Diretório dos textos
+
+    # Insere o nome
+    insert_name(dir_sec, root)
+
+    # Insere os textos
+    insert_texts(dir_sec, root)
+
+    # Converte imagens em .eps para .png
+    convert_eps_to_png(dir_sec)
+
+    # Transforma imagens .png e .jpg em base64 e as insere no xml
+    insert_images(dir_sec, root)
+
+    # Insere tutorial
+    insert_tutorial(dir_sec, root)
+
+    # Insere o tipo da questão
+    insert_solution_type(directory, root)
+
+    # Insere a solução da questão
+    insert_solution(directory, root)
+
+    # Insere os testcases no template
+    # e adiciona-o na questão
+    insert_testcases(dir_sec, directory, root,
+                     test_root, package_dir)
+
+    # Insere as tags
+    insert_tags(directory, root)
+
+    # Insere tempo e mémoria limite
+    insert_time_limit(directory, root)
+    insert_memory_limit(directory, root)
+
+    # Insere argumentos de penalidade e allornothing
+    insert_penalty(root, penalty)
+    insert_all_or_nothing(root, all_or_nothing)
+
+    # Gera o arquivo final da questão
+    write_xml_file(tree, question_name)
