@@ -69,8 +69,6 @@ def intermediate_to_coderunner(directory, question_name,
     files_sec = os.listdir(dir_sec)
     for name in files_sec:
         if name.endswith('.eps'):
-            # subprocess.Popen("ls", cwd="/")
-
             subprocess.call(['convert', os.path.join(dir_sec, name),
                              '+profile', '"*"',
                              os.path.join(dir_sec, name[:-4] + '.png')])
