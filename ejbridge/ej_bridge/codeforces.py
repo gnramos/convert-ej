@@ -52,6 +52,7 @@ def get_solution(language, dir_name, directory):
         'cpp': 'cpp_program'
     }
     close = False
+    solutiontype, namesolution = '', ''
 
     if language:
         for name in dir_name:

@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import os
 import subprocess
 from base64 import b64encode
-from .t2h import tex2html
+from t2h import tex2html
 
 
 def CDATA(text=None):
