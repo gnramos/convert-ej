@@ -3,7 +3,8 @@
 import argparse
 import os
 
-import translation_functions as tf
+import codeforces
+import coderunner
 
 
 def _file_or_path_(path):
@@ -53,4 +54,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'cf2cr':
-        tf.cf2cr(args.files, args.penalty, args.all_or_nothing, args.language)
+        for file in args.files:
+            if file.endswith('.zip'):
+                cf = codeforces.CodeForces(file)
+                cr = coderunner.CodeRunner()
+                cr.problem = cf.problem
+                cr.penalty = args.penalty
+                cr.all_or_nothing = args.all_or_nothing
+                cr.language = args.language
+
+                cr.write()
