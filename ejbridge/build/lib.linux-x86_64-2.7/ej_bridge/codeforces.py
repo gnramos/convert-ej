@@ -4,20 +4,26 @@ import xml.etree.ElementTree as ET
 
 
 def create_paths(question_name):
-    i_f = 'intermadiate_files'
-    inter_quest = os.path.join(i_f, question_name)
-    i_s = os.path.join(inter_quest, 'solutions')
-    if not os.path.exists(i_f):
-        os.mkdir(i_f)
+    '''
+    Create the directories needed to store the files
+    '''
+    inter_f = 'intermadiate_files'
+    inter_quest = os.path.join(inter_f, question_name)
+    inter_sol = os.path.join(inter_quest, 'solutions')
+    if not os.path.exists(inter_f):
+        os.mkdir(inter_f)
 
     if os.path.exists(inter_quest):
         shutil.rmtree(inter_quest)
 
     os.mkdir(inter_quest)
-    os.mkdir(i_s)
+    os.mkdir(inter_sol)
 
 
 def get_paths(directory, question_name):
+    '''
+    Return the paths needed to acess the files
+    '''
     inter_quest = os.path.join('intermadiate_files', question_name)
     dir_text = os.path.join(directory, 'statement-sections/english')
     dir_tests = os.path.join(directory, 'tests')
@@ -26,6 +32,9 @@ def get_paths(directory, question_name):
 
 
 def copy_files(dir_sol, dir_text, dir_tests, inter_quest, directory):
+    '''
+    Copy the files to the intermadiate format directory
+    '''
     shutil.copy(dir_sol, os.path.join(inter_quest, 'solutions'))
 
     shutil.copytree(dir_text, os.path.join(inter_quest, 'text'))
@@ -34,6 +43,9 @@ def copy_files(dir_sol, dir_text, dir_tests, inter_quest, directory):
 
 
 def get_solution(language, dir_name, directory):
+    '''
+    Find the right solution an its type according to the parameters received
+    '''
     lan_type = {
         'c': 'c_program',
         'py': 'python3',
@@ -83,6 +95,9 @@ def insert_time_limit(root_problem, inter_quest):
 
 
 def get_limits(directory, inter_quest):
+    '''
+    Find and insert the limits of time and memory for the question
+    '''
     tree_problem = ET.parse(os.path.join(directory, 'problem.xml'))
     root_problem = tree_problem.getroot()
 
@@ -91,6 +106,9 @@ def get_limits(directory, inter_quest):
 
 
 def codeforces_to_intermediate(directory, question_name, language):
+    '''
+    Gather the files needed and create a intemediate format with it
+    '''
 
     create_paths(question_name)
 

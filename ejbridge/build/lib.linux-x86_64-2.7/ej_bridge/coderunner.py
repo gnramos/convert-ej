@@ -5,8 +5,10 @@ from base64 import b64encode
 from .t2h import tex2html
 
 
-# Conjunto de funções para inserir a secção CDATA no xml
 def CDATA(text=None):
+    '''
+    Includes the CDATA tag
+    '''
     element = ET.Element('![CDATA[')
     element.text = text
     return element
@@ -17,6 +19,9 @@ ET._original_serialize_xml = ET._serialize_xml
 
 def _serialize_xml(write, elem, qnames, namespaces,
                    short_empty_elements, **kwargs):
+    '''
+    New serializing function to deal with the CDATA tag
+    '''
     if elem.tag == '![CDATA[':
         write("\n<{}{}]]>\n".format(elem.tag, elem.text))
     else:
@@ -38,6 +43,9 @@ def get_section(file_name, sec_name):
 
 
 def get_templates(package_dir):
+    '''
+    Return the imported data opened from the templates
+    '''
     tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
     root = tree.getroot()
     root = root[0]
@@ -47,12 +55,12 @@ def get_templates(package_dir):
     return [tree, root, test_tree, test_root]
 
 
-def insert_name(dir_sec, root):
-    with open(os.path.join(dir_sec, 'name.tex'), 'r') as name:
+def insert_name(dir_text, root):
+    with open(os.path.join(dir_text, 'name.tex'), 'r') as name:
         root.find("name").find("text").text = name.read()
 
 
-def insert_texts(dir_sec, root):
+def insert_texts(dir_text, root):
     sections = {
         'legend': '<p>',
         'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
@@ -62,24 +70,24 @@ def insert_texts(dir_sec, root):
     texto = ''
 
     for file_name, sec_name in sections.items():
-        if os.path.isfile(os.path.join(dir_sec, file_name + '.tex')):
-            texto += get_section(os.path.join(dir_sec, file_name + '.tex'),
+        if os.path.isfile(os.path.join(dir_text, file_name + '.tex')):
+            texto += get_section(os.path.join(dir_text, file_name + '.tex'),
                                  sec_name)
 
     root.find("questiontext").find("text").append(CDATA(texto))
 
 
-def convert_eps_to_png(dir_sec):
-    files_sec = os.listdir(dir_sec)
+def convert_eps_to_png(dir_text):
+    files_sec = os.listdir(dir_text)
     for name in files_sec:
         if name.endswith('.eps'):
-            subprocess.call(['convert', os.path.join(dir_sec, name),
+            subprocess.call(['convert', os.path.join(dir_text, name),
                              '+profile', '"*"',
-                             os.path.join(dir_sec, name[:-4] + '.png')])
+                             os.path.join(dir_text, name[:-4] + '.png')])
 
 
-def insert_images(dir_sec, root):
-    files_sec = os.listdir(dir_sec)
+def insert_images(dir_text, root):
+    files_sec = os.listdir(dir_text)
     for name in files_sec:
         if name.endswith('.jpg') or name.endswith('.png'):
             img = ET.Element('file')
@@ -87,16 +95,16 @@ def insert_images(dir_sec, root):
             img.set('path', '/')
             img.set('encoding', 'base64')
 
-            with open(os.path.join(dir_sec, name), "rb") as image:
+            with open(os.path.join(dir_text, name), "rb") as image:
                 encoded_string = str(b64encode(image.read()), 'utf-8')
 
             img.text = encoded_string
             root.find("questiontext").append(img)
 
 
-def insert_tutorial(dir_sec, root):
-    if os.path.isfile(os.path.join(dir_sec, 'tutorial.tex')):
-        with open(os.path.join(dir_sec, 'tutorial.tex'), 'r') as t:
+def insert_tutorial(dir_text, root):
+    if os.path.isfile(os.path.join(dir_text, 'tutorial.tex')):
+        with open(os.path.join(dir_text, 'tutorial.tex'), 'r') as t:
             root.find("generalfeedback").find("text").text = tex2html(t.read())
 
 
@@ -114,9 +122,9 @@ def insert_solution(directory, root):
         root.find("answer").append(CDATA(solution.read()))
 
 
-def get_example_testecases(dir_sec):
+def get_example_testecases(dir_text):
     list_example_tests = []
-    tests_show = os.listdir(dir_sec)
+    tests_show = os.listdir(dir_text)
     for arq in tests_show:
         if arq.endswith('.a'):
             list_example_tests.append(arq[8:])
@@ -124,13 +132,13 @@ def get_example_testecases(dir_sec):
     return list_example_tests
 
 
-def insert_testcases(dir_sec, directory, root,
+def insert_testcases(dir_text, directory, root,
                      test_root, package_dir):
 
     tests = os.listdir(os.path.join(directory, 'testcases'))
     tests.sort()
 
-    list_example_tests = get_example_testecases(dir_sec)
+    list_example_tests = get_example_testecases(dir_text)
 
     for arq in tests:
         if arq.endswith('.a'):
@@ -196,22 +204,22 @@ def intermediate_to_coderunner(directory, question_name,
     package_dir = os.path.abspath(os.path.dirname(__file__))
     [tree, root, test_tree, test_root] = get_templates(package_dir)
 
-    dir_sec = os.path.join(directory, 'text')  # Diretório dos textos
+    dir_text = os.path.join(directory, 'text')  # Diretório dos textos
 
     # Insere o nome
-    insert_name(dir_sec, root)
+    insert_name(dir_text, root)
 
     # Insere os textos
-    insert_texts(dir_sec, root)
+    insert_texts(dir_text, root)
 
     # Converte imagens em .eps para .png
-    convert_eps_to_png(dir_sec)
+    convert_eps_to_png(dir_text)
 
     # Transforma imagens .png e .jpg em base64 e as insere no xml
-    insert_images(dir_sec, root)
+    insert_images(dir_text, root)
 
     # Insere tutorial
-    insert_tutorial(dir_sec, root)
+    insert_tutorial(dir_text, root)
 
     # Insere o tipo da questão
     insert_solution_type(directory, root)
@@ -221,7 +229,7 @@ def intermediate_to_coderunner(directory, question_name,
 
     # Insere os testcases no template
     # e adiciona-o na questão
-    insert_testcases(dir_sec, directory, root,
+    insert_testcases(dir_text, directory, root,
                      test_root, package_dir)
 
     # Insere as tags
