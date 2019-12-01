@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 class ProblemText():
     """Stores the textual information for a problem."""
 
-    def __init__(self, name, context, input, output, tutorial, notes=None, images=[]):
+    def __init__(self, name, context, input, output, tutorial,
+                 notes=None, images=[]):
         """Constructor."""
         self.name = name
         self.context = context
@@ -22,8 +23,6 @@ class ProblemText():
         assert len(self.input) > 0
         assert self.output is not None
         assert len(self.output) > 0
-        assert self.tutorial is not None
-        assert len(self.tutorial) > 0
 
 
 class CompetitiveProgrammingProblem():

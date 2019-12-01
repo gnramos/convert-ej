@@ -3,8 +3,8 @@
 import argparse
 import os
 
-import codeforces
-import coderunner
+from codeforces import CodeForces
+from coderunner import CodeRunner
 
 
 def _file_or_path_(path):
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     if args.command == 'cf2cr':
         for file in args.files:
             if file.endswith('.zip'):
-                cf = codeforces.CodeForces(file)
-                cr = coderunner.CodeRunner()
+                cf = CodeForces(file)
+                cr = CodeRunner()
                 cr.problem = cf.problem
                 cr.penalty = args.penalty
                 cr.all_or_nothing = args.all_or_nothing

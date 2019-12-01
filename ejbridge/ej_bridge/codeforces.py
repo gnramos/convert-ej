@@ -1,4 +1,4 @@
-from utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
+from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
 import os
 import shutil
@@ -50,8 +50,9 @@ class CodeForces(EJudge):
                     notes = f.read()
             else:
                 notes = None
+            images = []
 
-            return ProblemText(name, legend, input, output, notes)
+            return ProblemText(name, legend, input, output, notes, images)
 
         def read_tests(root):
             def load_file(file):
@@ -110,13 +111,13 @@ class CodeForces(EJudge):
         tags = read_tags(root)
 
         images = {}
-        with os.scandir(os.path.join(package_dir, 'statements', 'english')) as it:
+        with os.scandir(os.path.join(package_dir, 'statements',
+                                     'english')) as it:
             for entry in it:
                 if entry.is_file() and entry.name.endswith(('.png', '.jpg',
                                                             '.eps')):
                     with open(entry.name, 'rb') as f:
                         images[entry.name] = f.read()
-
 
         cleanup(package_dir)
 
