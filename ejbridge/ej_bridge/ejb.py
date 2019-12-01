@@ -3,8 +3,8 @@
 import argparse
 import os
 
-from codeforces import CodeForces
-from coderunner import CodeRunner
+from .codeforces import CodeForces
+from .coderunner import CodeRunner
 
 
 def _file_or_path_(path):
@@ -49,7 +49,7 @@ def _parser_():
     return parser
 
 
-if __name__ == '__main__':
+def main():
     parser = _parser_()
     args = parser.parse_args()
 
@@ -57,10 +57,12 @@ if __name__ == '__main__':
         for file in args.files:
             if file.endswith('.zip'):
                 cf = CodeForces(file)
-                cr = CodeRunner()
+                cr = CodeRunner(args.penalty, args.all_or_nothing,
+                                args.language)
                 cr.problem = cf.problem
-                cr.penalty = args.penalty
-                cr.all_or_nothing = args.all_or_nothing
-                cr.language = args.language
 
                 cr.write()
+
+
+if __name__ == "__main__":
+    main()

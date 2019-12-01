@@ -12,5 +12,4 @@ ej_bridge/Testcase-Template.xml
 ej_bridge/codeforces.py
 ej_bridge/coderunner.py
 ej_bridge/ejb.py
-ej_bridge/t2h.py
-ej_bridge/translation_functions.py
+ej_bridge/utils.py

@@ -1,133 +1,134 @@
+from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
+
 import os
 import shutil
 import xml.etree.ElementTree as ET
+import zipfile
 
 
-def create_paths(question_name):
-    '''
-    Create the directories needed to store the files
-    '''
-    inter_f = 'intermadiate_files'
-    inter_quest = os.path.join(inter_f, question_name)
-    inter_sol = os.path.join(inter_quest, 'solutions')
-    if not os.path.exists(inter_f):
-        os.mkdir(inter_f)
+class CodeForces(EJudge):
+    """Manipulates CompetitiveProgrammingProblem files."""
 
-    if os.path.exists(inter_quest):
-        shutil.rmtree(inter_quest)
+    def __str__(self):
+        """Return a readable version of the instance's data."""
+        return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
-    os.mkdir(inter_quest)
-    os.mkdir(inter_sol)
+    def read(self, file):
+        """Read the data from the given file.
 
+        Returns a CompetitiveProgrammingProblem.
+        """
+        def unzip(package):
+            assert package.endswith('.zip'), '{} is not a zip file'.format(
+                package)
 
-def get_paths(directory, question_name):
-    '''
-    Return the paths needed to acess the files
-    '''
-    inter_quest = os.path.join('intermadiate_files', question_name)
-    dir_text = os.path.join(directory, 'statement-sections/english')
-    dir_tests = os.path.join(directory, 'tests')
+            file_dir, file_name = os.path.split(package)
+            package_dir = os.path.splitext(file_name)[0]
 
-    return [inter_quest, dir_text, dir_tests]
+            with zipfile.ZipFile(package, 'r') as zip_file:
+                zip_file.extractall(package_dir)
 
+            return package_dir
 
-def copy_files(dir_sol, dir_text, dir_tests, inter_quest, directory):
-    '''
-    Copy the files to the intermadiate format directory
-    '''
-    shutil.copy(dir_sol, os.path.join(inter_quest, 'solutions'))
+        def cleanup(package_dir):
+            shutil.rmtree(package_dir)
 
-    shutil.copytree(dir_text, os.path.join(inter_quest, 'text'))
-    shutil.copytree(dir_tests, os.path.join(inter_quest, 'testcases'))
-    shutil.copy(os.path.join(directory, 'tags'), inter_quest)
+        def build_text(package_dir):
+            sections = os.path.join(package_dir,
+                                    'statement-sections',
+                                    'english')
+            with open(os.path.join(sections, 'name.tex')) as f:
+                name = f.read()
+            with open(os.path.join(sections, 'legend.tex')) as f:
+                legend = f.read()
+            with open(os.path.join(sections, 'input.tex')) as f:
+                input = f.read()
+            with open(os.path.join(sections, 'output.tex')) as f:
+                output = f.read()
+            if os.path.isfile(os.path.join(sections, 'notes.tex')):
+                with open(os.path.join(sections, 'notes.tex')) as f:
+                    notes = f.read()
+            else:
+                notes = None
+            images = []
 
+            return ProblemText(name, legend, input, output, notes, images)
 
-def get_solution(language, dir_name, directory):
-    '''
-    Find the right solution an its type according to the parameters received
-    '''
-    lan_type = {
-        'c': 'c_program',
-        'py': 'python3',
-        'cpp': 'cpp_program'
-    }
-    close = False
+        def read_tests(root):
+            def load_file(file):
+                assert os.path.isfile(file), '{} is not a file'.format(file)
+                with open(file) as f:
+                    content = f.read()
+                return content
 
-    if language:
-        for name in dir_name:
-            if name.endswith('.' + language):
-                namesolution = name
-                solutiontype = lan_type[language]
-                break
-        else:
-            close = True
-    else:
-        for name in dir_name:
-            if name.endswith('.c'):
-                namesolution = name
-                solutiontype = 'c_program'
-                break
-        else:
-            for name in dir_name:
-                if name.endswith('.desc'):
-                    with open(os.path.join(directory, 'solutions', name)) \
-                            as desc:
-                        if 'Tag: MAIN' in desc.read():
-                            namesolution = name[:-5]
-                            if namesolution.endswith('.py'):
-                                solutiontype = 'python3'
-                            elif namesolution.endswith('.cpp'):
-                                solutiontype = 'cpp_program'
+            examples = {'in': [], 'out': []}
+            hidden = {'in': [], 'out': []}
+            x = 1
+            for e in root.findall('judging/testset/tests/test'):
+                file_num = '{:0>2}'.format(x)
+                file = os.path.join(package_dir, 'tests', file_num)
+                if 'sample' in e.attrib:
+                    examples['in'].append(load_file(file))
+                    examples['out'].append(load_file(file + '.a'))
+                else:
+                    hidden['in'].append(load_file(file))
+                    hidden['out'].append(load_file(file + '.a'))
 
-    return [solutiontype, namesolution, close]
+                x += 1
 
+            return {'example': examples, 'hidden': hidden}
 
-def insert_memory_limit(root_problem, inter_quest):
-    for data in root_problem.iter("memory-limit"):
-        with open(os.path.join(inter_quest, 'memory'), 'w') as memory_file:
-            memory_file.write(str(int(int(data.text)/(1024*1024))))
+        def read_limits(root):
+            testset = root.find('judging/testset')
+            time_limit = testset.find('time-limit').text
+            memory_limit = testset.find('memory-limit').text
 
+            return int(time_limit) // 1000, int(memory_limit) // (2 ** 20)
 
-def insert_time_limit(root_problem, inter_quest):
-    for data in root_problem.iter("time-limit"):
-        with open(os.path.join(inter_quest, 'time'), 'w') as time_file:
-            time_file.write(str(int(int(data.text)/1000)))
+        def read_main_solution(package_dir, root):
+            main_file = root.find(
+                'assets/solutions/solution[@tag="main"]/source').attrib['path']
+            with open(os.path.join(package_dir, main_file), 'r') as f:
+                source = f.read()
+            return source
 
+        def read_tags(root):
+            return [e.attrib['value'] for e in root.findall('tags/tag')]
 
-def get_limits(directory, inter_quest):
-    '''
-    Find and insert the limits of time and memory for the question
-    '''
-    tree_problem = ET.parse(os.path.join(directory, 'problem.xml'))
-    root_problem = tree_problem.getroot()
+        assert os.path.isfile(file), '{} is not a file'.format(file)
+        package_dir = unzip(file)
 
-    insert_memory_limit(root_problem, inter_quest)
-    insert_time_limit(root_problem, inter_quest)
+        xml = os.path.join(package_dir, 'problem.xml')
+        assert os.path.isfile(xml), '{} is not a file'.format(xml)
 
+        tree = ET.parse(xml)
+        root = tree.getroot()
+        handle = root.attrib['short-name']
+        text = build_text(package_dir)
+        tests_files = read_tests(root)
+        time_limit_sec, memory_limit_mb = read_limits(root)
+        main_source = read_main_solution(package_dir, root)
+        tags = read_tags(root)
 
-def codeforces_to_intermediate(directory, question_name, language):
-    '''
-    Gather the files needed and create a intemediate format with it
-    '''
+        images = {}
+        with os.scandir(os.path.join(package_dir, 'statements',
+                                     'english')) as it:
+            for entry in it:
+                if entry.is_file() and entry.name.endswith(('.png', '.jpg',
+                                                            '.eps')):
+                    with open(entry.name, 'rb') as f:
+                        images[entry.name] = f.read()
 
-    create_paths(question_name)
+        cleanup(package_dir)
 
-    [inter_quest, dir_text, dir_tests] = get_paths(directory, question_name)
+        self.problem = Cpp(handle, text, images, tests_files, main_source,
+                           tags, memory_limit_mb, time_limit_sec)
 
-    dir_name = os.listdir(os.path.join(directory, 'solutions'))
+    def write(self, file=None):
+        """Write the data into the given file."""
+        assert self.problem
 
-    [solutiontype, namesolution, close] = get_solution(language,
-                                                       dir_name, directory)
-    if close:
-        return 0
+        if file:
+            assert not os.path.isfile(file)
 
-    with open(os.path.join(inter_quest, 'type'), 'w') as sol_file:
-        sol_file.write(solutiontype)
-
-    dir_sol = os.path.join(directory, 'solutions', namesolution)
-
-    copy_files(dir_sol, dir_text, dir_tests, inter_quest, directory)
-
-    get_limits(directory, inter_quest)
-
-    return 1
+        raise NotImplementedError
