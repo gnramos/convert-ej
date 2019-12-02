@@ -56,10 +56,60 @@ class CodeRunner(EJudge):
             tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
             root = tree.getroot()
             root = root[0]
+            return [tree, root]
+
+        def get_test_templates(package_dir):
             test_tree = ET.parse(os.path.join(package_dir,
                                  'Testcase-Template.xml'))
             test_root = test_tree.getroot()
-            return [tree, root, test_tree, test_root]
+            return [test_tree, test_root]
+
+        def get_section(description, sec_name):
+            return sec_name + description + '\n</p>\n'
+
+        def insert_texts(text, root):
+
+            root.find("name").find("text").text = text.name
+
+            sections = {
+                'context': '<p>',
+                'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
+                'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
+                'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
+            }
+            texto = ''
+
+            texto += get_section(text.context, sections['context'])
+            texto += get_section(text.input, sections['input'])
+            texto += get_section(text.output, sections['output'])
+            if text.notes:
+                texto += get_section(text.notes, sections['notes'])
+
+            root.find("questiontext").find("text").append(CDATA(texto))
+
+        def insert_testcases(test_cases, root, package_dir):
+
+            [test_tree, test_root] = get_test_templates(package_dir)
+
+            for t_in, t_out in zip(test_cases['example']['in'],
+                                   test_cases['example']['out']):
+                test_root.find("stdin").find("text").text = t_in
+                test_root.find("expected").find("text").text = t_out
+                test_root.set("useasexample", "1")
+
+                root.find("testcases").append(test_root)
+
+                [test_tree, test_root] = get_test_templates(package_dir)
+
+            for t_in, t_out in zip(test_cases['hidden']['in'],
+                                   test_cases['hidden']['out']):
+                test_root.find("stdin").find("text").text = t_in
+                test_root.find("expected").find("text").text = t_out
+                test_root.set("useasexample", "0")
+
+                root.find("testcases").append(test_root)
+
+                [test_tree, test_root] = get_test_templates(package_dir)
 
         def insert_solution(solution, root):
             root.find("answer").append(CDATA(solution))
@@ -95,7 +145,7 @@ class CodeRunner(EJudge):
             root.find("penaltyregime").text = str(penalty)
 
         def insert_all_or_nothing(all_or_nothing, root):
-            root.find("allornothing").text = str(all_or_nothing)
+            root.find("allornothing").text = '1' if all_or_nothing else '0'
 
         def write_xml_file(tree, question_name):
             files = 'files'
@@ -106,14 +156,14 @@ class CodeRunner(EJudge):
         assert self.problem
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
-        [tree, root, test_tree, test_root] = get_templates(package_dir)
+        [tree, root] = get_templates(package_dir)
 
-        # insert_texts(root)
+        insert_texts(self.problem.text, root)
         # convert_eps_to_png()
         # insert_images(root)
         insert_tutorial(self.problem.text.tutorial, root)
         insert_solution(self.problem.solutions, root)
-        # insert_testcases(directory, root, test_root, package_dir)
+        insert_testcases(self.problem.test_cases, root, package_dir)
         insert_solution_type(self.problem.sol_type, root)
         insert_tags(self.problem.tags, root)
         insert_time_limit(self.problem.time_limit, root)
