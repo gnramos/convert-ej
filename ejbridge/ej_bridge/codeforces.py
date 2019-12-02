@@ -50,9 +50,16 @@ class CodeForces(EJudge):
                     notes = f.read()
             else:
                 notes = None
+            if os.path.isfile(os.path.join(sections, 'tutorial.tex')):
+                with open(os.path.join(sections, 'tutorial.tex')) as f:
+                    tutorial = f.read()
+            else:
+                tutorial = None
+
             images = []
 
-            return ProblemText(name, legend, input, output, notes, images)
+            return ProblemText(name, legend, input, output, tutorial,
+                               images, notes)
 
         def read_tests(root):
             def load_file(file):

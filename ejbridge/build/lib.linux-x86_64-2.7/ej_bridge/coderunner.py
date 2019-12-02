@@ -1,4 +1,4 @@
-from .utils import EJudge
+from .utils import EJudge, tex2html
 
 import xml.etree.ElementTree as ET
 import os
@@ -73,6 +73,11 @@ class CodeRunner(EJudge):
                 raise NameError("Solution type not identified")
             root.find("coderunnertype").text = ans
 
+        def insert_tutorial(tutorial, root):
+            if tutorial:
+                root.find("generalfeedback").find("text").text = \
+                    tex2html(tutorial)
+
         def insert_tags(taglist, root):
             tags = root.find("tags")
             for tag in taglist:
@@ -106,7 +111,7 @@ class CodeRunner(EJudge):
         # insert_texts(root)
         # convert_eps_to_png()
         # insert_images(root)
-        # insert_tutorial(root)
+        insert_tutorial(self.problem.text.tutorial, root)
         insert_solution(self.problem.solutions, root)
         # insert_testcases(directory, root, test_root, package_dir)
         insert_solution_type(self.problem.sol_type, root)
