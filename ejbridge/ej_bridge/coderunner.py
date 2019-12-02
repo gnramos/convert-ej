@@ -1,247 +1,174 @@
+from .utils import EJudge, tex2html
+
 import xml.etree.ElementTree as ET
 import os
-import subprocess
-from base64 import b64encode
-from t2h import tex2html
 
 
-def CDATA(text=None):
-    '''
-    Includes the CDATA tag
-    '''
-    element = ET.Element('![CDATA[')
-    element.text = text
-    return element
+class CodeRunner(EJudge):
+    """Manipulates CompetitiveProgrammingProblem files."""
 
+    def __init__(self, penalty=None, all_or_nothing=None,
+                 language=None, file=None):
+        super().__init__(file)
+        self.penalty = penalty
+        self.all_or_nothing = all_or_nothing
+        self.language = language
 
-ET._original_serialize_xml = ET._serialize_xml
+    def __str__(self):
+        """Return a readable version of the instance's data."""
+        return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
+    def read(self, file):
+        """Read the data from the given file.
 
-def _serialize_xml(write, elem, qnames, namespaces,
-                   short_empty_elements, **kwargs):
-    '''
-    New serializing function to deal with the CDATA tag
-    '''
-    if elem.tag == '![CDATA[':
-        write("\n<{}{}]]>\n".format(elem.tag, elem.text))
-    else:
-        return ET._original_serialize_xml(
-               write, elem, qnames, namespaces, short_empty_elements, **kwargs)
+        Returns a CompetitiveProgrammingProblem.
+        """
+        raise NotImplementedError
 
+    def write(self, file=None):
+        """Write the data into the given file."""
 
-ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
+        def CDATA(text=None):
+            '''
+            Includes the CDATA tag
+            '''
+            element = ET.Element('![CDATA[')
+            element.text = text
+            return element
 
+        ET._original_serialize_xml = ET._serialize_xml
 
-def name_section(sec_name, description):
-    return sec_name + description + '\n</p>\n'
+        def _serialize_xml(write, elem, qnames, namespaces,
+                           short_empty_elements, **kwargs):
+            '''
+            New serializing function to deal with the CDATA tag
+            '''
+            if elem.tag == '![CDATA[':
+                write("\n<{}{}]]>\n".format(elem.tag, elem.text))
+            else:
+                return ET._original_serialize_xml(
+                       write, elem, qnames, namespaces, short_empty_elements,
+                       **kwargs)
 
+        ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
 
-def get_section(file_name, sec_name):
-    with open(file_name, 'r') as section:
-        text = name_section(sec_name, tex2html(section.read()))
-    return text
+        def get_templates(package_dir):
+            tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
+            root = tree.getroot()
+            root = root[0]
+            return [tree, root]
 
+        def get_test_templates(package_dir):
+            test_tree = ET.parse(os.path.join(package_dir,
+                                 'Testcase-Template.xml'))
+            test_root = test_tree.getroot()
+            return [test_tree, test_root]
 
-def get_templates(package_dir):
-    '''
-    Return the imported data opened from the templates
-    '''
-    tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
-    root = tree.getroot()
-    root = root[0]
-    test_tree = ET.parse(os.path.join(package_dir, 'Testcase-Template.xml'))
-    test_root = test_tree.getroot()
+        def get_section(description, sec_name):
+            return sec_name + description + '\n</p>\n'
 
-    return [tree, root, test_tree, test_root]
+        def insert_texts(text, root):
 
+            root.find("name").find("text").text = text.name
 
-def insert_name(dir_text, root):
-    with open(os.path.join(dir_text, 'name.tex'), 'r') as name:
-        root.find("name").find("text").text = name.read()
+            sections = {
+                'context': '<p>',
+                'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
+                'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
+                'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
+            }
+            texto = ''
 
+            texto += get_section(text.context, sections['context'])
+            texto += get_section(text.input, sections['input'])
+            texto += get_section(text.output, sections['output'])
+            if text.notes:
+                texto += get_section(text.notes, sections['notes'])
 
-def insert_texts(dir_text, root):
-    sections = {
-        'legend': '<p>',
-        'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
-        'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
-        'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
-    }
-    texto = ''
+            root.find("questiontext").find("text").append(CDATA(texto))
 
-    for file_name, sec_name in sections.items():
-        if os.path.isfile(os.path.join(dir_text, file_name + '.tex')):
-            texto += get_section(os.path.join(dir_text, file_name + '.tex'),
-                                 sec_name)
+        def insert_testcases(test_cases, root, package_dir):
 
-    root.find("questiontext").find("text").append(CDATA(texto))
+            [test_tree, test_root] = get_test_templates(package_dir)
 
-
-def convert_eps_to_png(dir_text):
-    files_sec = os.listdir(dir_text)
-    for name in files_sec:
-        if name.endswith('.eps'):
-            subprocess.call(['convert', os.path.join(dir_text, name),
-                             '+profile', '"*"',
-                             os.path.join(dir_text, name[:-4] + '.png')])
-
-
-def insert_images(dir_text, root):
-    files_sec = os.listdir(dir_text)
-    for name in files_sec:
-        if name.endswith('.jpg') or name.endswith('.png'):
-            img = ET.Element('file')
-            img.set('name', name)
-            img.set('path', '/')
-            img.set('encoding', 'base64')
-
-            with open(os.path.join(dir_text, name), "rb") as image:
-                encoded_string = str(b64encode(image.read()), 'utf-8')
-
-            img.text = encoded_string
-            root.find("questiontext").append(img)
-
-
-def insert_tutorial(dir_text, root):
-    if os.path.isfile(os.path.join(dir_text, 'tutorial.tex')):
-        with open(os.path.join(dir_text, 'tutorial.tex'), 'r') as t:
-            root.find("generalfeedback").find("text").text = tex2html(t.read())
-
-
-def insert_solution_type(directory, root):
-    with open(os.path.join(directory, 'type'), 'r') as sol_file:
-        solutiontype = sol_file.read()
-    root.find("coderunnertype").text = solutiontype
-
-
-def insert_solution(directory, root):
-    name_dir = os.listdir(os.path.join(directory, 'solutions'))
-    namesolution = name_dir[0]
-    with open(os.path.join(directory, 'solutions', namesolution), 'r') \
-            as solution:
-        root.find("answer").append(CDATA(solution.read()))
-
-
-def get_example_testecases(dir_text):
-    list_example_tests = []
-    tests_show = os.listdir(dir_text)
-    for arq in tests_show:
-        if arq.endswith('.a'):
-            list_example_tests.append(arq[8:])
-
-    return list_example_tests
-
-
-def insert_testcases(dir_text, directory, root,
-                     test_root, package_dir):
-
-    tests = os.listdir(os.path.join(directory, 'testcases'))
-    tests.sort()
-
-    list_example_tests = get_example_testecases(dir_text)
-
-    for arq in tests:
-        if arq.endswith('.a'):
-            with open(os.path.join(directory, 'testcases', arq), 'r') \
-                    as testout:
-                test_root.find("expected").find("text").text = testout.read()
-
-                if arq in list_example_tests:
-                    test_root.set("useasexample", "1")
+            for t_in, t_out in zip(test_cases['example']['in'],
+                                   test_cases['example']['out']):
+                test_root.find("stdin").find("text").text = t_in
+                test_root.find("expected").find("text").text = t_out
+                test_root.set("useasexample", "1")
 
                 root.find("testcases").append(test_root)
 
-                test_tree = ET.parse(os.path.join(package_dir,
-                                                  'Testcase-Template.xml'))
-                test_root = test_tree.getroot()
-        else:
-            with open(os.path.join(directory, 'testcases', arq), 'r') \
-                    as testinput:
-                test_root.find("stdin").find("text").text = testinput.read()
+                [test_tree, test_root] = get_test_templates(package_dir)
 
+            for t_in, t_out in zip(test_cases['hidden']['in'],
+                                   test_cases['hidden']['out']):
+                test_root.find("stdin").find("text").text = t_in
+                test_root.find("expected").find("text").text = t_out
+                test_root.set("useasexample", "0")
 
-def insert_tags(directory, root):
-    with open(os.path.join(directory, "tags"), 'r') as tagfile:
-        tagscontent = tagfile.readlines()
-    taglist = [x.strip() for x in tagscontent]
+                root.find("testcases").append(test_root)
 
-    tags = root.find("tags")
-    for tagelement in taglist:
-        tag = ET.Element('tag')
-        ET.SubElement(tag, 'text').text = tagelement
-        tags.append(tag)
+                [test_tree, test_root] = get_test_templates(package_dir)
 
+        def insert_solution(solution, root):
+            root.find("answer").append(CDATA(solution))
 
-def insert_time_limit(directory, root):
-    with open(os.path.join(directory, 'time'), 'r') as time_file:
-        root.find("cputimelimitsecs").text = time_file.read()
+        def insert_solution_type(sol_type, root):
+            if sol_type == 'cpp.g++17':
+                ans = 'cpp_program'
+            elif sol_type == 'python.3':
+                ans = 'python3'
+            else:
+                raise NameError("Solution type not identified")
+            root.find("coderunnertype").text = ans
 
+        def insert_tutorial(tutorial, root):
+            if tutorial:
+                root.find("generalfeedback").find("text").text = \
+                    tex2html(tutorial)
 
-def insert_memory_limit(directory, root):
-    with open(os.path.join(directory, 'memory'), 'r') as memory_file:
-        root.find("memlimitmb").text = memory_file.read()
+        def insert_tags(taglist, root):
+            tags = root.find("tags")
+            for tag in taglist:
+                tag_element = ET.Element('tag')
+                ET.SubElement(tag_element, 'text').text = tag
+                tags.append(tag_element)
 
+        def insert_time_limit(time_limit, root):
+            root.find("cputimelimitsecs").text = str(time_limit)
 
-def insert_penalty(root, penalty):
-    root.find("penaltyregime").text = str(penalty)
+        def insert_memory_limit(memory_limit, root):
+            root.find("memlimitmb").text = str(memory_limit)
 
+        def insert_penalty(penalty, root):
+            root.find("penaltyregime").text = str(penalty)
 
-def insert_all_or_nothing(root, all_or_nothing):
-    root.find("allornothing").text = str(all_or_nothing)
+        def insert_all_or_nothing(all_or_nothing, root):
+            root.find("allornothing").text = '1' if all_or_nothing else '0'
 
+        def write_xml_file(tree, question_name):
+            files = 'files'
+            if not os.path.exists(files):
+                os.mkdir(files)
+            tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
-def write_xml_file(tree, question_name):
-    files = 'files'
-    if not os.path.exists(files):
-        os.mkdir(files)
-    tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
+        assert self.problem
 
+        package_dir = os.path.abspath(os.path.dirname(__file__))
+        [tree, root] = get_templates(package_dir)
 
-def intermediate_to_coderunner(directory, question_name,
-                               penalty, all_or_nothing):
+        insert_texts(self.problem.text, root)
+        # convert_eps_to_png()
+        # insert_images(root)
+        insert_tutorial(self.problem.text.tutorial, root)
+        insert_solution(self.problem.solutions, root)
+        insert_testcases(self.problem.test_cases, root, package_dir)
+        insert_solution_type(self.problem.sol_type, root)
+        insert_tags(self.problem.tags, root)
+        insert_time_limit(self.problem.time_limit, root)
+        insert_memory_limit(self.problem.memory_limit, root)
+        insert_penalty(self.penalty, root)
+        insert_all_or_nothing(self.all_or_nothing, root)
 
-    # Templates para a questão e para casos teste
-    package_dir = os.path.abspath(os.path.dirname(__file__))
-    [tree, root, test_tree, test_root] = get_templates(package_dir)
-
-    dir_text = os.path.join(directory, 'text')  # Diretório dos textos
-
-    # Insere o nome
-    insert_name(dir_text, root)
-
-    # Insere os textos
-    insert_texts(dir_text, root)
-
-    # Converte imagens em .eps para .png
-    convert_eps_to_png(dir_text)
-
-    # Transforma imagens .png e .jpg em base64 e as insere no xml
-    insert_images(dir_text, root)
-
-    # Insere tutorial
-    insert_tutorial(dir_text, root)
-
-    # Insere o tipo da questão
-    insert_solution_type(directory, root)
-
-    # Insere a solução da questão
-    insert_solution(directory, root)
-
-    # Insere os testcases no template
-    # e adiciona-o na questão
-    insert_testcases(dir_text, directory, root,
-                     test_root, package_dir)
-
-    # Insere as tags
-    insert_tags(directory, root)
-
-    # Insere tempo e mémoria limite
-    insert_time_limit(directory, root)
-    insert_memory_limit(directory, root)
-
-    # Insere argumentos de penalidade e allornothing
-    insert_penalty(root, penalty)
-    insert_all_or_nothing(root, all_or_nothing)
-
-    # Gera o arquivo final da questão
-    write_xml_file(tree, question_name)
+        write_xml_file(tree, self.problem.handle)
