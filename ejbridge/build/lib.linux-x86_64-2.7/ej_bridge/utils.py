@@ -28,14 +28,15 @@ class ProblemText():
 class CompetitiveProgrammingProblem():
     """Stores the data for a competitive programming problem."""
 
-    def __init__(self, handle, text, images, test_cases, solutions, tags,
-                 memory_limit, time_limit):
+    def __init__(self, handle, text, images, test_cases, solutions, sol_type,
+                 tags, memory_limit, time_limit):
         """Constructor."""
         self.handle = handle
         self.text = text
         self.images = images
         self.test_cases = test_cases
         self.solutions = solutions
+        self.sol_type = sol_type
         self.tags = tags
         self.memory_limit = memory_limit
         self.time_limit = time_limit
@@ -48,6 +49,8 @@ class CompetitiveProgrammingProblem():
         assert len(self.test_cases) > 0
         assert self.solutions is not None
         assert len(self.solutions) > 0
+        assert self.sol_type is not None
+        assert len(self.sol_type) > 0
         assert self.tags is not None
         assert len(self.tags) > 0
         assert self.memory_limit > 0

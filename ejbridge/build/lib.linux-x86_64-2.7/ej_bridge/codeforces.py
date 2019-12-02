@@ -88,9 +88,11 @@ class CodeForces(EJudge):
         def read_main_solution(package_dir, root):
             main_file = root.find(
                 'assets/solutions/solution[@tag="main"]/source').attrib['path']
+            sol_type = root.find(
+                'assets/solutions/solution[@tag="main"]/source').attrib['type']
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
-            return source
+            return [source, sol_type]
 
         def read_tags(root):
             return [e.attrib['value'] for e in root.findall('tags/tag')]
@@ -107,7 +109,7 @@ class CodeForces(EJudge):
         text = build_text(package_dir)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
-        main_source = read_main_solution(package_dir, root)
+        [main_source, sol_type] = read_main_solution(package_dir, root)
         tags = read_tags(root)
 
         images = {}
@@ -122,7 +124,7 @@ class CodeForces(EJudge):
         cleanup(package_dir)
 
         self.problem = Cpp(handle, text, images, tests_files, main_source,
-                           tags, memory_limit_mb, time_limit_sec)
+                           sol_type, tags, memory_limit_mb, time_limit_sec)
 
     def write(self, file=None):
         """Write the data into the given file."""

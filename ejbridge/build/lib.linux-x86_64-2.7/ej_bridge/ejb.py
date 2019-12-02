@@ -60,9 +60,8 @@ def main():
                 cr = CodeRunner(args.penalty, args.all_or_nothing,
                                 args.language)
                 cr.problem = cf.problem
-                print(cf.__str__())
 
-                # cr.write()
+                cr.write()
 
 
 if __name__ == "__main__":
