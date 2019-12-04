@@ -56,9 +56,8 @@ def main():
     if args.command == 'cf2cr':
         for file in args.files:
             if file.endswith('.zip'):
-                cf = CodeForces(file)
-                cr = CodeRunner(args.penalty, args.all_or_nothing,
-                                args.language)
+                cf = CodeForces(args.language, file)
+                cr = CodeRunner(args.penalty, args.all_or_nothing)
                 cr.problem = cf.problem
 
                 cr.write()

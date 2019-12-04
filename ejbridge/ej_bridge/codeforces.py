@@ -9,6 +9,10 @@ import zipfile
 class CodeForces(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
+    def __init__(self, language=None, file=None):
+        super().__init__(file)
+        self.language = language
+
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
