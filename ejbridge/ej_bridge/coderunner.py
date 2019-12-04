@@ -7,12 +7,10 @@ import os
 class CodeRunner(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, penalty=None, all_or_nothing=None,
-                 language=None, file=None):
+    def __init__(self, penalty=None, all_or_nothing=None, file=None):
         super().__init__(file)
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
-        self.language = language
 
     def __str__(self):
         """Return a readable version of the instance's data."""
@@ -64,10 +62,9 @@ class CodeRunner(EJudge):
             test_root = test_tree.getroot()
             return [test_tree, test_root]
 
-        def get_section(header, description):
-            return '{}<p>\n{}\n</p>\n'.format(header, tex2html(description))
-
         def insert_texts(text, root):
+            def get_section(header, description):
+                return '{}<p>\n{}\n</p>\n'.format(header, tex2html(description))
 
             root.find("name").find("text").text = text.name
 
