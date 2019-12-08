@@ -30,12 +30,11 @@ class ProblemText():
 class CompetitiveProgrammingProblem():
     """Stores the data for a competitive programming problem."""
 
-    def __init__(self, handle, text, images, test_cases, solutions, sol_type,
+    def __init__(self, handle, text, test_cases, solutions, sol_type,
                  tags, memory_limit, time_limit):
         """Constructor."""
         self.handle = handle
         self.text = text
-        self.images = images
         self.test_cases = test_cases
         self.solutions = solutions
         self.sol_type = sol_type

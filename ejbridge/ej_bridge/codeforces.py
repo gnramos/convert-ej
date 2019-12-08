@@ -1,5 +1,6 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
+import subprocess
 import os
 import shutil
 import xml.etree.ElementTree as ET
@@ -37,6 +38,15 @@ class CodeForces(EJudge):
         def cleanup(package_dir):
             shutil.rmtree(package_dir)
 
+        def convert_eps_to_png(dir_img):
+            files_sec = os.listdir(dir_img)
+            for name in files_sec:
+                if name.endswith('.eps'):
+                    subprocess.call(['convert', os.path.join(dir_img, name),
+                                     '+profile', '"*"',
+                                     os.path.join(dir_img, name[:-4] +
+                                                  '.png')])
+
         def build_text(package_dir):
             sections = os.path.join(package_dir,
                                     'statement-sections',
@@ -60,7 +70,14 @@ class CodeForces(EJudge):
             else:
                 tutorial = None
 
+            convert_eps_to_png(sections)
             images = []
+            with os.scandir(os.path.join(package_dir, 'statements',
+                                         'english')) as it:
+                for entry in it:
+                    if entry.is_file() and entry.name.endswith(('.png',
+                                                                '.jpg')):
+                        images.append(entry.name)
 
             return ProblemText(name, legend, input, output, tutorial,
                                images, notes)
@@ -136,18 +153,9 @@ class CodeForces(EJudge):
                                                      root, self.language)
         tags = read_tags(root)
 
-        images = {}
-        with os.scandir(os.path.join(package_dir, 'statements',
-                                     'english')) as it:
-            for entry in it:
-                if entry.is_file() and entry.name.endswith(('.png', '.jpg',
-                                                            '.eps')):
-                    with open(entry.name, 'rb') as f:
-                        images[entry.name] = f.read()
-
         cleanup(package_dir)
 
-        self.problem = Cpp(handle, text, images, tests_files, main_source,
+        self.problem = Cpp(handle, text, tests_files, main_source,
                            sol_type, tags, memory_limit_mb, time_limit_sec)
 
     def write(self, file=None):
