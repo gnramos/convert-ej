@@ -43,8 +43,8 @@ def _parser_():
     cf2cr.add_argument('-an', '--allornothing', action='store_true',
                        dest='all_or_nothing',
                        help='Set all-or-nothing marking behavior.')
-    cf2cr.add_argument('-l', '--language', choices=['C'], default='C',
-                       help='Set programming language.')
+    cf2cr.add_argument('-l', '--language', choices=['c', 'cpp', 'python'],
+                       default='c', help='Set programming language.')
 
     return parser
 
