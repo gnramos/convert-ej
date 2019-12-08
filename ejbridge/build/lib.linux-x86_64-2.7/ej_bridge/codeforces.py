@@ -9,6 +9,10 @@ import zipfile
 class CodeForces(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
+    def __init__(self, language=None, file=None):
+        super().__init__(file)
+        self.language = language
+
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
@@ -92,11 +96,23 @@ class CodeForces(EJudge):
 
             return int(time_limit) // 1000, int(memory_limit) // (2 ** 20)
 
-        def read_main_solution(package_dir, root):
-            main_file = root.find(
-                'assets/solutions/solution[@tag="main"]/source').attrib['path']
-            sol_type = root.find(
-                'assets/solutions/solution[@tag="main"]/source').attrib['type']
+        def read_main_solution(package_dir, root, language):
+            for e in root.findall(
+                    'assets/solutions/solution[@tag="main"]/source'):
+                if(e.attrib['type'].startswith(language+'.')):
+                    main_file = e.attrib['path']
+                    sol_type = e.attrib['type']
+                    break
+            else:
+                for e in root.findall(
+                        'assets/solutions/solution[@tag="accepted"]/source'):
+                    if(e.attrib['type'].startswith(language+'.')):
+                        main_file = e.attrib['path']
+                        sol_type = e.attrib['type']
+                        break
+                else:
+                    raise NameError('Solution not found')
+
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
             return [source, sol_type]
@@ -116,7 +132,8 @@ class CodeForces(EJudge):
         text = build_text(package_dir)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
-        [main_source, sol_type] = read_main_solution(package_dir, root)
+        [main_source, sol_type] = read_main_solution(package_dir,
+                                                     root, self.language)
         tags = read_tags(root)
 
         images = {}

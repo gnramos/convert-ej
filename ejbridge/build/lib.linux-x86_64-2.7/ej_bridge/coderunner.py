@@ -7,12 +7,10 @@ import os
 class CodeRunner(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, penalty=None, all_or_nothing=None,
-                 language=None, file=None):
+    def __init__(self, penalty=None, all_or_nothing=None, file=None):
         super().__init__(file)
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
-        self.language = language
 
     def __str__(self):
         """Return a readable version of the instance's data."""
@@ -64,60 +62,55 @@ class CodeRunner(EJudge):
             test_root = test_tree.getroot()
             return [test_tree, test_root]
 
-        def get_section(description, sec_name):
-            return sec_name + description + '\n</p>\n'
-
         def insert_texts(text, root):
+            def get_section(header, description):
+                return '{}<p>\n{}\n</p>\n'.format(header, tex2html(description))
 
             root.find("name").find("text").text = text.name
 
-            sections = {
-                'context': '<p>',
-                'input': '\n<p>\n<b>Entrada</b><br /></p><p>\n',
-                'output': '\n<p>\n<b>Saida</b><br /></p><p>\n',
-                'notes': '\n<p>\n<b>Notas</b><br /></p><p>\n'
-            }
+            sections = [
+                ('context', ''),
+                ('input', '\n<p>\n<b>Entrada</b><br /></p>\n'),
+                ('output', '\n<p>\n<b>Saida</b><br /></p>\n'),
+                ('notes', '\n<p>\n<b>Notas</b><br /></p>\n'),
+            ]
             texto = ''
 
-            texto += get_section(text.context, sections['context'])
-            texto += get_section(text.input, sections['input'])
-            texto += get_section(text.output, sections['output'])
-            if text.notes:
-                texto += get_section(text.notes, sections['notes'])
+            for attr_name, header in sections:
+                if getattr(text, attr_name):
+                    texto += get_section(header, getattr(text, attr_name))
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
         def insert_testcases(test_cases, root, package_dir):
 
-            [test_tree, test_root] = get_test_templates(package_dir)
-
             for t_in, t_out in zip(test_cases['example']['in'],
                                    test_cases['example']['out']):
+                [test_tree, test_root] = get_test_templates(package_dir)
+
                 test_root.find("stdin").find("text").text = t_in
                 test_root.find("expected").find("text").text = t_out
                 test_root.set("useasexample", "1")
-
                 root.find("testcases").append(test_root)
-
-                [test_tree, test_root] = get_test_templates(package_dir)
 
             for t_in, t_out in zip(test_cases['hidden']['in'],
                                    test_cases['hidden']['out']):
+                [test_tree, test_root] = get_test_templates(package_dir)
+
                 test_root.find("stdin").find("text").text = t_in
                 test_root.find("expected").find("text").text = t_out
                 test_root.set("useasexample", "0")
-
                 root.find("testcases").append(test_root)
-
-                [test_tree, test_root] = get_test_templates(package_dir)
 
         def insert_solution(solution, root):
             root.find("answer").append(CDATA(solution))
 
         def insert_solution_type(sol_type, root):
-            if sol_type == 'cpp.g++17':
+            if sol_type.startswith('c.'):
+                ans = 'c_program'
+            elif sol_type.startswith('cpp.'):
                 ans = 'cpp_program'
-            elif sol_type == 'python.3':
+            elif sol_type.startswith('python.'):
                 ans = 'python3'
             else:
                 raise NameError("Solution type not identified")
