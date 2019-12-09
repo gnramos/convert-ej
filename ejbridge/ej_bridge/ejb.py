@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 
-import argparse
-import os
-
 from .codeforces import CodeForces
 from .coderunner import CodeRunner
+
+import argparse
+import os
+import logging
+
+logging.basicConfig(
+    filename='test.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%m/%d/%Y - %I:%M:%S %p')
 
 
 def _file_or_path_(path):
@@ -56,11 +63,19 @@ def main():
     if args.command == 'cf2cr':
         for file in args.files:
             if file.endswith('.zip'):
-                cf = CodeForces(args.language, file)
-                cr = CodeRunner(args.penalty, args.all_or_nothing)
-                cr.problem = cf.problem
-
-                cr.write()
+                try:
+                    cf = CodeForces(args.language, file)
+                    cr = CodeRunner(args.penalty, args.all_or_nothing)
+                    cr.problem = cf.problem
+                    cr.write()
+                except Exception as err_list:
+                    for error in err_list.args:
+                        logging.error('Error: {}.'.format(error))
+                    logging.error('It was not possible to generate '
+                                  'the question \'{}\'.'.format(file[:-4]))
+                else:
+                    logging.info('Question \'{}\' was successfully generated!'
+                                 .format(file[:-4]))
 
 
 if __name__ == "__main__":
