@@ -62,9 +62,10 @@ class CodeRunner(EJudge):
             test_root = test_tree.getroot()
             return [test_tree, test_root]
 
-        def insert_texts(text, root):
+        def insert_text(text, root):
             def get_section(header, description):
-                return '{}<p>\n{}\n</p>\n'.format(header, tex2html(description))
+                return '{}<p>\n{}\n</p>\n'.format(header,
+                                                  tex2html(description))
 
             root.find("name").find("text").text = text.name
 
@@ -81,6 +82,22 @@ class CodeRunner(EJudge):
                     texto += get_section(header, getattr(text, attr_name))
 
             root.find("questiontext").find("text").append(CDATA(texto))
+
+            # def insert_images(root, images):
+            #     for name in images:
+            #         if name.endswith('.jpg') or name.endswith('.png'):
+            #             img = ET.Element('file')
+            #             img.set('name', name)
+            #             img.set('path', '/')
+            #             img.set('encoding', 'base64')
+
+            #             with open(os.path.join(dir_text, name), "rb") as image:
+            #                 encoded_string = str(b64encode(image.read()), 'utf-8')
+
+            #             img.text = encoded_string
+            #             root.find("questiontext").append(img)
+
+            # insert_images(self.problem.text.images, root)
 
         def insert_testcases(test_cases, root, package_dir):
 
@@ -151,9 +168,7 @@ class CodeRunner(EJudge):
         package_dir = os.path.abspath(os.path.dirname(__file__))
         [tree, root] = get_templates(package_dir)
 
-        insert_texts(self.problem.text, root)
-        # convert_eps_to_png()
-        # insert_images(root)
+        insert_text(self.problem.text, root)
         insert_tutorial(self.problem.text.tutorial, root)
         insert_solution(self.problem.solutions, root)
         insert_testcases(self.problem.test_cases, root, package_dir)

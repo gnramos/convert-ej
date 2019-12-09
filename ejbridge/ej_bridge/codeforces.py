@@ -38,16 +38,24 @@ class CodeForces(EJudge):
         def cleanup(package_dir):
             shutil.rmtree(package_dir)
 
-        def convert_eps_to_png(dir_img):
-            files_sec = os.listdir(dir_img)
-            for name in files_sec:
-                if name.endswith('.eps'):
-                    subprocess.call(['convert', os.path.join(dir_img, name),
-                                     '+profile', '"*"',
-                                     os.path.join(dir_img, name[:-4] +
-                                                  '.png')])
-
         def build_text(package_dir):
+            def convert_eps_to_png(dir_img):
+                files_sec = os.listdir(dir_img)
+                for name in files_sec:
+                    if name.endswith('.eps'):
+                        img_path = os.path.join(dir_img, name)
+                        subprocess.call(['convert', img_path, '+profile',
+                                         '"*"', img_path[:-4] + '.png'])
+
+            def read_images(sections):
+                images = []
+                convert_eps_to_png(sections)
+                with os.scandir(sections) as it:
+                    for entry in it:
+                        if entry.is_file() and entry.name.endswith('.png'):
+                            images.append(os.path.join(sections, entry.name))
+                return images
+
             sections = os.path.join(package_dir,
                                     'statement-sections',
                                     'english')
@@ -70,14 +78,7 @@ class CodeForces(EJudge):
             else:
                 tutorial = None
 
-            convert_eps_to_png(sections)
-            images = []
-            with os.scandir(os.path.join(package_dir, 'statements',
-                                         'english')) as it:
-                for entry in it:
-                    if entry.is_file() and entry.name.endswith(('.png',
-                                                                '.jpg')):
-                        images.append(entry.name)
+            images = read_images(sections)
 
             return ProblemText(name, legend, input, output, tutorial,
                                images, notes)
