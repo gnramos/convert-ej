@@ -9,7 +9,7 @@ import logging
 
 logging.basicConfig(
     filename='test.log',
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y - %I:%M:%S %p')
 
@@ -70,12 +70,12 @@ def main():
                     cr.write()
                 except Exception as err_list:
                     for error in err_list.args:
-                        logging.debug('Error: {}.'.format(error))
-                    logging.debug('It was not possible to generate '
+                        logging.error('Error: {}.'.format(error))
+                    logging.error('It was not possible to generate '
                                   'the question \'{}\'.'.format(file[:-4]))
                 else:
-                    logging.debug('Question \'{}\' was successfully generated!'
-                                  .format(file[:-4]))
+                    logging.info('Question \'{}\' was successfully generated!'
+                                 .format(file[:-4]))
 
 
 if __name__ == "__main__":

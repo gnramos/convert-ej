@@ -29,7 +29,8 @@ class ProblemText():
 
         if self.images:
             for img in self.images:
-                assert os.path.isfile(os.path.join('images', img))
+                if not os.path.isfile(os.path.join('images', img)):
+                    raise NameError('Images not found')
 
 
 class CompetitiveProgrammingProblem():
@@ -47,20 +48,22 @@ class CompetitiveProgrammingProblem():
         self.memory_limit = memory_limit
         self.time_limit = time_limit
 
-        assert self.handle is not None
-        assert len(self.handle) > 0
-        assert self.text is not None
-        # assert len(self.text) > 0
-        assert self.test_cases is not None
-        assert len(self.test_cases) > 0
-        assert self.solutions is not None
-        assert len(self.solutions) > 0
-        assert self.sol_type is not None
-        assert len(self.sol_type) > 0
-        assert self.tags is not None
-        assert len(self.tags) > 0
-        assert self.memory_limit > 0
-        assert self.time_limit > 0
+        if self.handle is None or len(self.handle) == 0:
+            raise NameError('Handle not found')
+        if self.text is None:
+            raise NameError('Text not found')
+        if self.test_cases is None or len(self.test_cases) == 0:
+            raise NameError('Test Cases not found')
+        if self.solutions is None or len(self.solutions) == 0:
+            raise NameError('Solution not found')
+        if self.sol_type is None or len(self.sol_type) == 0:
+            raise NameError('Solution type not found')
+        if self.tags is None:
+            raise NameError('Tags not found')
+        if self.memory_limit == 0:
+            raise NameError('Memory limit not found')
+        if self.time_limit == 0:
+            raise NameError('Time limit not found')
 
     def __str__(self):
         """Return a readable version of the instance's data."""
