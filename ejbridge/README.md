@@ -10,5 +10,5 @@ pip install -i https://test.pypi.org/simple/ EJ-Bridge
 
 Creating coderunner questions from the codeforces questions
 ```
-ejbridge 2cftocr name
+ejbridge cf2cr name
 ```
