@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(
     filename='test.log',
     level=logging.DEBUG,
-    format='%(asctime)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y - %I:%M:%S %p')
 
 

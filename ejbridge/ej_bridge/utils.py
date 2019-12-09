@@ -18,14 +18,15 @@ class ProblemText():
         self.tutorial = tutorial
         self.notes = notes
 
-        assert self.name is not None
-        assert len(self.name) > 0
-        assert self.context is not None
-        assert len(self.context) > 0
-        assert self.input is not None
-        assert len(self.input) > 0
-        assert self.output is not None
-        assert len(self.output) > 0
+        if self.name is None or len(self.name) == 0:
+            raise NameError('Name not found')
+        if self.context is None or len(self.context) == 0:
+            raise NameError('Legend not found')
+        if self.input is None or len(self.input) == 0:
+            raise NameError('Input text not found')
+        if self.output is None or len(self.output) == 0:
+            raise NameError('Output text not found')
+
         if self.images:
             for img in self.images:
                 assert os.path.isfile(os.path.join('images', img))

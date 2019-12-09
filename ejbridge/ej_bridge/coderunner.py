@@ -168,7 +168,8 @@ class CodeRunner(EJudge):
                 os.mkdir(files)
             tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
-        assert self.problem
+        if not self.problem:
+            raise NameError('Intermediate class not found')
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         [tree, root] = get_templates(package_dir)
