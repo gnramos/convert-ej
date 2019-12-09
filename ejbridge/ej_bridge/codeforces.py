@@ -1,5 +1,6 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
+import subprocess
 import os
 import shutil
 import xml.etree.ElementTree as ET
@@ -23,8 +24,8 @@ class CodeForces(EJudge):
         Returns a CompetitiveProgrammingProblem.
         """
         def unzip(package):
-            assert package.endswith('.zip'), '{} is not a zip file'.format(
-                package)
+            if not package.endswith('.zip'):
+                raise NameError('{} is not a zip file'.format(package))
 
             file_dir, file_name = os.path.split(package)
             package_dir = os.path.splitext(file_name)[0]
@@ -38,36 +39,69 @@ class CodeForces(EJudge):
             shutil.rmtree(package_dir)
 
         def build_text(package_dir):
+            def convert_eps_to_png(dir_img):
+                files_sec = os.listdir(dir_img)
+                for name in files_sec:
+                    if name.endswith('.eps'):
+                        img_path = os.path.join(dir_img, name)
+                        subprocess.call(['convert', img_path, '+profile',
+                                         '"*"', img_path[:-4] + '.png'])
+
+            def read_images(sections):
+                images = []
+                try:
+                    convert_eps_to_png(sections)
+                except Exception:
+                    raise NameError('Could not convert the .eps image')
+                try:
+                    tmp_img = 'images'
+                    if not os.path.exists(tmp_img):
+                        os.mkdir(tmp_img)
+
+                    with os.scandir(sections) as it:
+                        for e in it:
+                            if e.is_file() and e.name.endswith('.png'):
+                                shutil.move(os.path.join(sections, e.name),
+                                            os.path.join(tmp_img, e.name))
+                                images.append(e.name)
+                except Exception:
+                    raise NameError('Could not open the images')
+                return images
+
             sections = os.path.join(package_dir,
                                     'statement-sections',
                                     'english')
-            with open(os.path.join(sections, 'name.tex')) as f:
-                name = f.read()
-            with open(os.path.join(sections, 'legend.tex')) as f:
-                legend = f.read()
-            with open(os.path.join(sections, 'input.tex')) as f:
-                input = f.read()
-            with open(os.path.join(sections, 'output.tex')) as f:
-                output = f.read()
-            if os.path.isfile(os.path.join(sections, 'notes.tex')):
-                with open(os.path.join(sections, 'notes.tex')) as f:
-                    notes = f.read()
-            else:
-                notes = None
-            if os.path.isfile(os.path.join(sections, 'tutorial.tex')):
-                with open(os.path.join(sections, 'tutorial.tex')) as f:
-                    tutorial = f.read()
-            else:
-                tutorial = None
+            try:
+                with open(os.path.join(sections, 'name.tex')) as f:
+                    name = f.read()
+                with open(os.path.join(sections, 'legend.tex')) as f:
+                    legend = f.read()
+                with open(os.path.join(sections, 'input.tex')) as f:
+                    input = f.read()
+                with open(os.path.join(sections, 'output.tex')) as f:
+                    output = f.read()
+                if os.path.isfile(os.path.join(sections, 'notes.tex')):
+                    with open(os.path.join(sections, 'notes.tex')) as f:
+                        notes = f.read()
+                else:
+                    notes = None
+                if os.path.isfile(os.path.join(sections, 'tutorial.tex')):
+                    with open(os.path.join(sections, 'tutorial.tex')) as f:
+                        tutorial = f.read()
+                else:
+                    tutorial = None
+            except Exception:
+                raise NameError('Could not open a text file')
 
-            images = []
+            images = read_images(sections)
 
             return ProblemText(name, legend, input, output, tutorial,
                                images, notes)
 
         def read_tests(root):
             def load_file(file):
-                assert os.path.isfile(file), '{} is not a file'.format(file)
+                if not os.path.isfile(file):
+                    raise NameError('{} is not a file'.format(file))
                 with open(file) as f:
                     content = f.read()
                 return content
@@ -120,11 +154,13 @@ class CodeForces(EJudge):
         def read_tags(root):
             return [e.attrib['value'] for e in root.findall('tags/tag')]
 
-        assert os.path.isfile(file), '{} is not a file'.format(file)
+        if not os.path.isfile(file):
+            raise NameError('{} is not a file'.format(file))
         package_dir = unzip(file)
 
         xml = os.path.join(package_dir, 'problem.xml')
-        assert os.path.isfile(xml), '{} is not a file'.format(xml)
+        if not os.path.isfile(xml):
+            raise NameError('{} is not a file'.format(xml))
 
         tree = ET.parse(xml)
         root = tree.getroot()
@@ -136,25 +172,12 @@ class CodeForces(EJudge):
                                                      root, self.language)
         tags = read_tags(root)
 
-        images = {}
-        with os.scandir(os.path.join(package_dir, 'statements',
-                                     'english')) as it:
-            for entry in it:
-                if entry.is_file() and entry.name.endswith(('.png', '.jpg',
-                                                            '.eps')):
-                    with open(entry.name, 'rb') as f:
-                        images[entry.name] = f.read()
-
         cleanup(package_dir)
 
-        self.problem = Cpp(handle, text, images, tests_files, main_source,
+        self.problem = Cpp(handle, text, tests_files, main_source,
                            sol_type, tags, memory_limit_mb, time_limit_sec)
 
     def write(self, file=None):
         """Write the data into the given file."""
-        assert self.problem
-
-        if file:
-            assert not os.path.isfile(file)
 
         raise NotImplementedError

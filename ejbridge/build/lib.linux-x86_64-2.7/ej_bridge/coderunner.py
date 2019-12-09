@@ -1,7 +1,9 @@
 from .utils import EJudge, tex2html
 
+from base64 import b64encode
 import xml.etree.ElementTree as ET
 import os
+import shutil
 
 
 class CodeRunner(EJudge):
@@ -62,9 +64,10 @@ class CodeRunner(EJudge):
             test_root = test_tree.getroot()
             return [test_tree, test_root]
 
-        def insert_texts(text, root):
+        def insert_text(text, root):
             def get_section(header, description):
-                return '{}<p>\n{}\n</p>\n'.format(header, tex2html(description))
+                return '{}<p>\n{}\n</p>\n'.format(header,
+                                                  tex2html(description))
 
             root.find("name").find("text").text = text.name
 
@@ -81,6 +84,25 @@ class CodeRunner(EJudge):
                     texto += get_section(header, getattr(text, attr_name))
 
             root.find("questiontext").find("text").append(CDATA(texto))
+
+            def insert_images(root, images):
+                tmp_img = 'images'
+                for name in images:
+                    path = os.path.join(tmp_img, name)
+
+                    img = ET.Element('file')
+                    img.set('name', name)
+                    img.set('path', '/')
+                    img.set('encoding', 'base64')
+
+                    with open(path, "rb") as image:
+                        encoded_string = str(b64encode(image.read()), 'utf-8')
+
+                    img.text = encoded_string
+                    root.find("questiontext").append(img)
+                shutil.rmtree(tmp_img)
+
+            insert_images(root, self.problem.text.images)
 
         def insert_testcases(test_cases, root, package_dir):
 
@@ -146,14 +168,13 @@ class CodeRunner(EJudge):
                 os.mkdir(files)
             tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
-        assert self.problem
+        if not self.problem:
+            raise NameError('Intermediate class not found')
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         [tree, root] = get_templates(package_dir)
 
-        insert_texts(self.problem.text, root)
-        # convert_eps_to_png()
-        # insert_images(root)
+        insert_text(self.problem.text, root)
         insert_tutorial(self.problem.text.tutorial, root)
         insert_solution(self.problem.solutions, root)
         insert_testcases(self.problem.test_cases, root, package_dir)
