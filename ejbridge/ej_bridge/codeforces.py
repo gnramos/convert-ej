@@ -50,10 +50,17 @@ class CodeForces(EJudge):
             def read_images(sections):
                 images = []
                 convert_eps_to_png(sections)
+
+                tmp_img = 'images'
+                if not os.path.exists(tmp_img):
+                    os.mkdir(tmp_img)
+
                 with os.scandir(sections) as it:
-                    for entry in it:
-                        if entry.is_file() and entry.name.endswith('.png'):
-                            images.append(os.path.join(sections, entry.name))
+                    for e in it:
+                        if e.is_file() and e.name.endswith('.png'):
+                            shutil.move(os.path.join(sections, e.name),
+                                        os.path.join(tmp_img, e.name))
+                            images.append(e.name)
                 return images
 
             sections = os.path.join(package_dir,

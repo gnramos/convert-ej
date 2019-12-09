@@ -1,7 +1,9 @@
 from .utils import EJudge, tex2html
 
+from base64 import b64encode
 import xml.etree.ElementTree as ET
 import os
+import shutil
 
 
 class CodeRunner(EJudge):
@@ -83,21 +85,24 @@ class CodeRunner(EJudge):
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
-            # def insert_images(root, images):
-            #     for name in images:
-            #         if name.endswith('.jpg') or name.endswith('.png'):
-            #             img = ET.Element('file')
-            #             img.set('name', name)
-            #             img.set('path', '/')
-            #             img.set('encoding', 'base64')
+            def insert_images(root, images):
+                tmp_img = 'images'
+                for name in images:
+                    path = os.path.join(tmp_img, name)
 
-            #             with open(os.path.join(dir_text, name), "rb") as image:
-            #                 encoded_string = str(b64encode(image.read()), 'utf-8')
+                    img = ET.Element('file')
+                    img.set('name', name)
+                    img.set('path', '/')
+                    img.set('encoding', 'base64')
 
-            #             img.text = encoded_string
-            #             root.find("questiontext").append(img)
+                    with open(path, "rb") as image:
+                        encoded_string = str(b64encode(image.read()), 'utf-8')
 
-            # insert_images(self.problem.text.images, root)
+                    img.text = encoded_string
+                    root.find("questiontext").append(img)
+                shutil.rmtree(tmp_img)
+
+            insert_images(root, self.problem.text.images)
 
         def insert_testcases(test_cases, root, package_dir):
 
