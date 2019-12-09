@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import re
+import os
 
 
 class ProblemText():
@@ -25,6 +26,9 @@ class ProblemText():
         assert len(self.input) > 0
         assert self.output is not None
         assert len(self.output) > 0
+        if self.images:
+            for img in self.images:
+                assert os.path.isfile(os.path.join('images', img))
 
 
 class CompetitiveProgrammingProblem():
