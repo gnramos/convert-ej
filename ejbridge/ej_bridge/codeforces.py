@@ -40,19 +40,25 @@ class CodeForces(EJudge):
 
         def build_text(package_dir):
             def convert_eps_to_png(dir_img):
-                files_sec = os.listdir(dir_img)
-                for name in files_sec:
-                    if name.endswith('.eps'):
-                        img_path = os.path.join(dir_img, name)
-                        subprocess.call(['convert', img_path, '+profile',
-                                         '"*"', img_path[:-4] + '.png'])
+                with os.scandir(dir_img) as it:
+                    for entry in it:
+                        if entry.is_file() and entry.name.endswith('.eps'):
+                            file_name, file_ext = os.path.splitext(entry.path)
+                            subprocess.check_call(['convert', entry.path,
+                                                   '+profile', '"*"',
+                                                   file_name + '.png'])
 
             def read_images(sections):
                 images = []
                 try:
                     convert_eps_to_png(sections)
                 except Exception:
-                    raise NameError('Could not convert the .eps image')
+                    raise NameError('Could not convert the .eps image.\n\
+This can be solved by acessing:\n\"sudo subl /etc/ImageMagick-6/policy.xml\"\n\
+and commenting the line:\n\
+\"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+-security-policy-pdf-blocking-conversion')
                 try:
                     tmp_img = 'images'
                     if not os.path.exists(tmp_img):
@@ -145,7 +151,7 @@ class CodeForces(EJudge):
                         sol_type = e.attrib['type']
                         break
                 else:
-                    raise NameError('Solution not found')
+                    raise ValueError('{} solution not found'.format(language))
 
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
