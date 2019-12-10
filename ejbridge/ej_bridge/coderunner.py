@@ -19,6 +19,17 @@ class CodeRunner(EJudge):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
+    def __del__(self):
+        if os.path.isdir('images_cr'):
+            shutil.rmtree('images_cr')
+        pass
+
+    def get_data(self, problem):
+        if problem.text.images:
+            shutil.copytree(problem.text.img_path, 'images_cr')
+            problem.text.img_path = 'images_cr'
+        self.problem = problem
+
     def read(self, file):
         """Read the data from the given file.
 
@@ -77,8 +88,7 @@ class CodeRunner(EJudge):
                                                    file_name + '.png'])
                             os.remove(entry.path)
 
-            def insert_images(root, images):
-                img_path = 'images_cf'
+            def insert_images(root, images, img_path):
                 try:
                     convert_all_to_eps(img_path)
                 except Exception:
@@ -106,7 +116,7 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                shutil.rmtree(img_path)
+                #shutil.rmtree(img_path)
 
             def get_section(header, description):
                 return '{}<p>\n{}\n</p>\n'.format(header,
@@ -128,7 +138,8 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
-            insert_images(root, self.problem.text.images)
+            insert_images(root, self.problem.text.images,
+                          self.problem.text.img_path)
 
         def insert_testcases(test_cases, root, package_dir):
 

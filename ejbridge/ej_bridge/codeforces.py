@@ -17,6 +17,11 @@ class CodeForces(EJudge):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
+    def __del__(self):
+        if os.path.isdir('images_cr'):
+            shutil.rmtree('images_cf')
+        pass
+
     def read(self, file):
         """Read the data from the given file.
 
