@@ -4,6 +4,7 @@ from base64 import b64encode
 import xml.etree.ElementTree as ET
 import os
 import shutil
+import subprocess
 
 
 class CodeRunner(EJudge):
@@ -65,6 +66,48 @@ class CodeRunner(EJudge):
             return [test_tree, test_root]
 
         def insert_text(text, root):
+
+            def convert_all_to_eps(dir_img):
+                with os.scandir(dir_img) as it:
+                    for entry in it:
+                        if entry.is_file() and entry.name.endswith('.eps'):
+                            file_name, file_ext = os.path.splitext(entry.path)
+                            subprocess.check_call(['convert', entry.path,
+                                                   '+profile', '"*"',
+                                                   file_name + '.png'])
+                            os.remove(entry.path)
+
+            def insert_images(root, images):
+                img_path = 'images_cf'
+                try:
+                    convert_all_to_eps(img_path)
+                except Exception:
+                    raise NameError('Could not convert the .eps image.\n\
+This can be solved by acessing:\n\"sudo subl /etc/ImageMagick-6/policy.xml\"\n\
+and commenting the line:\n\
+\"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+-security-policy-pdf-blocking-conversion')
+
+                for name in images:
+                    if name.endswith('.eps'):
+                        file_name, file_ext = os.path.splitext(name)
+                        name = file_name + '.png'
+
+                    path = os.path.join(img_path, name)
+
+                    img = ET.Element('file')
+                    img.set('name', name)
+                    img.set('path', '/')
+                    img.set('encoding', 'base64')
+
+                    with open(path, "rb") as image:
+                        encoded_string = str(b64encode(image.read()), 'utf-8')
+
+                    img.text = encoded_string
+                    root.find("questiontext").append(img)
+                shutil.rmtree(img_path)
+
             def get_section(header, description):
                 return '{}<p>\n{}\n</p>\n'.format(header,
                                                   tex2html(description))
@@ -84,23 +127,6 @@ class CodeRunner(EJudge):
                     texto += get_section(header, getattr(text, attr_name))
 
             root.find("questiontext").find("text").append(CDATA(texto))
-
-            def insert_images(root, images):
-                tmp_img = 'images_cf'
-                for name in images:
-                    path = os.path.join(tmp_img, name)
-
-                    img = ET.Element('file')
-                    img.set('name', name)
-                    img.set('path', '/')
-                    img.set('encoding', 'base64')
-
-                    with open(path, "rb") as image:
-                        encoded_string = str(b64encode(image.read()), 'utf-8')
-
-                    img.text = encoded_string
-                    root.find("questiontext").append(img)
-                shutil.rmtree(tmp_img)
 
             insert_images(root, self.problem.text.images)
 

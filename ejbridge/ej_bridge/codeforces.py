@@ -1,6 +1,5 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
-import subprocess
 import os
 import shutil
 import xml.etree.ElementTree as ET
@@ -39,27 +38,8 @@ class CodeForces(EJudge):
             shutil.rmtree(package_dir)
 
         def build_text(package_dir):
-            # def convert_eps_to_png(dir_img):
-            #     with os.scandir(dir_img) as it:
-            #         for entry in it:
-            #             if entry.is_file() and entry.name.endswith('.eps'):
-            #                 file_name, file_ext = os.path.splitext(entry.path)
-            #                 subprocess.check_call(['convert', entry.path,
-            #                                        '+profile', '"*"',
-            #                                        file_name + '.png'])
-
             def read_images(sections, img_path):
                 images = []
-#                 try:
-#                     convert_eps_to_png(sections)
-#                 except Exception:
-#                     raise NameError('Could not convert the .eps image.\n\
-# This can be solved by acessing:\n\"sudo subl /etc/ImageMagick-6/policy.xml\"\n\
-# and commenting the line:\n\
-# \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
-# For more information: https://stackoverflow.com/questions/52998331/imagemagick\
-# -security-policy-pdf-blocking-conversion')
-
                 try:
                     if not os.path.exists(img_path):
                         os.mkdir(img_path)
