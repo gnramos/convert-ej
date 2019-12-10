@@ -22,7 +22,6 @@ class CodeRunner(EJudge):
     def __del__(self):
         if os.path.isdir('images_cr'):
             shutil.rmtree('images_cr')
-        pass
 
     def get_data(self, problem):
         if problem.text.images:
@@ -116,7 +115,6 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                #shutil.rmtree(img_path)
 
             def get_section(header, description):
                 return '{}<p>\n{}\n</p>\n'.format(header,

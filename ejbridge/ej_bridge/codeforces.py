@@ -18,9 +18,10 @@ class CodeForces(EJudge):
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        if os.path.isdir('images_cr'):
-            shutil.rmtree('images_cf')
-        pass
+        path = self.problem.text.img_path
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        shutil.rmtree(self.package_dir)
 
     def read(self, file):
         """Read the data from the given file.
@@ -39,10 +40,7 @@ class CodeForces(EJudge):
 
             return package_dir
 
-        def cleanup(package_dir):
-            shutil.rmtree(package_dir)
-
-        def build_text(package_dir):
+        def build_text(package_dir, img_path):
             def read_images(sections, img_path):
                 images = []
                 try:
@@ -86,7 +84,6 @@ class CodeForces(EJudge):
             except Exception:
                 raise NameError('Could not open a text file.')
 
-            img_path = 'images_cf'
             images = read_images(sections, img_path)
 
             return ProblemText(name, legend, input, output, tutorial,
@@ -151,6 +148,9 @@ class CodeForces(EJudge):
         if not os.path.isfile(file):
             raise NameError('{} is not a file.'.format(file))
         package_dir = unzip(file)
+        img_path = 'images_cf'
+
+        self.package_dir = package_dir
 
         xml = os.path.join(package_dir, 'problem.xml')
         if not os.path.isfile(xml):
@@ -159,14 +159,12 @@ class CodeForces(EJudge):
         tree = ET.parse(xml)
         root = tree.getroot()
         handle = root.attrib['short-name']
-        text = build_text(package_dir)
+        text = build_text(package_dir, img_path)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
         [main_source, sol_type] = read_main_solution(package_dir,
                                                      root, self.language)
         tags = read_tags(root)
-
-        cleanup(package_dir)
 
         self.problem = Cpp(handle, text, tests_files, main_source,
                            sol_type, tags, memory_limit_mb, time_limit_sec)
