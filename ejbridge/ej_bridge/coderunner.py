@@ -100,7 +100,7 @@ class CodeRunner(EJudge):
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                #shutil.rmtree(tmp_img)
+                shutil.rmtree(tmp_img)
 
             insert_images(root, self.problem.text.images)
 
