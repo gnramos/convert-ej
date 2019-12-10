@@ -86,7 +86,7 @@ class CodeRunner(EJudge):
             root.find("questiontext").find("text").append(CDATA(texto))
 
             def insert_images(root, images):
-                tmp_img = 'images'
+                tmp_img = 'images_cf'
                 for name in images:
                     path = os.path.join(tmp_img, name)
 
@@ -100,7 +100,7 @@ class CodeRunner(EJudge):
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                shutil.rmtree(tmp_img)
+                #shutil.rmtree(tmp_img)
 
             insert_images(root, self.problem.text.images)
 
@@ -135,7 +135,7 @@ class CodeRunner(EJudge):
             elif sol_type.startswith('python.'):
                 ans = 'python3'
             else:
-                raise NameError("Solution type not identified")
+                raise NameError("Solution type not identified.")
             root.find("coderunnertype").text = ans
 
         def insert_tutorial(tutorial, root):
@@ -169,7 +169,7 @@ class CodeRunner(EJudge):
             tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
         if not self.problem:
-            raise NameError('Intermediate class not found')
+            raise NameError('Intermediate class not found.')
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         [tree, root] = get_templates(package_dir)

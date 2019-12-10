@@ -6,11 +6,12 @@ from .coderunner import CodeRunner
 import argparse
 import os
 import logging
+import sys
 
 logging.basicConfig(
-    filename='test.log',
+    stream=sys.stdout,
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='\n%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y - %I:%M:%S %p')
 
 
@@ -70,7 +71,7 @@ def main():
                     cr.write()
                 except Exception as err_list:
                     for error in err_list.args:
-                        logging.error('Error: {}.'.format(error))
+                        logging.error('Error: {}'.format(error))
                     logging.error('It was not possible to generate '
                                   'the question \'{}\'.'.format(file[:-4]))
                 else:
