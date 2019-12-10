@@ -25,7 +25,7 @@ class CodeForces(EJudge):
         """
         def unzip(package):
             if not package.endswith('.zip'):
-                raise NameError('{} is not a zip file'.format(package))
+                raise NameError('{} is not a zip file.'.format(package))
 
             file_dir, file_name = os.path.split(package)
             package_dir = os.path.splitext(file_name)[0]
@@ -48,7 +48,7 @@ class CodeForces(EJudge):
                                                    '+profile', '"*"',
                                                    file_name + '.png'])
 
-            def read_images(sections):
+            def read_images(sections, img_path):
                 images = []
                 try:
                     convert_eps_to_png(sections)
@@ -59,19 +59,19 @@ and commenting the line:\n\
 \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
 For more information: https://stackoverflow.com/questions/52998331/imagemagick\
 -security-policy-pdf-blocking-conversion')
+
                 try:
-                    tmp_img = 'images'
-                    if not os.path.exists(tmp_img):
-                        os.mkdir(tmp_img)
+                    if not os.path.exists(img_path):
+                        os.mkdir(img_path)
 
                     with os.scandir(sections) as it:
                         for e in it:
                             if e.is_file() and e.name.endswith('.png'):
                                 shutil.move(os.path.join(sections, e.name),
-                                            os.path.join(tmp_img, e.name))
+                                            os.path.join(img_path, e.name))
                                 images.append(e.name)
                 except Exception:
-                    raise NameError('Could not open the images')
+                    raise NameError('Could not open the images.')
                 return images
 
             sections = os.path.join(package_dir,
@@ -97,17 +97,18 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
                 else:
                     tutorial = None
             except Exception:
-                raise NameError('Could not open a text file')
+                raise NameError('Could not open a text file.')
 
-            images = read_images(sections)
+            img_path = 'images_cf'
+            images = read_images(sections, img_path)
 
             return ProblemText(name, legend, input, output, tutorial,
-                               images, notes)
+                               images, img_path, notes)
 
         def read_tests(root):
             def load_file(file):
                 if not os.path.isfile(file):
-                    raise NameError('{} is not a file'.format(file))
+                    raise NameError('{} is not a file.'.format(file))
                 with open(file) as f:
                     content = f.read()
                 return content
@@ -151,7 +152,7 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
                         sol_type = e.attrib['type']
                         break
                 else:
-                    raise ValueError('{} solution not found'.format(language))
+                    raise ValueError('{} solution not found.'.format(language))
 
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
@@ -161,12 +162,12 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
             return [e.attrib['value'] for e in root.findall('tags/tag')]
 
         if not os.path.isfile(file):
-            raise NameError('{} is not a file'.format(file))
+            raise NameError('{} is not a file.'.format(file))
         package_dir = unzip(file)
 
         xml = os.path.join(package_dir, 'problem.xml')
         if not os.path.isfile(xml):
-            raise NameError('{} is not a file'.format(xml))
+            raise NameError('{} is not a file.'.format(xml))
 
         tree = ET.parse(xml)
         root = tree.getroot()

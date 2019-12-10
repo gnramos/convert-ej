@@ -8,29 +8,32 @@ class ProblemText():
     """Stores the textual information for a problem."""
 
     def __init__(self, name, context, input, output, tutorial=None,
-                 images=[], notes=None):
+                 images=[], img_path=None, notes=None):
         """Constructor."""
         self.name = name
         self.context = context
         self.input = input
         self.output = output
         self.images = images
+        self.img_path = img_path
         self.tutorial = tutorial
         self.notes = notes
 
         if self.name is None or len(self.name) == 0:
-            raise NameError('Name not found')
+            raise NameError('Name not found.')
         if self.context is None or len(self.context) == 0:
-            raise NameError('Legend not found')
+            raise NameError('Legend not found.')
         if self.input is None or len(self.input) == 0:
-            raise NameError('Input text not found')
+            raise NameError('Input text not found.')
         if self.output is None or len(self.output) == 0:
-            raise NameError('Output text not found')
+            raise NameError('Output text not found.')
+        if not os.path.isdir(self.img_path):
+            raise NameError('Images folder not found.')
 
         if self.images:
             for img in self.images:
-                if not os.path.isfile(os.path.join('images', img)):
-                    raise NameError('Images not found')
+                if not os.path.isfile(os.path.join(img_path, img)):
+                    raise NameError('Images not found.')
 
 
 class CompetitiveProgrammingProblem():
@@ -49,21 +52,21 @@ class CompetitiveProgrammingProblem():
         self.time_limit = time_limit
 
         if self.handle is None or len(self.handle) == 0:
-            raise NameError('Handle not found')
+            raise NameError('Handle not found.')
         if self.text is None:
-            raise NameError('Text not found')
+            raise NameError('Text not found.')
         if self.test_cases is None or len(self.test_cases) == 0:
-            raise NameError('Test Cases not found')
+            raise NameError('Test Cases not found.')
         if self.solutions is None or len(self.solutions) == 0:
-            raise NameError('Solution not found')
+            raise NameError('Solution not found.')
         if self.sol_type is None or len(self.sol_type) == 0:
-            raise NameError('Solution type not found')
+            raise NameError('Solution type not found.')
         if self.tags is None:
-            raise NameError('Tags not found')
+            raise NameError('Tags not found.')
         if self.memory_limit == 0:
-            raise NameError('Memory limit not found')
+            raise NameError('Memory limit not found.')
         if self.time_limit == 0:
-            raise NameError('Time limit not found')
+            raise NameError('Time limit not found.')
 
     def __str__(self):
         """Return a readable version of the instance's data."""
