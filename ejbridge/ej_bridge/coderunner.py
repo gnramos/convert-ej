@@ -11,22 +11,23 @@ class CodeRunner(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
     def __init__(self, penalty=None, all_or_nothing=None, file=None):
-        super().__init__(file)
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
+        self.img_path = 'images_cr'
+        super().__init__(file)
 
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        if os.path.isdir('images_cr'):
-            shutil.rmtree('images_cr')
+        if os.path.isdir(self.img_path):
+            shutil.rmtree(self.img_path)
 
     def get_data(self, problem):
         if problem.text.images:
-            shutil.copytree(problem.text.img_path, 'images_cr')
-            problem.text.img_path = 'images_cr'
+            shutil.copytree(problem.text.img_path, self.img_path)
+            problem.text.img_path = self.img_path
         self.problem = problem
 
     def read(self, file):
@@ -137,7 +138,7 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
             root.find("questiontext").find("text").append(CDATA(texto))
 
             insert_images(root, self.problem.text.images,
-                          self.problem.text.img_path)
+                          self.img_path)
 
         def insert_testcases(test_cases, root, package_dir):
 

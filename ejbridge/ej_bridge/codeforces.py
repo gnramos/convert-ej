@@ -11,6 +11,7 @@ class CodeForces(EJudge):
 
     def __init__(self, language=None, file=None):
         self.language = language
+        self.img_path = 'images_cf'
         super().__init__(file)
 
     def __str__(self):
@@ -18,7 +19,7 @@ class CodeForces(EJudge):
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        path = self.problem.text.img_path
+        path = self.img_path
         if os.path.isdir(path):
             shutil.rmtree(path)
         shutil.rmtree(self.package_dir)
@@ -148,7 +149,6 @@ class CodeForces(EJudge):
         if not os.path.isfile(file):
             raise NameError('{} is not a file.'.format(file))
         package_dir = unzip(file)
-        img_path = 'images_cf'
 
         self.package_dir = package_dir
 
@@ -159,7 +159,7 @@ class CodeForces(EJudge):
         tree = ET.parse(xml)
         root = tree.getroot()
         handle = root.attrib['short-name']
-        text = build_text(package_dir, img_path)
+        text = build_text(package_dir, self.img_path)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
         [main_source, sol_type] = read_main_solution(package_dir,
