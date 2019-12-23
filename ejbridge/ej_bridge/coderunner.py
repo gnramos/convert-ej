@@ -79,14 +79,15 @@ class CodeRunner(EJudge):
         def insert_text(text, root):
 
             def convert_all_to_eps(dir_img):
-                with os.scandir(dir_img) as it:
-                    for entry in it:
-                        if entry.is_file() and entry.name.endswith('.eps'):
-                            file_name, file_ext = os.path.splitext(entry.path)
-                            subprocess.check_call(['convert', entry.path,
-                                                   '+profile', '"*"',
-                                                   file_name + '.png'])
-                            os.remove(entry.path)
+                if os.path.isdir(dir_img):
+                    with os.scandir(dir_img) as it:
+                        for entry in it:
+                            if entry.is_file() and entry.name.endswith('.eps'):
+                                file_name, ext = os.path.splitext(entry.path)
+                                subprocess.check_call(['convert', entry.path,
+                                                       '+profile', '"*"',
+                                                       file_name + '.png'])
+                                os.remove(entry.path)
 
             def insert_images(root, images, img_path):
                 try:
