@@ -11,7 +11,7 @@ import sys
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.INFO,
-    format='\n%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s\n',
     datefmt='%m/%d/%Y - %I:%M:%S %p')
 
 
@@ -67,8 +67,10 @@ def main():
                 try:
                     cf = CodeForces(args.language, file)
                     cr = CodeRunner(args.penalty, args.all_or_nothing)
-                    cr.problem = cf.problem
+                    cr.get_data(cf.problem)
                     cr.write()
+                    del cf
+                    del cr
                 except Exception as err_list:
                     for error in err_list.args:
                         logging.error('Error: {}'.format(error))

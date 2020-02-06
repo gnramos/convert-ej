@@ -160,10 +160,13 @@ def tex2html(s):
 
 
 def convert_eps_to_png(dir_img):
-    with os.scandir(dir_img) as it:
-        for entry in it:
-            if entry.is_file() and entry.name.endswith('.eps'):
-                file_name, file_ext = os.path.splitext(entry.path)
-                subprocess.check_call(['convert', entry.path,
-                                       '+profile', '"*"',
-                                       file_name + '.png'])
+    if os.path.isdir(dir_img):
+        with os.scandir(dir_img) as it:
+            for entry in it:
+                if entry.is_file() and entry.name.endswith('.eps'):
+                    file_name, ext = os.path.splitext(entry.path)
+                    subprocess.check_call(['convert', entry.path,
+                                           '+profile', '"*"',
+                                           file_name + '.png'])
+                    os.remove(entry.path)
+                    print(entry.path)
