@@ -1,4 +1,4 @@
-from .utils import EJudge, tex2html
+from .utils import EJudge, tex2html, convert_eps_to_png
 
 from base64 import b64encode
 import xml.etree.ElementTree as ET
@@ -85,10 +85,19 @@ class CodeRunner(EJudge):
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
-            def insert_images(root, images):
-                tmp_img = 'images_cf'
+            def insert_images(root, images, img_path):
+                try:
+                    convert_eps_to_png(sections)
+                except Exception:
+                    raise NameError('Could not convert the .eps image.\n\
+                This can be solved by acessing:\n\"/etc/ImageMagick-6/policy.xml\"\n\
+                and commenting the line:\n\
+                \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+                For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+                -security-policy-pdf-blocking-conversion')
+
                 for name in images:
-                    path = os.path.join(tmp_img, name)
+                    path = os.path.join(img_path, name)
 
                     img = ET.Element('file')
                     img.set('name', name)
@@ -100,9 +109,10 @@ class CodeRunner(EJudge):
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                shutil.rmtree(tmp_img)
+                shutil.rmtree(img_path)
 
-            insert_images(root, self.problem.text.images)
+            insert_images(root, self.problem.text.images,
+                          self.problem.text.img_path)
 
         def insert_testcases(test_cases, root, package_dir):
 

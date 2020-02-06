@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import subprocess
 import re
 import os
 
@@ -33,7 +34,7 @@ class ProblemText():
         if self.images:
             for img in self.images:
                 if not os.path.isfile(os.path.join(img_path, img)):
-                    raise NameError('Images not found.')
+                    raise NameError('One of the images was not found.')
 
 
 class CompetitiveProgrammingProblem():
@@ -156,3 +157,13 @@ def tex2html(s):
         s = re.sub(l_str, h_str, s)
 
     return s
+
+
+def convert_eps_to_png(dir_img):
+    with os.scandir(dir_img) as it:
+        for entry in it:
+            if entry.is_file() and entry.name.endswith('.eps'):
+                file_name, file_ext = os.path.splitext(entry.path)
+                subprocess.check_call(['convert', entry.path,
+                                       '+profile', '"*"',
+                                       file_name + '.png'])

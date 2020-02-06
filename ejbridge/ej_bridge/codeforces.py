@@ -1,6 +1,5 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
-import subprocess
 import os
 import shutil
 import xml.etree.ElementTree as ET
