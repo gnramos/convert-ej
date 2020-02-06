@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import subprocess
 import re
 import os
 
@@ -156,3 +157,15 @@ def tex2html(s):
         s = re.sub(l_str, h_str, s)
 
     return s
+
+
+def convert_all_to_eps(dir_img):
+    if os.path.isdir(dir_img):
+        with os.scandir(dir_img) as it:
+            for entry in it:
+                if entry.is_file() and entry.name.endswith('.eps'):
+                    file_name, ext = os.path.splitext(entry.path)
+                    subprocess.check_call(['convert', entry.path,
+                                           '+profile', '"*"',
+                                           file_name + '.png'])
+                    os.remove(entry.path)

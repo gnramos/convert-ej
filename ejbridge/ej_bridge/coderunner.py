@@ -1,10 +1,9 @@
-from .utils import EJudge, tex2html
+from .utils import EJudge, tex2html, convert_all_to_eps
 
 from base64 import b64encode
 import xml.etree.ElementTree as ET
 import os
 import shutil
-import subprocess
 
 
 class CodeRunner(EJudge):
@@ -77,17 +76,6 @@ class CodeRunner(EJudge):
             return [test_tree, test_root]
 
         def insert_text(text, root):
-
-            def convert_all_to_eps(dir_img):
-                if os.path.isdir(dir_img):
-                    with os.scandir(dir_img) as it:
-                        for entry in it:
-                            if entry.is_file() and entry.name.endswith('.eps'):
-                                file_name, ext = os.path.splitext(entry.path)
-                                subprocess.check_call(['convert', entry.path,
-                                                       '+profile', '"*"',
-                                                       file_name + '.png'])
-                                os.remove(entry.path)
 
             def insert_images(root, images, img_path):
                 try:
