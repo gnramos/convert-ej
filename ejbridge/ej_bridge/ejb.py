@@ -16,6 +16,8 @@ logging.basicConfig(
 
 
 def _file_or_path_(path):
+    """Return all the files inside path, in case it's a directory,
+    otherwise if it's just a single file, return the file."""
     files = set()
     if os.path.isfile(path):
         files.add(path)
@@ -67,7 +69,7 @@ def main():
                 try:
                     cf = CodeForces(args.language, file)
                     cr = CodeRunner(args.penalty, args.all_or_nothing)
-                    cr.get_data(cf.problem)
+                    cr.read_data(cf.problem)
                     cr.write()
                     del cf
                     del cr
