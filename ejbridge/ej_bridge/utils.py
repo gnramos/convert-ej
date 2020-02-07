@@ -169,4 +169,3 @@ def convert_eps_to_png(dir_img):
                                            '+profile', '"*"',
                                            file_name + '.png'])
                     os.remove(entry.path)
-                    print(entry.path)

@@ -79,6 +79,8 @@ def main():
                 else:
                     logging.info('Question \'{}\' was successfully generated!'
                                  .format(file[:-4]))
+        if not args.files:
+            logging.error('Path or file doesn\'t exist.')
 
 
 if __name__ == "__main__":
