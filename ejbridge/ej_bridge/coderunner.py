@@ -1,4 +1,4 @@
-from .utils import EJudge, tex2html, convert_all_to_eps
+from .utils import EJudge, tex2html, convert_eps_to_png
 
 from base64 import b64encode
 import xml.etree.ElementTree as ET
@@ -77,35 +77,6 @@ class CodeRunner(EJudge):
 
         def insert_text(text, root):
 
-            def insert_images(root, images, img_path):
-                try:
-                    convert_all_to_eps(img_path)
-                except Exception:
-                    raise NameError('Could not convert the .eps image.\n\
-This can be solved by acessing:\n\"sudo subl /etc/ImageMagick-6/policy.xml\"\n\
-and commenting the line:\n\
-\"<policy domain="coder" rights="none" pattern="PS" />\"\n\
-For more information: https://stackoverflow.com/questions/52998331/imagemagick\
--security-policy-pdf-blocking-conversion')
-
-                for name in images:
-                    if name.endswith('.eps'):
-                        file_name, file_ext = os.path.splitext(name)
-                        name = file_name + '.png'
-
-                    path = os.path.join(img_path, name)
-
-                    img = ET.Element('file')
-                    img.set('name', name)
-                    img.set('path', '/')
-                    img.set('encoding', 'base64')
-
-                    with open(path, "rb") as image:
-                        encoded_string = str(b64encode(image.read()), 'utf-8')
-
-                    img.text = encoded_string
-                    root.find("questiontext").append(img)
-
             def get_section(header, description):
                 return '{}<p>\n{}\n</p>\n'.format(header,
                                                   tex2html(description))
@@ -126,8 +97,38 @@ For more information: https://stackoverflow.com/questions/52998331/imagemagick\
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
+            def insert_images(root, images, img_path):
+                try:
+                    convert_eps_to_png(img_path)
+                except Exception:
+                    raise NameError('Could not convert the .eps image.\n\
+                This can be solved by acessing:\n\"/etc/ImageMagick-6/policy.xml\"\n\
+                and commenting the line:\n\
+                \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+                For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+                -security-policy-pdf-blocking-conversion')
+
+                for name in images:
+                    if name.endswith('.eps'):
+                        file_name, file_ext = os.path.splitext(name)
+                        name = file_name + '.png'
+
+                    path = os.path.join(img_path, name)
+
+                    img = ET.Element('file')
+                    img.set('name', name)
+                    img.set('path', '/')
+                    img.set('encoding', 'base64')
+
+                    with open(path, "rb") as image:
+                        encoded_string = str(b64encode(image.read()), 'utf-8')
+
+                    img.text = encoded_string
+                    root.find("questiontext").append(img)
+                shutil.rmtree(img_path)
+
             insert_images(root, self.problem.text.images,
-                          self.img_path)
+                          self.problem.text.img_path)
 
         def insert_testcases(test_cases, root, package_dir):
 

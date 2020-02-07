@@ -34,7 +34,7 @@ class ProblemText():
         if self.images:
             for img in self.images:
                 if not os.path.isfile(os.path.join(img_path, img)):
-                    raise NameError('Images not found.')
+                    raise NameError('One of the images was not found.')
 
 
 class CompetitiveProgrammingProblem():
@@ -159,7 +159,7 @@ def tex2html(s):
     return s
 
 
-def convert_all_to_eps(dir_img):
+def convert_eps_to_png(dir_img):
     if os.path.isdir(dir_img):
         with os.scandir(dir_img) as it:
             for entry in it:
