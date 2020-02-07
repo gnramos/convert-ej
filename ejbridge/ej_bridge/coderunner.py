@@ -101,7 +101,7 @@ class CodeRunner(EJudge):
                 try:
                     convert_eps_to_png(img_path)
                 except Exception:
-                    raise NameError('Could not convert the .eps image.\n\
+                    raise Exception('Could not convert the .eps image.\n\
                 This can be solved by acessing:\n\"/etc/ImageMagick-6/policy.xml\"\n\
                 and commenting the line:\n\
                 \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
@@ -161,7 +161,7 @@ class CodeRunner(EJudge):
             elif sol_type.startswith('python.'):
                 ans = 'python3'
             else:
-                raise NameError("Solution type not identified.")
+                raise Exception("Solution type not identified.")
             root.find("coderunnertype").text = ans
 
         def insert_tutorial(tutorial, root):
@@ -195,7 +195,7 @@ class CodeRunner(EJudge):
             tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
         if not self.problem:
-            raise NameError('Intermediate class not found.')
+            raise Exception('Intermediate class not found.')
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         [tree, root] = get_templates(package_dir)

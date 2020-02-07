@@ -31,7 +31,7 @@ class CodeForces(EJudge):
         """
         def unzip(package):
             if not package.endswith('.zip'):
-                raise NameError('{} is not a zip file.'.format(package))
+                raise Exception('{} is not a zip file.'.format(package))
 
             file_dir, file_name = os.path.split(package)
             package_dir = os.path.splitext(file_name)[0]
@@ -57,7 +57,7 @@ class CodeForces(EJudge):
                                             os.path.join(img_path, entry.name))
                                 images.append(entry.name)
                 except Exception:
-                    raise NameError('Could not open the images.')
+                    raise Exception('Could not open the images.')
                 return images
 
             sections = os.path.join(package_dir,
@@ -83,7 +83,7 @@ class CodeForces(EJudge):
                 else:
                     tutorial = None
             except Exception:
-                raise NameError('Could not open a text file.')
+                raise Exception('Could not open a text file.')
 
             images = read_images(sections, img_path)
 
@@ -93,7 +93,7 @@ class CodeForces(EJudge):
         def read_tests(root):
             def load_file(file):
                 if not os.path.isfile(file):
-                    raise NameError('{} is not a file.'.format(file))
+                    raise Exception('{} is not a file.'.format(file))
                 with open(file) as f:
                     content = f.read()
                 return content
@@ -137,7 +137,7 @@ class CodeForces(EJudge):
                         sol_type = e.attrib['type']
                         break
                 else:
-                    raise ValueError('{} solution not found.'.format(language))
+                    raise Exception('{} solution not found.'.format(language))
 
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
@@ -147,14 +147,14 @@ class CodeForces(EJudge):
             return [e.attrib['value'] for e in root.findall('tags/tag')]
 
         if not os.path.isfile(file):
-            raise NameError('{} is not a file.'.format(file))
+            raise Exception('{} is not a file.'.format(file))
         package_dir = unzip(file)
 
         self.package_dir = package_dir
 
         xml = os.path.join(package_dir, 'problem.xml')
         if not os.path.isfile(xml):
-            raise NameError('{} is not a file.'.format(xml))
+            raise Exception('{} is not a file.'.format(xml))
 
         tree = ET.parse(xml)
         root = tree.getroot()

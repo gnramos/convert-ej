@@ -21,20 +21,20 @@ class ProblemText():
         self.notes = notes
 
         if self.name is None or len(self.name) == 0:
-            raise NameError('Name not found.')
+            raise Exception('Name not found.')
         if self.context is None or len(self.context) == 0:
-            raise NameError('Legend not found.')
+            raise Exception('Legend not found.')
         if self.input is None or len(self.input) == 0:
-            raise NameError('Input text not found.')
+            raise Exception('Input text not found.')
         if self.output is None or len(self.output) == 0:
-            raise NameError('Output text not found.')
+            raise Exception('Output text not found.')
         if not os.path.isdir(self.img_path):
-            raise NameError('Images folder not found.')
+            raise Exception('Images folder not found.')
 
         if self.images:
             for img in self.images:
                 if not os.path.isfile(os.path.join(img_path, img)):
-                    raise NameError('One of the images was not found.')
+                    raise Exception('One of the images was not found.')
 
 
 class CompetitiveProgrammingProblem():
@@ -53,21 +53,21 @@ class CompetitiveProgrammingProblem():
         self.time_limit = time_limit
 
         if self.handle is None or len(self.handle) == 0:
-            raise NameError('Handle not found.')
+            raise Exception('Handle not found.')
         if self.text is None:
-            raise NameError('Text not found.')
+            raise Exception('Text not found.')
         if self.test_cases is None or len(self.test_cases) == 0:
-            raise NameError('Test Cases not found.')
+            raise Exception('Test Cases not found.')
         if self.solutions is None or len(self.solutions) == 0:
-            raise NameError('Solution not found.')
+            raise Exception('Solution not found.')
         if self.sol_type is None or len(self.sol_type) == 0:
-            raise NameError('Solution type not found.')
+            raise Exception('Solution type not found.')
         if self.tags is None:
-            raise NameError('Tags not found.')
+            raise Exception('Tags not found.')
         if self.memory_limit == 0:
-            raise NameError('Memory limit not found.')
+            raise Exception('Memory limit not found.')
         if self.time_limit == 0:
-            raise NameError('Time limit not found.')
+            raise Exception('Time limit not found.')
 
     def __str__(self):
         """Return a readable version of the instance's data."""
