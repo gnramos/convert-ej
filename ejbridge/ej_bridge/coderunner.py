@@ -236,3 +236,6 @@ class CodeRunner(EJudge):
         write_all_or_nothing(self.all_or_nothing, root)
 
         write_xml_file(tree, self.problem.handle)
+
+        # Set the standard method as the original one.
+        ET._serialize_xml = ET._serialize['xml'] = ET._original_serialize_xml
