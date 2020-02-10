@@ -32,14 +32,11 @@ class CodeRunner(EJudge):
         self.problem = problem
 
     def read(self, file):
-        """Read the data from the given file.
-
-        Return a CompetitiveProgrammingProblem.
-        """
+        """Read the data from the given file."""
         raise NotImplementedError
 
     def write(self, file=None):
-        """Write the data into the given file."""
+        """Write the given data into a file."""
 
         def CDATA(text=None):
             """Includes the CDATA tag."""

@@ -26,10 +26,7 @@ class CodeForces(EJudge):
             shutil.rmtree(self.package_dir)
 
     def read(self, file):
-        """Read the data from the given file.
-
-        Return a CompetitiveProgrammingProblem.
-        """
+        """Read the data from the given file."""
 
         def read_problem_xml(package_dir):
             xml = os.path.join(package_dir, 'problem.xml')
@@ -195,6 +192,6 @@ class CodeForces(EJudge):
                            sol_type, tags, memory_limit_mb, time_limit_sec)
 
     def write(self, file=None):
-        """Write the data into the given file."""
+        """Write the given data into a file."""
 
         raise NotImplementedError
