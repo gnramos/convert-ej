@@ -25,6 +25,10 @@ class CodeForces(EJudge):
         if os.path.isdir(self.package_dir):
             shutil.rmtree(self.package_dir)
 
+    def read_data(self, problem):
+        """Read the data from the other class, and create a new image path."""
+        raise NotImplementedError
+
     def read(self, file):
         """Read the data from the given file."""
 
