@@ -22,7 +22,10 @@ class Boca(EJudge):
 
     def read_data(self, problem):
         """Read the data from the other class, and create a new image path."""
-        raise NotImplementedError
+        if problem.text.images:
+            shutil.copytree(problem.text.img_path, self.img_path)
+            problem.text.img_path = self.img_path
+        self.problem = problem
 
     def read(self, file):
         """Read the data from the given file."""
