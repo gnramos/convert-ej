@@ -10,15 +10,17 @@ Description: # ejbridge
         
         Tools for translating questions between electronic judges.
         
+        [TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
+        
         ## Installation
         
         ```
-        pip install -i https://test.pypi.org/project/EJ-Bridge/
+        pip install -i https://test.pypi.org/simple/ EJ-Bridge
         ```
         
         ## Usage
         
-        Creating coderunner problems using codeforces problems.
+        Creating coderunner problems using a codeforces problems.
         ```
         ejbridge cf2cr files
         ```
