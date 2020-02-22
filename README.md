@@ -2,10 +2,12 @@
 
 Tools for translating questions between electronic judges.
 
+[TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
+
 ## Installation
 
 ```
-pip install -i https://test.pypi.org/project/EJ-Bridge/
+pip install -i https://test.pypi.org/simple/ EJ-Bridge
 ```
 
 ## Usage
