@@ -10,7 +10,7 @@ pip install -i https://test.pypi.org/project/EJ-Bridge/
 
 ## Usage
 
-Creating coderunner problems using codeforces problems.
+Creating coderunner problems using a codeforces problems.
 ```
 ejbridge cf2cr files
 ```

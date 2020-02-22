@@ -9,6 +9,7 @@ EJ_Bridge.egg-info/entry_points.txt
 EJ_Bridge.egg-info/top_level.txt
 ej_bridge/Template.xml
 ej_bridge/Testcase-Template.xml
+ej_bridge/boca.py
 ej_bridge/codeforces.py
 ej_bridge/coderunner.py
 ej_bridge/ejb.py
