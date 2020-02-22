@@ -77,13 +77,6 @@ class CompetitiveProgrammingProblem():
 class EJudge(ABC):
     """Manipulates a CompetitiveProgrammingProblem file."""
 
-    def __init__(self, file=None):
-        """Constructor."""
-        if file:
-            self.read(file)
-        else:
-            self.problem = None
-
     @abstractmethod
     def read(self, file):
         """Read the data from the given file.

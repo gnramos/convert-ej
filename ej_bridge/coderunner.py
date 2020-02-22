@@ -9,11 +9,10 @@ import shutil
 class CodeRunner(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, penalty=None, all_or_nothing=None, file=None):
+    def __init__(self, penalty=None, all_or_nothing=None):
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
         self.img_path = 'images_cr'
-        super().__init__(file)
 
     def __str__(self):
         """Return a readable version of the instance's data."""

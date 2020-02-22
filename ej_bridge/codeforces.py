@@ -9,10 +9,9 @@ import zipfile
 class CodeForces(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, language=None, file=None):
+    def __init__(self, language=None):
         self.language = language
         self.img_path = 'images_cf'
-        super().__init__(file)
 
     def __str__(self):
         """Return a readable version of the instance's data."""

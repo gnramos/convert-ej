@@ -97,8 +97,9 @@ def main():
         for file in args.files:
             if file.endswith('.zip'):
                 try:
-                    cf = CodeForces(args.language, file)
+                    cf = CodeForces(args.language)
                     cr = CodeRunner(args.penalty, args.all_or_nothing)
+                    cf.read(file)
                     cr.read_data(cf.problem)
                     cr.write()
                     del cf

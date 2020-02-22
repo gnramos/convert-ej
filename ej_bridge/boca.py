@@ -7,9 +7,8 @@ import shutil
 class Boca(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, file=None):
+    def __init__(self):
         self.img_path = 'images_boca'
-        super().__init__(file)
 
     def __str__(self):
         """Return a readable version of the instance's data."""
