@@ -83,6 +83,8 @@ def main():
                                  .format(file[:-4]))
         if not args.files:
             logging.error('Path or file doesn\'t exist.')
+    elif args.command == 'cf2boca':
+        pass
 
 
 if __name__ == "__main__":
