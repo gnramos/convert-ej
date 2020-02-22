@@ -1,14 +1,22 @@
 # ejbridge
 
+Tools for translating questions between electronic judges.
+
 ## Installation
 
 ```
-pip install -i https://test.pypi.org/simple/ EJ-Bridge
+pip install -i https://test.pypi.org/project/EJ-Bridge/
 ```
 
 ## Usage
 
-Creating coderunner questions from the codeforces questions
+Creating coderunner problems using codeforces problems.
 ```
-ejbridge cf2cr name
+ejbridge cf2cr files
 ```
+Parameters:
+
+* files : name of the .zip file, or the name of a path with .zip files inside;
+* -p : string argument for penalties;
+* -an : boolean argument to activate the all-or-nothing parameter;
+* -l : string argument to create problems in a specific programming language. ('c', 'cpp' or 'python').
