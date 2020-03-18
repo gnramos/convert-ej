@@ -65,7 +65,8 @@ class CodeRunner(EJudge):
 
             Return the ElementTree elements with the template
             """
-            tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
+            tree = ET.parse(os.path.join(package_dir, 'CR_Templates',
+                                         'Template.xml'))
             root = tree.getroot()
             root = root[0]
             return tree, root
@@ -75,7 +76,7 @@ class CodeRunner(EJudge):
 
             Return the ElementTree elements with the template
             """
-            test_tree = ET.parse(os.path.join(package_dir,
+            test_tree = ET.parse(os.path.join(package_dir, 'CR_Templates',
                                  'Testcase-Template.xml'))
             test_root = test_tree.getroot()
             return test_tree, test_root

@@ -1,0 +1,32 @@
+% Exemplo de uso da classe UnBExam.
+%
+% Criado por : Guilherme N. Ramos (gnramos@unb.br) em 2011.
+
+\documentclass{UnBExam}%
+
+\disciplina{Estruturas de Dados}%
+\turma{B}%
+\documento{Prova 1}%
+\professor{Guilherme N. Ramos}%
+
+% \printanswers%
+
+\begin{document}%
+	\begin{questions}%
+		\question[1] Questão 1, valendo 1 ponto.
+			\begin{resposta}[Resposta]%
+				Resposta da questão 1.
+			\end{resposta}%
+		\question[3] Questão 2, valendo 3 pontos.
+			\begin{resposta}%
+				Resposta da questão 3.
+			\end{resposta}%
+		\question[6] Questão 3, valendo 6 pontos.
+			\begin{resposta}%
+				\begin{parts}%
+					\part[5] Primeira parte da resposta da questão 6.
+					\part[1] Segunda parte.
+				\end{parts}%
+			\end{resposta}%
+	\end{questions}%
+\end{document}%
