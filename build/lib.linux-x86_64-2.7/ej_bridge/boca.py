@@ -7,9 +7,8 @@ import shutil
 class Boca(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, file=None):
+    def __init__(self):
         self.img_path = 'images_boca'
-        super().__init__(file)
 
     def __str__(self):
         """Return a readable version of the instance's data."""
@@ -31,6 +30,10 @@ class Boca(EJudge):
         """Read the data from the given file."""
         raise NotImplementedError
 
-    def write(self, file=None):
+    def write(self):
         """Write the given data into a file."""
-        raise NotImplementedError
+
+        if not self.problem:
+            raise Exception('Intermediate class not found.')
+
+        print('tudo certo aqui rapazeada')

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+import subprocess
 import re
 import os
 
@@ -8,29 +9,32 @@ class ProblemText():
     """Stores the textual information for a problem."""
 
     def __init__(self, name, context, input, output, tutorial=None,
-                 images=[], notes=None):
+                 images=[], img_path=None, notes=None):
         """Constructor."""
         self.name = name
         self.context = context
         self.input = input
         self.output = output
         self.images = images
+        self.img_path = img_path
         self.tutorial = tutorial
         self.notes = notes
 
         if self.name is None or len(self.name) == 0:
-            raise NameError('Name not found')
+            raise Exception('Name not found.')
         if self.context is None or len(self.context) == 0:
-            raise NameError('Legend not found')
+            raise Exception('Legend not found.')
         if self.input is None or len(self.input) == 0:
-            raise NameError('Input text not found')
+            raise Exception('Input text not found.')
         if self.output is None or len(self.output) == 0:
-            raise NameError('Output text not found')
+            raise Exception('Output text not found.')
+        if not os.path.isdir(self.img_path):
+            raise Exception('Images folder not found.')
 
         if self.images:
             for img in self.images:
-                if not os.path.isfile(os.path.join('images', img)):
-                    raise NameError('Images not found')
+                if not os.path.isfile(os.path.join(img_path, img)):
+                    raise Exception('One of the images was not found.')
 
 
 class CompetitiveProgrammingProblem():
@@ -49,21 +53,21 @@ class CompetitiveProgrammingProblem():
         self.time_limit = time_limit
 
         if self.handle is None or len(self.handle) == 0:
-            raise NameError('Handle not found')
+            raise Exception('Handle not found.')
         if self.text is None:
-            raise NameError('Text not found')
+            raise Exception('Text not found.')
         if self.test_cases is None or len(self.test_cases) == 0:
-            raise NameError('Test Cases not found')
+            raise Exception('Test Cases not found.')
         if self.solutions is None or len(self.solutions) == 0:
-            raise NameError('Solution not found')
+            raise Exception('Solution not found.')
         if self.sol_type is None or len(self.sol_type) == 0:
-            raise NameError('Solution type not found')
+            raise Exception('Solution type not found.')
         if self.tags is None:
-            raise NameError('Tags not found')
+            raise Exception('Tags not found.')
         if self.memory_limit == 0:
-            raise NameError('Memory limit not found')
+            raise Exception('Memory limit not found.')
         if self.time_limit == 0:
-            raise NameError('Time limit not found')
+            raise Exception('Time limit not found.')
 
     def __str__(self):
         """Return a readable version of the instance's data."""
@@ -72,13 +76,6 @@ class CompetitiveProgrammingProblem():
 
 class EJudge(ABC):
     """Manipulates a CompetitiveProgrammingProblem file."""
-
-    def __init__(self, file=None):
-        """Constructor."""
-        if file:
-            self.read(file)
-        else:
-            self.problem = None
 
     @abstractmethod
     def read(self, file):
@@ -89,7 +86,7 @@ class EJudge(ABC):
         pass
 
     @abstractmethod
-    def write(self, file=None):
+    def write(self):
         """Write the data into the given file."""
         pass
 
@@ -153,3 +150,15 @@ def tex2html(s):
         s = re.sub(l_str, h_str, s)
 
     return s
+
+
+def convert_eps_to_png(dir_img):
+    if os.path.isdir(dir_img):
+        with os.scandir(dir_img) as it:
+            for entry in it:
+                if entry.is_file() and entry.name.endswith('.eps'):
+                    file_name, ext = os.path.splitext(entry.path)
+                    subprocess.check_call(['convert', entry.path,
+                                           '+profile', '"*"',
+                                           file_name + '.png'])
+                    os.remove(entry.path)

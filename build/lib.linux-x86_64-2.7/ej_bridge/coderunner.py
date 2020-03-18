@@ -1,4 +1,4 @@
-from .utils import EJudge, tex2html
+from .utils import EJudge, tex2html, convert_eps_to_png
 
 from base64 import b64encode
 import xml.etree.ElementTree as ET
@@ -9,40 +9,47 @@ import shutil
 class CodeRunner(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, penalty=None, all_or_nothing=None, file=None):
-        super().__init__(file)
+    def __init__(self, penalty=None, all_or_nothing=None):
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
+        self.img_path = 'images_cr'
 
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
-    def read(self, file):
-        """Read the data from the given file.
+    def __del__(self):
+        """Delete the image path."""
+        if os.path.isdir(self.img_path):
+            shutil.rmtree(self.img_path)
 
-        Returns a CompetitiveProgrammingProblem.
-        """
+    def read_data(self, problem):
+        """Read the data from the other class, and create a new image path."""
+        if problem.text.images:
+            shutil.copytree(problem.text.img_path, self.img_path)
+            problem.text.img_path = self.img_path
+        self.problem = problem
+
+    def read(self, file):
+        """Read the data from the given file."""
         raise NotImplementedError
 
-    def write(self, file=None):
-        """Write the data into the given file."""
+    def write(self):
+        """Write the given data into a file."""
 
         def CDATA(text=None):
-            '''
-            Includes the CDATA tag
-            '''
+            """Includes the CDATA tag."""
+
             element = ET.Element('![CDATA[')
             element.text = text
             return element
 
+        # Save the original method.
         ET._original_serialize_xml = ET._serialize_xml
 
         def _serialize_xml(write, elem, qnames, namespaces,
                            short_empty_elements, **kwargs):
-            '''
-            New serializing function to deal with the CDATA tag
-            '''
+            """New serializing method to deal with the CDATA tag."""
             if elem.tag == '![CDATA[':
                 write("\n<{}{}]]>\n".format(elem.tag, elem.text))
             else:
@@ -50,28 +57,39 @@ class CodeRunner(EJudge):
                        write, elem, qnames, namespaces, short_empty_elements,
                        **kwargs)
 
+        # Set the new method as the standard one.
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
 
-        def get_templates(package_dir):
+        def read_templates(package_dir):
+            """Read the template from the package path.
+
+            Return the ElementTree elements with the template
+            """
             tree = ET.parse(os.path.join(package_dir, 'Template.xml'))
             root = tree.getroot()
             root = root[0]
-            return [tree, root]
+            return tree, root
 
-        def get_test_templates(package_dir):
+        def read_test_templates(package_dir):
+            """Read the testcase template from the package path.
+
+            Return the ElementTree elements with the template
+            """
             test_tree = ET.parse(os.path.join(package_dir,
                                  'Testcase-Template.xml'))
             test_root = test_tree.getroot()
-            return [test_tree, test_root]
+            return test_tree, test_root
 
-        def insert_text(text, root):
+        def write_text(text, root):
+            """Write the text on the root element."""
             def get_section(header, description):
+                """Return a formated description, given a header."""
                 return '{}<p>\n{}\n</p>\n'.format(header,
                                                   tex2html(description))
 
             root.find("name").find("text").text = text.name
 
-            sections = [
+            sections = [  # Header, description.
                 ('context', ''),
                 ('input', '\n<p>\n<b>Entrada</b><br /></p>\n'),
                 ('output', '\n<p>\n<b>Saida</b><br /></p>\n'),
@@ -85,10 +103,28 @@ class CodeRunner(EJudge):
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
-            def insert_images(root, images):
-                tmp_img = 'images'
+            def write_images(root, images, img_path):
+                """Convert the images to the base64 format, and write them on the root element.
+
+                Convert the .eps images to .png, using the ImageMagick function
+                convert.
+                """
+                try:
+                    convert_eps_to_png(img_path)
+                except Exception:
+                    raise Exception('Could not convert the .eps image.\n\
+                This can be solved by acessing:\n\
+                \"/etc/ImageMagick-6/policy.xml\"\nand commenting the line:\n\
+                \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+                For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+                -security-policy-pdf-blocking-conversion')
+
                 for name in images:
-                    path = os.path.join(tmp_img, name)
+                    if name.endswith('.eps'):
+                        file_name, file_ext = os.path.splitext(name)
+                        name = file_name + '.png'
+
+                    path = os.path.join(img_path, name)
 
                     img = ET.Element('file')
                     img.set('name', name)
@@ -100,15 +136,15 @@ class CodeRunner(EJudge):
 
                     img.text = encoded_string
                     root.find("questiontext").append(img)
-                shutil.rmtree(tmp_img)
 
-            insert_images(root, self.problem.text.images)
+            write_images(root, self.problem.text.images,
+                         self.problem.text.img_path)
 
-        def insert_testcases(test_cases, root, package_dir):
-
+        def write_testcases(test_cases, root, package_dir):
+            """Write the testcases on the root element."""
             for t_in, t_out in zip(test_cases['example']['in'],
                                    test_cases['example']['out']):
-                [test_tree, test_root] = get_test_templates(package_dir)
+                test_tree, test_root = read_test_templates(package_dir)
 
                 test_root.find("stdin").find("text").text = t_in
                 test_root.find("expected").find("text").text = t_out
@@ -117,17 +153,19 @@ class CodeRunner(EJudge):
 
             for t_in, t_out in zip(test_cases['hidden']['in'],
                                    test_cases['hidden']['out']):
-                [test_tree, test_root] = get_test_templates(package_dir)
+                test_tree, test_root = read_test_templates(package_dir)
 
                 test_root.find("stdin").find("text").text = t_in
                 test_root.find("expected").find("text").text = t_out
                 test_root.set("useasexample", "0")
                 root.find("testcases").append(test_root)
 
-        def insert_solution(solution, root):
+        def write_solution(solution, root):
+            """Write the solution on the root element."""
             root.find("answer").append(CDATA(solution))
 
-        def insert_solution_type(sol_type, root):
+        def write_solution_type(sol_type, root):
+            """Write the solution type on the root element."""
             if sol_type.startswith('c.'):
                 ans = 'c_program'
             elif sol_type.startswith('cpp.'):
@@ -135,54 +173,65 @@ class CodeRunner(EJudge):
             elif sol_type.startswith('python.'):
                 ans = 'python3'
             else:
-                raise NameError("Solution type not identified")
+                raise Exception("Solution type not identified.")
             root.find("coderunnertype").text = ans
 
-        def insert_tutorial(tutorial, root):
+        def write_tutorial(tutorial, root):
+            """Write the tutorial on the root element."""
             if tutorial:
                 root.find("generalfeedback").find("text").text = \
                     tex2html(tutorial)
 
-        def insert_tags(taglist, root):
+        def write_tags(taglist, root):
+            """Write the tags on the root element."""
             tags = root.find("tags")
             for tag in taglist:
                 tag_element = ET.Element('tag')
                 ET.SubElement(tag_element, 'text').text = tag
                 tags.append(tag_element)
 
-        def insert_time_limit(time_limit, root):
+        def write_time_limit(time_limit, root):
+            """Write the time limit on the root element."""
             root.find("cputimelimitsecs").text = str(time_limit)
 
-        def insert_memory_limit(memory_limit, root):
+        def write_memory_limit(memory_limit, root):
+            """Write the memoty limit on the root element."""
             root.find("memlimitmb").text = str(memory_limit)
 
-        def insert_penalty(penalty, root):
+        def write_penalty(penalty, root):
+            """Write the penalty parameter on the root element."""
             root.find("penaltyregime").text = str(penalty)
 
-        def insert_all_or_nothing(all_or_nothing, root):
+        def write_all_or_nothing(all_or_nothing, root):
+            """Write the all or nothing parameter on the root element."""
             root.find("allornothing").text = '1' if all_or_nothing else '0'
 
         def write_xml_file(tree, question_name):
+            """Write the .xml file on the files directory."""
             files = 'files'
+
             if not os.path.exists(files):
                 os.mkdir(files)
             tree.write(os.path.join(files, question_name + '.xml'), 'UTF-8')
 
         if not self.problem:
-            raise NameError('Intermediate class not found')
+            raise Exception('Intermediate class not found.')
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
-        [tree, root] = get_templates(package_dir)
+        tree, root = read_templates(package_dir)
 
-        insert_text(self.problem.text, root)
-        insert_tutorial(self.problem.text.tutorial, root)
-        insert_solution(self.problem.solutions, root)
-        insert_testcases(self.problem.test_cases, root, package_dir)
-        insert_solution_type(self.problem.sol_type, root)
-        insert_tags(self.problem.tags, root)
-        insert_time_limit(self.problem.time_limit, root)
-        insert_memory_limit(self.problem.memory_limit, root)
-        insert_penalty(self.penalty, root)
-        insert_all_or_nothing(self.all_or_nothing, root)
+        write_text(self.problem.text, root)
+        write_tutorial(self.problem.text.tutorial, root)
+        write_solution(self.problem.solutions, root)
+        write_testcases(self.problem.test_cases, root, package_dir)
+        write_solution_type(self.problem.sol_type, root)
+        write_tags(self.problem.tags, root)
+        write_time_limit(self.problem.time_limit, root)
+        write_memory_limit(self.problem.memory_limit, root)
+        write_penalty(self.penalty, root)
+        write_all_or_nothing(self.all_or_nothing, root)
 
         write_xml_file(tree, self.problem.handle)
+
+        # Set the standard method as the original one.
+        ET._serialize_xml = ET._serialize['xml'] = ET._original_serialize_xml

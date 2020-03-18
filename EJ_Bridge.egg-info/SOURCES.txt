@@ -14,3 +14,17 @@ ej_bridge/codeforces.py
 ej_bridge/coderunner.py
 ej_bridge/ejb.py
 ej_bridge/utils.py
+ej_bridge/Boca-templates/teste.tex
+ej_bridge/Boca-templates/compare/c
+ej_bridge/Boca-templates/compare/cpp
+ej_bridge/Boca-templates/compare/java
+ej_bridge/Boca-templates/compile/c
+ej_bridge/Boca-templates/compile/cpp
+ej_bridge/Boca-templates/compile/java
+ej_bridge/Boca-templates/description/problem.info
+ej_bridge/Boca-templates/limits/c
+ej_bridge/Boca-templates/limits/cpp
+ej_bridge/Boca-templates/limits/java
+ej_bridge/Boca-templates/run/c
+ej_bridge/Boca-templates/run/cpp
+ej_bridge/Boca-templates/run/java

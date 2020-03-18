@@ -1,6 +1,5 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
 
-import subprocess
 import os
 import shutil
 import xml.etree.ElementTree as ET
@@ -10,22 +9,44 @@ import zipfile
 class CodeForces(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
-    def __init__(self, language=None, file=None):
+    def __init__(self, language=None):
         self.language = language
-        super().__init__(file)
+        self.img_path = 'images_cf'
 
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
-    def read(self, file):
-        """Read the data from the given file.
+    def __del__(self):
+        """Delete the image path and the unziped path, if they exist."""
+        if os.path.isdir(self.img_path):
+            shutil.rmtree(self.img_path)
+        if os.path.isdir(self.package_dir):
+            shutil.rmtree(self.package_dir)
 
-        Returns a CompetitiveProgrammingProblem.
-        """
+    def read_data(self, problem):
+        """Read the data from the other class, and create a new image path."""
+        raise NotImplementedError
+
+    def read(self, file):
+        """Read the data from the given file."""
+
+        def read_problem_xml(package_dir):
+            xml = os.path.join(package_dir, 'problem.xml')
+            if not os.path.isfile(xml):
+                raise Exception('{} is not a file.'.format(xml))
+
+            tree = ET.parse(xml)
+            root = tree.getroot()
+
+            return tree, root
+
         def unzip(package):
+            """Unzip the file and return the path to it."""
+            if not os.path.isfile(package):
+                raise Exception('{} is not a file.'.format(package))
             if not package.endswith('.zip'):
-                raise NameError('{} is not a zip file'.format(package))
+                raise Exception('{} is not a zip file.'.format(package))
 
             file_dir, file_name = os.path.split(package)
             package_dir = os.path.splitext(file_name)[0]
@@ -35,37 +56,31 @@ class CodeForces(EJudge):
 
             return package_dir
 
-        def cleanup(package_dir):
-            shutil.rmtree(package_dir)
+        def read_text(package_dir, img_path):
+            """Read data and build a ProblemText class with it.
 
-        def build_text(package_dir):
-            def convert_eps_to_png(dir_img):
-                files_sec = os.listdir(dir_img)
-                for name in files_sec:
-                    if name.endswith('.eps'):
-                        img_path = os.path.join(dir_img, name)
-                        subprocess.call(['convert', img_path, '+profile',
-                                         '"*"', img_path[:-4] + '.png'])
+            Return a ProblemText class.
+            """
+            def read_images(sections, img_path):
+                """Copy the images into a temporary path, if they exist.
 
-            def read_images(sections):
+                Return a list with the name of the images files.
+                """
                 images = []
                 try:
-                    convert_eps_to_png(sections)
-                except Exception:
-                    raise NameError('Could not convert the .eps image')
-                try:
-                    tmp_img = 'images'
-                    if not os.path.exists(tmp_img):
-                        os.mkdir(tmp_img)
+                    if not os.path.exists(img_path):
+                        os.mkdir(img_path)
 
                     with os.scandir(sections) as it:
-                        for e in it:
-                            if e.is_file() and e.name.endswith('.png'):
-                                shutil.move(os.path.join(sections, e.name),
-                                            os.path.join(tmp_img, e.name))
-                                images.append(e.name)
+                        for entry in it:
+                            if entry.is_file() and \
+                                    entry.name.endswith(('.png', 'jpg',
+                                                         '.eps')):
+                                shutil.move(os.path.join(sections, entry.name),
+                                            os.path.join(img_path, entry.name))
+                                images.append(entry.name)
                 except Exception:
-                    raise NameError('Could not open the images')
+                    raise Exception('Could not open the images.')
                 return images
 
             sections = os.path.join(package_dir,
@@ -91,17 +106,22 @@ class CodeForces(EJudge):
                 else:
                     tutorial = None
             except Exception:
-                raise NameError('Could not open a text file')
+                raise Exception('Could not open a text file.')
 
-            images = read_images(sections)
+            images = read_images(sections, img_path)
 
             return ProblemText(name, legend, input, output, tutorial,
-                               images, notes)
+                               images, img_path, notes)
 
         def read_tests(root):
+            """Read the tests cases using the problem.xml file.
+
+            Return lists with inputs and outputs tests.
+            """
             def load_file(file):
+                """Read a file and return it's content."""
                 if not os.path.isfile(file):
-                    raise NameError('{} is not a file'.format(file))
+                    raise Exception('{} is not a file.'.format(file))
                 with open(file) as f:
                     content = f.read()
                 return content
@@ -124,6 +144,7 @@ class CodeForces(EJudge):
             return {'example': examples, 'hidden': hidden}
 
         def read_limits(root):
+            """Read the time and memoty limits and return them."""
             testset = root.find('judging/testset')
             time_limit = testset.find('time-limit').text
             memory_limit = testset.find('memory-limit').text
@@ -131,6 +152,8 @@ class CodeForces(EJudge):
             return int(time_limit) // 1000, int(memory_limit) // (2 ** 20)
 
         def read_main_solution(package_dir, root, language):
+            """Find the solution specified by a type parameter (language)
+            and return them."""
             for e in root.findall(
                     'assets/solutions/solution[@tag="main"]/source'):
                 if(e.attrib['type'].startswith(language+'.')):
@@ -145,39 +168,33 @@ class CodeForces(EJudge):
                         sol_type = e.attrib['type']
                         break
                 else:
-                    raise NameError('Solution not found')
+                    raise Exception('{} solution not found.'.format(language))
 
             with open(os.path.join(package_dir, main_file), 'r') as f:
                 source = f.read()
-            return [source, sol_type]
+            return source, sol_type
 
         def read_tags(root):
+            """Read the tags and return them on a list."""
             return [e.attrib['value'] for e in root.findall('tags/tag')]
 
-        if not os.path.isfile(file):
-            raise NameError('{} is not a file'.format(file))
         package_dir = unzip(file)
 
-        xml = os.path.join(package_dir, 'problem.xml')
-        if not os.path.isfile(xml):
-            raise NameError('{} is not a file'.format(xml))
+        self.package_dir = package_dir
 
-        tree = ET.parse(xml)
-        root = tree.getroot()
+        tree, root = read_problem_xml(package_dir)
         handle = root.attrib['short-name']
-        text = build_text(package_dir)
+        text = read_text(package_dir, self.img_path)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
-        [main_source, sol_type] = read_main_solution(package_dir,
-                                                     root, self.language)
+        main_source, sol_type = read_main_solution(package_dir,
+                                                   root, self.language)
         tags = read_tags(root)
-
-        cleanup(package_dir)
 
         self.problem = Cpp(handle, text, tests_files, main_source,
                            sol_type, tags, memory_limit_mb, time_limit_sec)
 
-    def write(self, file=None):
-        """Write the data into the given file."""
+    def write(self):
+        """Write the given data into a file."""
 
         raise NotImplementedError

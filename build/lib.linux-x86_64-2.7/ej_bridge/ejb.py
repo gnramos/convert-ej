@@ -2,19 +2,43 @@
 
 from .codeforces import CodeForces
 from .coderunner import CodeRunner
+from .boca import Boca
 
 import argparse
 import os
 import logging
+import sys
 
 logging.basicConfig(
-    filename='test.log',
+    stream=sys.stdout,
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s\n',
     datefmt='%m/%d/%Y - %I:%M:%S %p')
 
 
+def log_exceptions(err_list):
+    for error in err_list.args:
+        logging.error('Error: {}'.format(error))
+
+
+def log_fail(file):
+    logging.error('It was not possible to generate '
+                  'the question \'{}\'.'
+                  .format(os.path.splitext(file)[0]))
+
+
+def log_sucess(file):
+    logging.info('Question \'{}\' was successfully generated!'
+                 .format(os.path.splitext(file)[0]))
+
+
+def log_no_files():
+    logging.error('No .ZIP file was found.')
+
+
 def _file_or_path_(path):
+    """Return all the files inside path, in case it's a directory,
+    otherwise if it's just a single file, return the file."""
     files = set()
     if os.path.isfile(path):
         files.add(path)
@@ -32,6 +56,7 @@ def _parser_():
 
     subparsers = parser.add_subparsers(dest='command')
 
+    # Codeforces to Coderunner
     cf2cr = subparsers.add_parser('cf2cr',
                                   description='Translate CodeForces packages \
                                                to CodeRunner XML.',
@@ -53,6 +78,15 @@ def _parser_():
     cf2cr.add_argument('-l', '--language', choices=['c', 'cpp', 'python'],
                        default='c', help='Set programming language.')
 
+    # Codeforces to BOCA
+    cf2boca = subparsers.add_parser('cf2boca',
+                                    description='Translate CodeForces packages \
+                                                 to a BOCA contest',
+                                    help='Help on transforming CodeForces \
+                                          package(s) into a BOCA contest.')
+    cf2boca.add_argument('files', nargs='+', type=str,
+                         help='')
+
     return parser
 
 
@@ -64,18 +98,39 @@ def main():
         for file in args.files:
             if file.endswith('.zip'):
                 try:
-                    cf = CodeForces(args.language, file)
+                    cf = CodeForces(args.language)
                     cr = CodeRunner(args.penalty, args.all_or_nothing)
-                    cr.problem = cf.problem
+                    cf.read(file)
+                    cr.read_data(cf.problem)
                     cr.write()
+                    del cf
+                    del cr
                 except Exception as err_list:
-                    for error in err_list.args:
-                        logging.error('Error: {}.'.format(error))
-                    logging.error('It was not possible to generate '
-                                  'the question \'{}\'.'.format(file[:-4]))
+                    log_exceptions(err_list)
+                    log_fail(file)
                 else:
-                    logging.info('Question \'{}\' was successfully generated!'
-                                 .format(file[:-4]))
+                    log_sucess(file)
+        if not args.files:
+            log_no_files()
+
+    elif args.command == 'cf2boca':
+        for file in args.files:
+            if file.endswith('.zip'):
+                try:
+                    cf = CodeForces('cpp')
+                    boca = Boca()
+                    cf.read(file)
+                    boca.read_data(cf.problem)
+                    boca.write()
+                    del cf
+                    del boca
+                except Exception as err_list:
+                    log_exceptions(err_list)
+                    log_fail(file)
+                else:
+                    log_sucess(file)
+        if not args.files:
+            log_no_files()
 
 
 if __name__ == "__main__":

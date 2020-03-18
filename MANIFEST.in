@@ -2,3 +2,4 @@ include README.md
 include LICENSE
 include ej_bridge/Template.xml
 include ej_bridge/Testcase-Template.xml
+recursive-include ej_bridge/Boca-templates *
