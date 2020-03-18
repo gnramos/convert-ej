@@ -30,6 +30,10 @@ class Boca(EJudge):
         """Read the data from the given file."""
         raise NotImplementedError
 
-    def write(self, file=None):
+    def write(self):
         """Write the given data into a file."""
-        raise NotImplementedError
+
+        if not self.problem:
+            raise Exception('Intermediate class not found.')
+
+        print('tudo certo aqui rapazeada')

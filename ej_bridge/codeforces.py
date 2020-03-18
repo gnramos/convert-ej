@@ -194,7 +194,7 @@ class CodeForces(EJudge):
         self.problem = Cpp(handle, text, tests_files, main_source,
                            sol_type, tags, memory_limit_mb, time_limit_sec)
 
-    def write(self, file=None):
+    def write(self):
         """Write the given data into a file."""
 
         raise NotImplementedError

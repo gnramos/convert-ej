@@ -2,6 +2,7 @@
 
 from .codeforces import CodeForces
 from .coderunner import CodeRunner
+from .boca import Boca
 
 import argparse
 import os
@@ -32,7 +33,7 @@ def log_sucess(file):
 
 
 def log_no_files():
-    logging.error('Path or file doesn\'t exist.')
+    logging.error('No .ZIP file was found.')
 
 
 def _file_or_path_(path):
@@ -80,11 +81,11 @@ def _parser_():
     # Codeforces to BOCA
     cf2boca = subparsers.add_parser('cf2boca',
                                     description='Translate CodeForces packages \
-                                                 to BOCA ZIP.',
+                                                 to a BOCA contest',
                                     help='Help on transforming CodeForces \
-                                          package(s) into BOCA ZIP(s).')
-    cf2boca.add_argument('files', type=_file_or_path_,
-                         help='Path of a file or a folder of files.')
+                                          package(s) into a BOCA contest.')
+    cf2boca.add_argument('files', nargs='+', type=str,
+                         help='')
 
     return parser
 
@@ -113,7 +114,23 @@ def main():
             log_no_files()
 
     elif args.command == 'cf2boca':
-        pass
+        for file in args.files:
+            if file.endswith('.zip'):
+                try:
+                    cf = CodeForces('cpp')
+                    boca = Boca()
+                    cf.read(file)
+                    boca.read_data(cf.problem)
+                    boca.write()
+                    del cf
+                    del boca
+                except Exception as err_list:
+                    log_exceptions(err_list)
+                    log_fail(file)
+                else:
+                    log_sucess(file)
+        if not args.files:
+            log_no_files()
 
 
 if __name__ == "__main__":

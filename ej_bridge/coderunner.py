@@ -34,7 +34,7 @@ class CodeRunner(EJudge):
         """Read the data from the given file."""
         raise NotImplementedError
 
-    def write(self, file=None):
+    def write(self):
         """Write the given data into a file."""
 
         def CDATA(text=None):

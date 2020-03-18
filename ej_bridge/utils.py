@@ -86,7 +86,7 @@ class EJudge(ABC):
         pass
 
     @abstractmethod
-    def write(self, file=None):
+    def write(self):
         """Write the data into the given file."""
         pass
 
