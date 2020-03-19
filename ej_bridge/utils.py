@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import subprocess
+import shutil
 import re
 import os
 
@@ -179,8 +180,18 @@ def pdflatex(tex_file, output_dir):
         try:
             subprocess.check_call(cmd, stdout=DEVNULL)
         except Exception:
-            raise Exception("Erro na transformação de LaTex para pdf.")
+            subprocess.check_call(cmd)
 
     remove_aux(output_dir)
 
     return os.path.splitext(tex_file)[0]+'.pdf'
+
+
+def remove_dir(dir):
+    if os.path.isdir(dir):
+        shutil.rmtree(dir)
+
+
+def makenew_dir(dir):
+    remove_dir(dir)
+    os.makedirs(dir)
