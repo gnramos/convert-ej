@@ -12,7 +12,6 @@ ej_bridge/codeforces.py
 ej_bridge/coderunner.py
 ej_bridge/ejb.py
 ej_bridge/utils.py
-ej_bridge/Boca_Templates/question/teste.tex
 ej_bridge/Boca_Templates/question/compare/c
 ej_bridge/Boca_Templates/question/compare/cpp
 ej_bridge/Boca_Templates/question/compare/java
@@ -26,12 +25,6 @@ ej_bridge/Boca_Templates/question/limits/java
 ej_bridge/Boca_Templates/question/run/c
 ej_bridge/Boca_Templates/question/run/cpp
 ej_bridge/Boca_Templates/question/run/java
-ej_bridge/Boca_Templates/src/geninput.py3
-ej_bridge/Boca_Templates/src/problem.c
-ej_bridge/Boca_Templates/src/problem.cpp
-ej_bridge/Boca_Templates/src/problem.java
-ej_bridge/Boca_Templates/src/problem.py2
-ej_bridge/Boca_Templates/src/problem.py3
 ej_bridge/Boca_Templates/tex/CIC_header.pdf
 ej_bridge/Boca_Templates/tex/LICENSE
 ej_bridge/Boca_Templates/tex/MaratonaUnB.cls

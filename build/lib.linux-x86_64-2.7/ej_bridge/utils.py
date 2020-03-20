@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import subprocess
+import shutil
 import re
 import os
 
@@ -162,3 +163,35 @@ def convert_eps_to_png(dir_img):
                                            '+profile', '"*"',
                                            file_name + '.png'])
                     os.remove(entry.path)
+
+
+def pdflatex(tex_file, output_dir):
+    """Transform a given LaTeX file into a PDF"""
+    def remove_aux(output_dir):
+        """Remove auxiliary files"""
+        for dirpath, dirnames, filenames in os.walk(output_dir):
+            for f in filenames:
+                if not f.endswith('.pdf'):
+                    os.remove(os.path.join(dirpath, f))
+
+    cmd = ['pdflatex', '-output-directory=' + output_dir,
+           '-interaction=nonstopmode', '-halt-on-error', tex_file]
+    with open(os.devnull, 'w') as DEVNULL:
+        try:
+            subprocess.check_call(cmd, stdout=DEVNULL)
+        except Exception:
+            subprocess.check_call(cmd)
+
+    remove_aux(output_dir)
+
+    return os.path.splitext(tex_file)[0]+'.pdf'
+
+
+def remove_dir(dir):
+    if os.path.isdir(dir):
+        shutil.rmtree(dir)
+
+
+def makenew_dir(dir):
+    remove_dir(dir)
+    os.makedirs(dir)
