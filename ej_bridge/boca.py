@@ -1,5 +1,5 @@
 from .utils import EJudge, pdflatex, makenew_dir
-from base64 import b64encode
+from base64 import b64decode
 
 import os
 import shutil
@@ -53,8 +53,8 @@ class Boca(EJudge):
                     f_out.write(t_out)
                 x = x+1
 
-        def write_text(question_dir, text, tags, n_ex, let):
-            """Write the text on a LaTeX file, and copy the images to the
+        def write_text(question_dir, text, images, tags, n_ex, let):
+            """Write the text on a LaTeX file, and decode the images to the
             question directory."""
 
             texto = ''
@@ -70,7 +70,11 @@ class Boca(EJudge):
 
             with open(os.path.join(question_dir, let+'.tex'), 'w') as texfile:
                 texfile.write(texto)
-            # Implementar decodificação das imagens de base64 para seu formato original
+
+            # Decode the images
+            for name, data in zip(images['name'], images['data']):
+                with open(os.path.join(question_dir, name), 'wb') as img:
+                    img.write(b64decode(data))
 
         def get_letter(num):
             """Return the num-th uppercase letter."""
@@ -90,5 +94,5 @@ class Boca(EJudge):
         shutil.copytree(template_dir, question_dir)
         write_tests(self.problem.test_cases, question_dir)
         num_examples = len(self.problem.test_cases['example']['in'])
-        write_text(question_dir, self.problem.text,
+        write_text(question_dir, self.problem.text, self.problem.text.images,
                    self.problem.tags, num_examples, get_letter(letter))

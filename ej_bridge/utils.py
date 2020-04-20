@@ -176,16 +176,6 @@ def convert_eps_to_png(images):
 
     return new_images
 
-    # if os.path.isdir(dir_img):
-    #     with os.scandir(dir_img) as it:
-    #         for entry in it:
-    #             if entry.is_file() and entry.name.endswith('.eps'):
-    #                 file_name, ext = os.path.splitext(entry.path)
-    #                 subprocess.check_call(['convert', entry.path,
-    #                                        '+profile', '"*"',
-    #                                        file_name + '.png'])
-    #                 os.remove(entry.path)
-
 
 def pdflatex(tex_file, output_dir):
     """Transform a given LaTeX file into a PDF"""
