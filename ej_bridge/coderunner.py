@@ -104,28 +104,21 @@ class CodeRunner(EJudge):
                 convert.
                 """
 
-                # try:
-                #     convert_eps_to_png(img_path)
-                # except Exception:
-                #     raise Exception('Could not convert the .eps image.\n\
-                # This can be solved by acessing:\n\
-                # \"/etc/ImageMagick-6/policy.xml\"\nand commenting the line:\n\
-                # \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
-                # For more information: https://stackoverflow.com/questions/52998331/imagemagick\
-                # -security-policy-pdf-blocking-conversion')
+                try:
+                    images = convert_eps_to_png(images)
+                except Exception:
+                    raise Exception('Could not convert the .eps image.\n\
+                This can be solved by acessing:\n\
+                \"/etc/ImageMagick-6/policy.xml\"\nand commenting the line:\n\
+                \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+                For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+                -security-policy-pdf-blocking-conversion')
 
                 for name, data in zip(images['name'], images['data']):
-                    # for name in images:
-                    #     if name.endswith('.eps'):
-                    #         file_name, file_ext = os.path.splitext(name)
-                    #         name = file_name + '.png'
-
-
                     img = ET.Element('file')
                     img.set('name', name)
                     img.set('path', '/')
                     img.set('encoding', 'base64')
-
                     img.text = data
                     root.find("questiontext").append(img)
 

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from base64 import b64encode, b64decode
 
 import subprocess
 import shutil
@@ -10,7 +11,7 @@ class ProblemText():
     """Stores the textual information for a problem."""
 
     def __init__(self, name, context, input, output, tutorial=None,
-                 images=[], notes=None):
+                 images={}, notes=None):
         """Constructor."""
         self.name = name
         self.context = context
@@ -145,16 +146,45 @@ def tex2html(s):
     return s
 
 
-def convert_eps_to_png(dir_img):
-    if os.path.isdir(dir_img):
-        with os.scandir(dir_img) as it:
-            for entry in it:
-                if entry.is_file() and entry.name.endswith('.eps'):
-                    file_name, ext = os.path.splitext(entry.path)
-                    subprocess.check_call(['convert', entry.path,
-                                           '+profile', '"*"',
-                                           file_name + '.png'])
-                    os.remove(entry.path)
+def convert_eps_to_png(images):
+    """
+    Convert every .eps image to .png,
+    using the function convert from ImageMagick.
+    """
+    new_images = {'name': [], 'data': []}
+
+    for name, data in zip(images['name'], images['data']):
+        if(name.endswith('.eps')):
+            file_name, ext = os.path.splitext(name)
+            tmp_path = '/tmp'
+            img_path_eps = os.path.join(tmp_path, file_name+'.eps')
+            img_path_png = os.path.join(tmp_path, file_name+'.png')
+
+            with open(img_path_eps, 'wb') as img:
+                img.write(b64decode(data))
+            subprocess.check_call(['convert', img_path_eps,
+                                   '+profile', '"*"', img_path_png])
+
+            new_images['name'].append(file_name+'.png')
+            with open(img_path_png, 'rb') as img:
+                new_images['data'].append(str(b64encode(img.read()), 'utf-8'))
+            os.remove(img_path_eps)
+            os.remove(img_path_png)
+        else:
+            new_images['name'].append(name)
+            new_images['data'].append(data)
+
+    return new_images
+
+    # if os.path.isdir(dir_img):
+    #     with os.scandir(dir_img) as it:
+    #         for entry in it:
+    #             if entry.is_file() and entry.name.endswith('.eps'):
+    #                 file_name, ext = os.path.splitext(entry.path)
+    #                 subprocess.check_call(['convert', entry.path,
+    #                                        '+profile', '"*"',
+    #                                        file_name + '.png'])
+    #                 os.remove(entry.path)
 
 
 def pdflatex(tex_file, output_dir):
