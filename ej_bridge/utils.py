@@ -10,14 +10,13 @@ class ProblemText():
     """Stores the textual information for a problem."""
 
     def __init__(self, name, context, input, output, tutorial=None,
-                 images=[], img_path=None, notes=None):
+                 images=[], notes=None):
         """Constructor."""
         self.name = name
         self.context = context
         self.input = input
         self.output = output
         self.images = images
-        self.img_path = img_path
         self.tutorial = tutorial
         self.notes = notes
 
@@ -29,13 +28,6 @@ class ProblemText():
             raise Exception('Input text not found.')
         if self.output is None or len(self.output) == 0:
             raise Exception('Output text not found.')
-        if not os.path.isdir(self.img_path):
-            raise Exception('Images folder not found.')
-
-        if self.images:
-            for img in self.images:
-                if not os.path.isfile(os.path.join(img_path, img)):
-                    raise Exception('One of the images was not found.')
 
 
 class CompetitiveProgrammingProblem():

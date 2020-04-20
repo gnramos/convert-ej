@@ -1,4 +1,5 @@
 from .utils import EJudge, ProblemText, CompetitiveProgrammingProblem as Cpp
+from base64 import b64encode
 
 import os
 import shutil
@@ -11,7 +12,6 @@ class CodeForces(EJudge):
 
     def __init__(self, language=None):
         self.language = language
-        self.img_path = 'images_cf'
 
     def __str__(self):
         """Return a readable version of the instance's data."""
@@ -19,8 +19,6 @@ class CodeForces(EJudge):
 
     def __del__(self):
         """Delete the image path and the unziped path, if they exist."""
-        if os.path.isdir(self.img_path):
-            shutil.rmtree(self.img_path)
         if os.path.isdir(self.package_dir):
             shutil.rmtree(self.package_dir)
 
@@ -56,31 +54,27 @@ class CodeForces(EJudge):
 
             return package_dir
 
-        def read_text(package_dir, img_path):
+        def read_text(package_dir):
             """Read data and build a ProblemText class with it.
 
             Return a ProblemText class.
             """
-            def read_images(sections, img_path):
+            def read_images(sections):
                 """Copy the images into a temporary path, if they exist.
 
                 Return a list with the name of the images files.
                 """
-                images = []
-                try:
-                    if not os.path.exists(img_path):
-                        os.mkdir(img_path)
+                images = {'name': [], 'data': []}
 
-                    with os.scandir(sections) as it:
-                        for entry in it:
-                            if entry.is_file() and \
-                                    entry.name.endswith(('.png', 'jpg',
-                                                         '.eps')):
-                                shutil.move(os.path.join(sections, entry.name),
-                                            os.path.join(img_path, entry.name))
-                                images.append(entry.name)
-                except Exception:
-                    raise Exception('Could not open the images.')
+                for entry in os.scandir(sections):
+                    if entry.is_file() and \
+                            entry.name.endswith(('.png', 'jpg', '.eps')):
+                        images['name'].append(entry.name)
+                        with open(os.path.join(sections, entry.name),
+                                  'rb') as img:
+                            images['data'].append(str(b64encode(img.read()),
+                                                  'utf-8'))
+
                 return images
 
             sections = os.path.join(package_dir,
@@ -108,10 +102,10 @@ class CodeForces(EJudge):
             except Exception:
                 raise Exception('Could not open a text file.')
 
-            images = read_images(sections, img_path)
+            images = read_images(sections)
 
             return ProblemText(name, legend, input, output, tutorial,
-                               images, img_path, notes)
+                               images, notes)
 
         def read_tests(root):
             """Read the tests cases using the problem.xml file.
@@ -184,7 +178,7 @@ class CodeForces(EJudge):
 
         tree, root = read_problem_xml(package_dir)
         handle = root.attrib['short-name']
-        text = read_text(package_dir, self.img_path)
+        text = read_text(package_dir)
         tests_files = read_tests(root)
         time_limit_sec, memory_limit_mb = read_limits(root)
         main_source, sol_type = read_main_solution(package_dir,

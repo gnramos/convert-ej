@@ -1,4 +1,5 @@
 from .utils import EJudge, pdflatex, makenew_dir
+from base64 import b64encode
 
 import os
 import shutil
@@ -8,7 +9,6 @@ class Boca(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
     def __init__(self):
-        self.img_path = 'images_boca'
         self.contest_dir = 'contest'
 
     def __str__(self):
@@ -16,15 +16,10 @@ class Boca(EJudge):
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        """Delete the image path, if it exists."""
-        if os.path.isdir(self.img_path):
-            shutil.rmtree(self.img_path)
+        pass
 
     def read_data(self, problem):
         """Read the data from the other class, and create a new image path."""
-        if problem.text.images:
-            shutil.copytree(problem.text.img_path, self.img_path)
-            problem.text.img_path = self.img_path
         self.problem = problem
 
     def read(self, file):
@@ -75,13 +70,7 @@ class Boca(EJudge):
 
             with open(os.path.join(question_dir, let+'.tex'), 'w') as texfile:
                 texfile.write(texto)
-
-            def cpy_images(question_dir):
-                for img in text.images:
-                    shutil.copy(os.path.join(text.img_path, img),
-                                question_dir)
-
-            cpy_images(question_dir)
+            # Implementar decodificação das imagens de base64 para seu formato original
 
         def get_letter(num):
             """Return the num-th uppercase letter."""

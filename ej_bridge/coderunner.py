@@ -1,6 +1,5 @@
 from .utils import EJudge, tex2html, convert_eps_to_png
 
-from base64 import b64encode
 import xml.etree.ElementTree as ET
 import os
 import shutil
@@ -12,22 +11,16 @@ class CodeRunner(EJudge):
     def __init__(self, penalty=None, all_or_nothing=None):
         self.penalty = penalty
         self.all_or_nothing = all_or_nothing
-        self.img_path = 'images_cr'
 
     def __str__(self):
         """Return a readable version of the instance's data."""
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        """Delete the image path."""
-        if os.path.isdir(self.img_path):
-            shutil.rmtree(self.img_path)
+        pass
 
     def read_data(self, problem):
         """Read the data from the other class, and create a new image path."""
-        if problem.text.images:
-            shutil.copytree(problem.text.img_path, self.img_path)
-            problem.text.img_path = self.img_path
         self.problem = problem
 
     def read(self, file):
@@ -104,42 +97,39 @@ class CodeRunner(EJudge):
 
             root.find("questiontext").find("text").append(CDATA(texto))
 
-            def write_images(root, images, img_path):
+            def write_images(root, images):
                 """Convert the images to the base64 format, and write them on the root element.
 
                 Convert the .eps images to .png, using the ImageMagick function
                 convert.
                 """
-                try:
-                    convert_eps_to_png(img_path)
-                except Exception:
-                    raise Exception('Could not convert the .eps image.\n\
-                This can be solved by acessing:\n\
-                \"/etc/ImageMagick-6/policy.xml\"\nand commenting the line:\n\
-                \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
-                For more information: https://stackoverflow.com/questions/52998331/imagemagick\
-                -security-policy-pdf-blocking-conversion')
 
-                for name in images:
-                    if name.endswith('.eps'):
-                        file_name, file_ext = os.path.splitext(name)
-                        name = file_name + '.png'
+                # try:
+                #     convert_eps_to_png(img_path)
+                # except Exception:
+                #     raise Exception('Could not convert the .eps image.\n\
+                # This can be solved by acessing:\n\
+                # \"/etc/ImageMagick-6/policy.xml\"\nand commenting the line:\n\
+                # \"<policy domain="coder" rights="none" pattern="PS" />\"\n\
+                # For more information: https://stackoverflow.com/questions/52998331/imagemagick\
+                # -security-policy-pdf-blocking-conversion')
 
-                    path = os.path.join(img_path, name)
+                for name, data in zip(images['name'], images['data']):
+                    # for name in images:
+                    #     if name.endswith('.eps'):
+                    #         file_name, file_ext = os.path.splitext(name)
+                    #         name = file_name + '.png'
+
 
                     img = ET.Element('file')
                     img.set('name', name)
                     img.set('path', '/')
                     img.set('encoding', 'base64')
 
-                    with open(path, "rb") as image:
-                        encoded_string = str(b64encode(image.read()), 'utf-8')
-
-                    img.text = encoded_string
+                    img.text = data
                     root.find("questiontext").append(img)
 
-            write_images(root, self.problem.text.images,
-                         self.problem.text.img_path)
+            write_images(root, self.problem.text.images)
 
         def write_testcases(test_cases, root, package_dir):
             """Write the testcases on the root element."""
