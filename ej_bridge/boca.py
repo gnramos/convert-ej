@@ -1,8 +1,9 @@
-from .utils import EJudge, pdflatex, makenew_dir
+from .utils import EJudge, pdflatex, remove_dir, makenew_dir
 from base64 import b64decode
 
 import os
 import shutil
+import zipfile
 
 
 class Boca(EJudge):
@@ -80,6 +81,9 @@ class Boca(EJudge):
             """Return the num-th uppercase letter."""
             return chr(ord('A')+num)
 
+        def zip_dir(question_dir, letter):
+            shutil.make_archive(letter, 'zip', question_dir)
+
         if not self.problem:
             raise Exception('Intermediate class not found.')
 
@@ -87,6 +91,7 @@ class Boca(EJudge):
         makenew_dir(self.contest_dir)
 
         # Iterate through the problems later
+        # Increment the variable letter
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         template_dir = os.path.join(package_dir, 'Boca_Templates', 'question')
@@ -96,3 +101,6 @@ class Boca(EJudge):
         num_examples = len(self.problem.test_cases['example']['in'])
         write_text(question_dir, self.problem.text, self.problem.text.images,
                    self.problem.tags, num_examples, get_letter(letter))
+        zip_dir(question_dir, os.path.join(self.contest_dir,
+                                           get_letter(letter)))
+        remove_dir(question_dir)
