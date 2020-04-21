@@ -2,7 +2,6 @@ from .utils import EJudge, tex2html, convert_eps_to_png
 
 import xml.etree.ElementTree as ET
 import os
-import shutil
 
 
 class CodeRunner(EJudge):

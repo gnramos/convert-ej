@@ -3,7 +3,6 @@ from base64 import b64decode
 
 import os
 import shutil
-import zipfile
 
 
 class Boca(EJudge):

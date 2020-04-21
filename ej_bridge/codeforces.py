@@ -4,7 +4,6 @@ from base64 import b64encode
 import os
 import shutil
 import xml.etree.ElementTree as ET
-import zipfile
 
 
 class CodeForces(EJudge):
@@ -49,8 +48,7 @@ class CodeForces(EJudge):
             file_dir, file_name = os.path.split(package)
             package_dir = os.path.splitext(file_name)[0]
 
-            with zipfile.ZipFile(package, 'r') as zip_file:
-                zip_file.extractall(package_dir)
+            shutil.unpack_archive(package, package_dir, 'zip')
 
             return package_dir
 
