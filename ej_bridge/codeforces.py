@@ -46,8 +46,10 @@ class CodeForces(EJudge):
                 raise Exception('{} is not a zip file.'.format(package))
 
             file_dir, file_name = os.path.split(package)
+            tmp_path = '/tmp'
             package_dir = os.path.splitext(file_name)[0]
 
+            package_dir = os.path.join(tmp_path, package_dir)
             shutil.unpack_archive(package, package_dir, 'zip')
 
             return package_dir
