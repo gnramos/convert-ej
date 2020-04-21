@@ -175,7 +175,8 @@ class CodeRunner(EJudge):
 
         def write_time_limit(time_limit, root):
             """Write the time limit on the root element."""
-            root.find("cputimelimitsecs").text = str(time_limit)
+            k = 5
+            root.find("cputimelimitsecs").text = str(time_limit*k)
 
         def write_memory_limit(memory_limit, root):
             """Write the memoty limit on the root element."""
