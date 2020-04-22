@@ -115,7 +115,11 @@ class CodeForces(EJudge):
             def load_file(file):
                 """Read a file and return it's content."""
                 if not os.path.isfile(file):
-                    raise Exception('{} is not a file.'.format(file))
+                    raise Exception(
+                        'The test case \"{}\" was not found.\nMake sure that '
+                        'the file you downloaded from polygon has all the '
+                        'test cases, if not, try making a full package in the '
+                        'package section.'.format(os.path.basename(file)))
                 with open(file) as f:
                     content = f.read()
                 return content
