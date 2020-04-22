@@ -68,7 +68,7 @@ def _parser_():
     cf2cr.add_argument('-p', '--penalty',
                        choices=['0, 0, 10, 20, ...', '10, 20, ...',
                                 '0, 0, ...'],
-                       default=['0, 0, 10, 20, ...'], metavar='P',
+                       default='0, 0, 10, 20, ...', metavar='P',
                        help='Set marking penalty regime. Options are:\
                              \n\"0, 0, 10, 20, ...\" (default), \
                              \n\"0, 0, ...\",\n or \"10, 20, ...\"')

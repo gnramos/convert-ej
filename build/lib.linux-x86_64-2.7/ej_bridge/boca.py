@@ -1,4 +1,5 @@
-from .utils import EJudge, pdflatex, makenew_dir
+from .utils import EJudge, pdflatex, remove_dir, makenew_dir
+from base64 import b64decode
 
 import os
 import shutil
@@ -8,7 +9,6 @@ class Boca(EJudge):
     """Manipulates CompetitiveProgrammingProblem files."""
 
     def __init__(self):
-        self.img_path = 'images_boca'
         self.contest_dir = 'contest'
 
     def __str__(self):
@@ -16,15 +16,10 @@ class Boca(EJudge):
         return '\n'.join('{}: {}'.format(k, v) for k, v in vars(self).items())
 
     def __del__(self):
-        """Delete the image path, if it exists."""
-        if os.path.isdir(self.img_path):
-            shutil.rmtree(self.img_path)
+        pass
 
     def read_data(self, problem):
         """Read the data from the other class, and create a new image path."""
-        if problem.text.images:
-            shutil.copytree(problem.text.img_path, self.img_path)
-            problem.text.img_path = self.img_path
         self.problem = problem
 
     def read(self, file):
@@ -58,8 +53,8 @@ class Boca(EJudge):
                     f_out.write(t_out)
                 x = x+1
 
-        def write_text(question_dir, text, tags, n_ex, let):
-            """Write the text on a LaTeX file, and copy the images to the
+        def write_text(question_dir, text, images, tags, n_ex, let):
+            """Write the text on a LaTeX file, and decode the images to the
             question directory."""
 
             texto = ''
@@ -76,16 +71,17 @@ class Boca(EJudge):
             with open(os.path.join(question_dir, let+'.tex'), 'w') as texfile:
                 texfile.write(texto)
 
-            def cpy_images(question_dir):
-                for img in text.images:
-                    shutil.copy(os.path.join(text.img_path, img),
-                                question_dir)
-
-            cpy_images(question_dir)
+            # Decode the images
+            for name, data in zip(images['name'], images['data']):
+                with open(os.path.join(question_dir, name), 'wb') as img:
+                    img.write(b64decode(data))
 
         def get_letter(num):
             """Return the num-th uppercase letter."""
             return chr(ord('A')+num)
+
+        def zip_dir(question_dir, letter):
+            shutil.make_archive(letter, 'zip', question_dir)
 
         if not self.problem:
             raise Exception('Intermediate class not found.')
@@ -94,6 +90,7 @@ class Boca(EJudge):
         makenew_dir(self.contest_dir)
 
         # Iterate through the problems later
+        # Increment the variable letter
 
         package_dir = os.path.abspath(os.path.dirname(__file__))
         template_dir = os.path.join(package_dir, 'Boca_Templates', 'question')
@@ -101,5 +98,8 @@ class Boca(EJudge):
         shutil.copytree(template_dir, question_dir)
         write_tests(self.problem.test_cases, question_dir)
         num_examples = len(self.problem.test_cases['example']['in'])
-        write_text(question_dir, self.problem.text,
+        write_text(question_dir, self.problem.text, self.problem.text.images,
                    self.problem.tags, num_examples, get_letter(letter))
+        zip_dir(question_dir, os.path.join(self.contest_dir,
+                                           get_letter(letter)))
+        remove_dir(question_dir)
