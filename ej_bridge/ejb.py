@@ -101,8 +101,7 @@ def main():
                     cf = CodeForces(args.language)
                     cr = CodeRunner(args.penalty, args.all_or_nothing)
                     cf.read(file)
-                    cr.read_data(cf.problem)
-                    cr.write()
+                    cr.write(cf.problem)
                     del cf
                     del cr
                 except Exception as err_list:
@@ -120,8 +119,7 @@ def main():
                     cf = CodeForces('cpp')
                     boca = Boca()
                     cf.read(file)
-                    boca.read_data(cf.problem)
-                    boca.write()
+                    boca.write(cf.problem)
                     del cf
                     del boca
                 except Exception as err_list:

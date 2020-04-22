@@ -18,16 +18,13 @@ class CodeRunner(EJudge):
     def __del__(self):
         pass
 
-    def read_data(self, problem):
-        """Read the data from the other class, and create a new image path."""
-        self.problem = problem
-
     def read(self, file):
         """Read the data from the given file."""
         raise NotImplementedError
 
-    def write(self):
+    def write(self, problem):
         """Write the given data into a file."""
+        self.problem = problem
 
         def CDATA(text=None):
             """Includes the CDATA tag."""
