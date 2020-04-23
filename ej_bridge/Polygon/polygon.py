@@ -48,8 +48,8 @@ class Polygon(Converter):
             images = {}
             examples = {}
             path = os.path.join('statement-sections', language)
-            for entry in zip_obj.namelist():
-                if not zip_obj.getinfo(entry).is_dir() and entry.startswith(path):
+            for entry in pzip.namelist():
+                if not pzip.getinfo(entry).is_dir() and entry.startswith(path):
                     entry_name = os.path.split(entry)[1]
                     if entry_name.startswith('example.'):
                         ex = entry_name.split('.')[1]
@@ -60,14 +60,14 @@ class Polygon(Converter):
                         else:
                             examples[ex]['in'] = get_in_zip(entry)
                     elif not entry_name.lower().endswith('.tex'):
-                        with zip_obj.open(entry) as f:
+                        with pzip.open(entry) as f:
                             images[entry_name] = f.read()
 
             return images, [examples[k] for k in sorted(examples.keys())]
 
         def get_in_zip(file):
             try:
-                with zip_obj.open(file) as f:
+                with pzip.open(file) as f:
                     return f.read().decode('utf-8')
             except KeyError:
                 return ''
@@ -102,13 +102,15 @@ class Polygon(Converter):
 
         def get_tests():
             test_files = [entry
-                          for entry in zip_obj.namelist()
+                          for entry in pzip.namelist()
                           if entry.startswith('tests/') and entry != 'tests/'
                           and not entry.endswith('a')]
             test_samples = ['sample' in e.attrib
-                            for e in root.findall('judging/testset/tests/test')]
+                            for e in root.findall(
+                                'judging/testset/tests/test')]
 
-            # Tests listed in the XML in the same order as the files are numbered.
+            # Tests listed in the XML in the same order as the files are
+            # numbered.
             tests = {'examples': {}, 'hidden': {}}
             for path, is_sample in zip(sorted(test_files), test_samples):
                 test = 'examples' if is_sample else 'hidden'
@@ -119,8 +121,8 @@ class Polygon(Converter):
             return tests
 
         try:
-            with zipfile.ZipFile(file) as zip_obj:
-                with zip_obj.open('problem.xml') as f:
+            with zipfile.ZipFile(file) as pzip:
+                with pzip.open('problem.xml') as f:
                     root = ET.parse(f).getroot()
 
                 problem_id = root.attrib['short-name']

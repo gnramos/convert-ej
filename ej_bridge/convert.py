@@ -6,8 +6,9 @@ import os
 
 
 def check_files(path):
-    """Return all the files inside path, in case it's a directory,
-    otherwise if it's just a single file, return the file."""
+    """Returns all the files inside path, in case it's a directory, otherwise
+    return the single file path.
+    """
     files = set()
     if os.path.isfile(path):
         files.add(path)
@@ -16,15 +17,17 @@ def check_files(path):
             files = set(entry.path for entry in it
                         if entry.is_file() and not entry.name.startswith('.'))
     else:
-        raise ValueError('Must provide a valid file or path.')
+        raise ValueError('Must provide a valid file or directory.')
     return files
 
 
 def check_ejudge(ejudge):
     """Checks if the given name is a valid directory."""
-    if not os.path.isdir(ejudge):
-        raise ValueError(f'No {ejudge} directory found for E-judge files.')
-    return ejudge
+    script = os.path.join(ejudge, f'{ejudge.lower()}.py')
+    if os.path.isdir(ejudge) and os.path.isfile(script):
+        return ejudge
+
+    raise ValueError(f'{ejudge} is not a valid E-judge.')
 
 
 if __name__ == "__main__":
@@ -53,8 +56,8 @@ if __name__ == "__main__":
     parser.add_argument('dest', choices=sorted(options),
                         help='Path for judge files for destination format.')
     parser.add_argument('-f', '--files', type=check_files, required=True,
-                        help='Path of a file or a folder of files to convert from'
-                        ' origin to destination formats.')
+                        help='Path of a file or a folder of files to convert'
+                        ' from origin to destination formats.')
 
     # 1st parsing.
     args, unknown = parser.parse_known_args()

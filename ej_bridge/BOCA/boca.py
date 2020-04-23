@@ -53,14 +53,6 @@ class BOCA(Converter):
         args -- the arguments for configuring the created file
         """
 
-        def copy_template_files(dir_name):
-            with os.scandir(os.path.join(cwd, f'template/{dir_name}')) as it:
-                for entry in it:
-                    with open(entry.path, 'rb') as f:
-                        content = f.read()
-                    with zip_obj.open(f'{dir_name}/{entry.name}', 'w') as f:
-                        f.write(content)
-
         def add_description():
             def add_pdf():
                 def image_files():
@@ -70,13 +62,18 @@ class BOCA(Converter):
 
                 def make_tex():
                     def rows(examples):
-                        def cell(ex):
-                            verbatim = f'\\begin{{verbatim}}\n{ex}\\end{{verbatim}}'
-                            return f'\\vspace{{-1.2\\baselineskip}}%\n{verbatim}\n\\vspace*{{-2\\baselineskip}}%'
-                        return ''.join('{}\n&\n{}\n\\\\\hline'.format(cell(ex['in']), cell(ex['out']))
+                        def verbatim(ex):
+                            return f'\\vspace{{-1.2\\baselineskip}}%\n' \
+                                   f'\\begin{{verbatim}}\n' \
+                                   f'{ex}\\end{{verbatim}}\n' \
+                                   f'\\vspace*{{-2\\baselineskip}}%'
+
+                        return ''.join('{}\n&\n{}\n\\\\\hline'.format(
+                                       verbatim(ex['in']), verbatim(ex['out']))
                                        for ex in examples)
 
-                    with open(os.path.join(cwd, 'template.tex')) as f:
+                    with open(os.path.join(cwd, 'templates',
+                                           'description.tex')) as f:
                         tex = f.read()
 
                     stmt = problem.statement
@@ -84,7 +81,8 @@ class BOCA(Converter):
                     tex = tex.replace('[[DESCRIPTION]]', stmt.description)
                     tex = tex.replace('[[INPUT]]', stmt.input)
                     tex = tex.replace('[[OUTPUT]]', stmt.output)
-                    tex = tex.replace('[[VERBATIM_EXAMPLE_ROWS]]', rows(stmt.examples))
+                    tex = tex.replace('[[VERBATIM_EXAMPLE_PER_ROW]]',
+                                      rows(stmt.examples))
                     if stmt.notes:
                         tex = tex.replace('[[NOTES]]', stmt.notes)
                     else:
@@ -98,16 +96,19 @@ class BOCA(Converter):
                     env = os.environ.copy()
                     env['TEXINPUTS'] = f'.:{tmp_dir}//:'
                     cmd = ['pdflatex', '-output-directory=' + tmp_dir,
-                           '-interaction=nonstopmode', '-halt-on-error', tex_file]
+                           '-interaction=nonstopmode', '-halt-on-error',
+                           tex_file]
                     with open(os.devnull, 'w') as DEVNULL:
                         try:
                             subprocess.check_call(cmd, env=env, stdout=DEVNULL)
-                        except:
-                            try:
-                                # run again to show errors
-                                subprocess.check_call(cmd, env=env)
-                            except Exception as e:
-                                raise ValueError(f'Unable to create pdf from {tex_file}.')
+                        except subprocess.CalledProcessError:
+                            raise ValueError(f'Unable to create pdf from'
+                                             f' {tex_file}.')
+                            # try:
+                            #     # run again to show errors
+                            #     subprocess.check_call(cmd, env=env)
+                            # except Exception as e:
+                            #     raise ValueError(f'Unable to create pdf from {tex_file}.')
 
                 tex_file = os.path.join(tmp_dir, f'{problem.id}.tex')
                 make_tex()
@@ -139,7 +140,8 @@ class BOCA(Converter):
                         zip_obj.writestr(f'{k}put/{name}', data)
 
         def add_limits():
-            with os.scandir(os.path.join(cwd, f'template/limits')) as it:
+            with os.scandir(os.path.join(cwd, 'templates', 'zip',
+                                         'limits')) as it:
                 for entry in it:
                     with open(entry.path) as f:
                         limits = [line.rstrip('\r\n')
@@ -155,14 +157,25 @@ class BOCA(Converter):
 
                     zip_obj.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
+        def copy_template(dir_path):
+            with os.scandir(dir_path) as it:
+                dir_name = os.path.split(dir_path)[-1]
+                for entry in it:
+                    with open(entry.path, 'rb') as f_in:
+                        with zip_obj.open(f'{dir_name}/{entry.name}',
+                                          'w') as f_out:
+                            f_out.write(f_in.read())
+
         problem_zip = f'{problem.id}.zip'
         cwd = os.path.abspath(os.path.dirname(__file__))
 
         with zipfile.ZipFile(problem_zip, 'w') as zip_obj:
-            copy_template_files('compare')
-            copy_template_files('compile')
             add_description()
             add_IO()
             add_limits()
-            copy_template_files('run')
-            # copy_template_files('tests')
+
+            processed = ['description', 'input', 'output', 'limits']
+            with os.scandir(os.path.join(cwd, 'templates', 'zip')) as it:
+                for entry in it:
+                    if entry.is_dir() and entry.name not in processed:
+                        copy_template(entry.path)
