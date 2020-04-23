@@ -13,8 +13,6 @@ class Statement():
       - images must be "HTML friendly",
     """
 
-    accepted_images = ('.jpg', '.png')
-
     def __init__(self, title, description, in_format, out_format, examples,
                  images={}, tags=[], tutorial=None, notes=None):
         """Class constructor.
@@ -42,10 +40,6 @@ class Statement():
         self.tags = tags
         self.tutorial = tutorial
         self.notes = notes
-
-        for name in self.images:
-            if not name.endswith(Statement.accepted_images):
-                raise ValueError(f'Image {name} is not HTML compatible.')
 
 
 class Evaluation():

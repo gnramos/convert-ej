@@ -49,12 +49,9 @@ class Polygon(Converter):
             examples = {}
             path = os.path.join('statement-sections', language)
             for entry in zip_obj.namelist():
-                if entry.startswith(path):
+                if not zip_obj.getinfo(entry).is_dir() and entry.startswith(path):
                     entry_name = os.path.split(entry)[1]
-                    if entry_name.endswith(Statement.accepted_images):
-                        with zip_obj.open(entry) as f:
-                            images[entry_name] = f.read()
-                    elif entry_name.startswith('example.'):
+                    if entry_name.startswith('example.'):
                         ex = entry_name.split('.')[1]
                         if ex not in examples:
                             examples[ex] = {}
@@ -62,6 +59,10 @@ class Polygon(Converter):
                             examples[ex]['out'] = get_in_zip(entry)
                         else:
                             examples[ex]['in'] = get_in_zip(entry)
+                    elif not entry_name.lower().endswith('.tex'):
+                        with zip_obj.open(entry) as f:
+                            images[entry_name] = f.read()
+
             return images, examples
 
         def get_in_zip(file):

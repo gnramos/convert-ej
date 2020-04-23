@@ -16,8 +16,12 @@ class CodeRunner(Converter):
 
     https://coderunner.org.nz/
 
-    Files from CodeRunner must be exported as "Moodle XML".
+    Keep in mind that:
+      - Files from CodeRunner must be exported as "Moodle XML".
+      - images must be "HTML friendly",
     """
+
+    accepted_images = ('.jpg', '.png')
 
     def add_dest_parser(self, parser):
         """Adds a parser for creating a file formatted for a CodeRunner EJudge.
@@ -151,6 +155,9 @@ class CodeRunner(Converter):
             qt.find('text').append(CDATA(html))
 
             for name, image in statement.images.items():
+                if not name.lower().endswith(CodeRunner.accepted_images):
+                    raise ValueError(f'Image {name} is not HTML compatible.')
+
                 img = ET.Element('file')
                 img.set('name', name)
                 img.set('path', '/')
