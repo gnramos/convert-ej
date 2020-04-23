@@ -52,8 +52,8 @@ class Evaluation():
         test_cases -- dict of 'examples' and 'hidden' test cases, each case
                       has a dict of 'in' (input) data and its expected 'out'
                       (output).
-        solutions -- dict of 'main' and 'accepted' solutions, where each entry
-                     is {file_extension: source_code}.
+        solutions -- list of solutions with 'main' (preferred) and 'accepted'
+                     dicts, where each entry is {file_extension: source_code}.
         limits -- dict of 'time_sec' and 'memory_MB' limits for evaluation a
                   solution.
         """

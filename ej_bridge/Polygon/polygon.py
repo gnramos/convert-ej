@@ -97,8 +97,7 @@ class Polygon(Converter):
                         for e in root.findall(
                             f'assets/solutions/solution[@tag="{tag}"]/source')}
 
-            return {'main': solution_code('main'),
-                    'accepted': solution_code('accepted')}
+            return [solution_code('main'), solution_code('accepted')]
 
         def get_tests():
             test_files = [entry
