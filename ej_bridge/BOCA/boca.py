@@ -24,7 +24,11 @@ class BOCA(Converter):
         Keyword arguments:
         parser -- the parser to configure
         """
-        pass
+        parser.add_argument('--tmp', default='/tmp',
+                            help='Directory for storing temporary files.'
+                            ' (default /tmp')
+        parser.add_argument('-b', '--basename', default=None,
+                            help='Basename for problem description.')
 
     def add_origin_parser(self, parser):
         """Adds a parser for creating an EJudgeProblem from a file formatted
@@ -41,11 +45,10 @@ class BOCA(Converter):
         Keyword arguments:
         file -- the file containing the data for the problem
         args -- the arguments for configuring the EJudgeProblem
-        language -- the language the statement of the problem is written in.
         """
         raise NotImplementedError
 
-    def write(self, problem, args, tmp_dir='/tmp'):
+    def write(self, problem, args):
         """Writes the given EJudgeProblem into a BOCA file.
 
         Keyword arguments:
@@ -57,7 +60,7 @@ class BOCA(Converter):
             def add_pdf():
                 def image_files():
                     for name, img in problem.statement.images.items():
-                        with open(os.path.join(tmp_dir, name), 'wb') as f:
+                        with open(os.path.join(args.tmp, name), 'wb') as f:
                             f.write(img)
 
                 def make_tex():
@@ -94,8 +97,8 @@ class BOCA(Converter):
 
                 def pdflatex():
                     env = os.environ.copy()
-                    env['TEXINPUTS'] = f'.:{tmp_dir}//:'
-                    cmd = ['pdflatex', '-output-directory=' + tmp_dir,
+                    env['TEXINPUTS'] = f'.:{args.tmp}//:'
+                    cmd = ['pdflatex', '-output-directory=' + args.tmp,
                            '-interaction=nonstopmode', '-halt-on-error',
                            tex_file]
                     with open(os.devnull, 'w') as DEVNULL:
@@ -108,9 +111,10 @@ class BOCA(Converter):
                             #     # run again to show errors
                             #     subprocess.check_call(cmd, env=env)
                             # except Exception as e:
-                            #     raise ValueError(f'Unable to create pdf from {tex_file}.')
+                            #     raise ValueError(f'Unable to create pdf'
+                            #                      f' from {tex_file}.')
 
-                tex_file = os.path.join(tmp_dir, f'{problem.id}.tex')
+                tex_file = os.path.join(args.tmp, f'{problem.id}.tex')
                 make_tex()
                 image_files()
                 pdflatex()
@@ -125,8 +129,9 @@ class BOCA(Converter):
                 return pdf_file
 
             def add_problem_info():
+                basename = args.basename if args.basename else problem.id
                 zip_obj.writestr('description/problem.info',
-                                 f'basename={problem.id}\n'
+                                 f'basename={basename}\n'
                                  f'fullname={problem.statement.title}\n'
                                  f'descfile={pdf_file}\n')
 
@@ -157,7 +162,7 @@ class BOCA(Converter):
 
                     zip_obj.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
-        def copy_template(dir_path):
+        def add_template(dir_path):
             with os.scandir(dir_path) as it:
                 dir_name = os.path.split(dir_path)[-1]
                 for entry in it:
@@ -178,4 +183,4 @@ class BOCA(Converter):
             with os.scandir(os.path.join(cwd, 'templates', 'zip')) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in processed:
-                        copy_template(entry.path)
+                        add_template(entry.path)
