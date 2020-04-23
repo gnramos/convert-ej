@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # arguments, which are then parsed (and the "inital" are parsed again).
     #
     # However, the standard "help" action will be processed in the 1st parsing
-    # and then exits the program (as per argparse design), thus it will NOT
+    # and then the program exits (as per argparse design), thus it will NOT
     # show the e-judge-specific information.
     #
     # To bypass this, "help" action is only added for the 2nd parsing.
