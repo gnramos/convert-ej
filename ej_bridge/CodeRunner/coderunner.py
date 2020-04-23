@@ -20,6 +20,7 @@ class CodeRunner(Converter):
       - Files from CodeRunner must be exported as "Moodle XML".
       - Images must be "HTML friendly".
       - The question is defined by a single solution's programming language.
+      Choosing 'all' for language causes a new file per available solution.
     """
 
     accepted_images = ('.jpg', '.png')
@@ -45,7 +46,7 @@ class CodeRunner(Converter):
                             help='Set all-or-nothing marking behavior.')
         parser.add_argument('-l', '--language', choices=sorted(list(
                                 CodeRunner.accepted_types.keys())),
-                            default='c', help='Set programming language.')
+                            default='all', help='Set programming language.')
 
     def add_origin_parser(self, subparsers):
         """Adds a parser for creating an EJudgeProblem from a file formatted
@@ -88,31 +89,19 @@ class CodeRunner(Converter):
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
         #######################################################################
 
-        def add_solution(evaluation):
-            def cr_type(lang):
-                try:
-                    return CodeRunner.accepted_types[lang]
-                except KeyError:
-                    raise ValueError(f'{lang} source file not supported.')
+        def add_solution(evaluation, language):
+            def find_source(language):
+                for solutions in evaluation.solutions:
+                    if language in solutions.keys():
+                        return solutions[language]
 
-            for lang, source in evaluation.solutions['main'].items():
-                if lang == args.language:
-                    root.find('answer').append(CDATA(source))
-                    set_text('coderunnertype', cr_type(lang))
-                    break
-            else:
-                for lang, source in evaluation.solutions['accepted'].items():
-                    if lang == args.language:
-                        root.find('answer').append(CDATA(source))
-                        set_text('coderunnertype', cr_type(lang))
-                        break
-                else:
-                    langs = set(l for sols in evaluation.solutions.values()
-                                for l in sols.keys()
-                                if l in CodeRunner.accepted_types.keys())
-                    langs = ', '.join(l for l in sorted(langs))
-                    raise ValueError(f'No {args.language} solution available.'
-                                     f' Try one of [{langs}].')
+            answer = root.find('answer')
+            if answer.getchildren():
+                answer.remove(answer.getchildren()[0])
+
+            source = find_source(language)
+            answer.append(CDATA(source))
+            set_text('coderunnertype', CodeRunner.accepted_types[language])
 
         def add_tags(statement):
             tags = root.find("tags")
@@ -139,6 +128,14 @@ class CodeRunner(Converter):
             element = ET.Element('![CDATA[')
             element.text = content
             return element
+
+        def get_languages_from_solutions():
+            languages = set(CodeRunner.accepted_types.keys()
+                            if args.language == 'all' else [args.language])
+            available = set([k
+                            for solutions in problem.evaluation.solutions
+                            for k in solutions.keys()])
+            return available & languages
 
         def set_questiontext(statement):
             def to_html(header, content):
@@ -217,13 +214,16 @@ class CodeRunner(Converter):
         tree = ET.parse(xml)
         root = tree.getroot()[0]  # question root
 
+        languages = get_languages_from_solutions()
+        if not languages:
+            raise ValueError(f'No {args.language} solution(s) available.')
+
         root.find('name').find('text').text = problem.statement.title
         set_questiontext(problem.statement)
         if problem.statement.tutorial:
             root.find('generalfeedback').find(
                 'text').text = tex2html(problem.statement.tutorial)
 
-        add_solution(problem.evaluation)
         append_tests(problem.evaluation)
         add_tags(problem.statement)
 
@@ -232,7 +232,13 @@ class CodeRunner(Converter):
         set_text('penaltyregime', args.penalty)
         set_text('allornothing', 1 if args.all_or_nothing else 0)
 
-        tree.write(f'{problem.id}.xml', 'UTF-8')
+        for lang in languages:
+            add_solution(problem.evaluation, lang)
+
+            file = f'{problem.id}-{lang}.xml'
+            tree.write(file, 'UTF-8')
+            print(f'Created {file}.')
+
         #######################################################################
         # CDATA parsing isn't supported natively, so it needs an override.
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
