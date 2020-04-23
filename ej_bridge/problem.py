@@ -22,8 +22,8 @@ class Statement():
         description -- problem specification
         in_format -- description of input format
         out_format -- description of output format
-        examples -- dict of 'in' (input) files and the expected 'out' (output)
-                    result
+        examples -- list of dict entries with 'in' (input) files and the
+                    expected 'out' (output) result
         images -- dict of images used in the description (default {})
         tags -- list of tags for indexing the problem (default [])
         tutorial -- instructions on how to solve the problem (default None)

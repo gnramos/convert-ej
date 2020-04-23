@@ -63,7 +63,7 @@ class Polygon(Converter):
                         with zip_obj.open(entry) as f:
                             images[entry_name] = f.read()
 
-            return images, examples
+            return images, [examples[k] for k in sorted(examples.keys())]
 
         def get_in_zip(file):
             try:
@@ -82,7 +82,7 @@ class Polygon(Converter):
 
         def get_stmt_tex(name):
             file = os.path.join('statement-sections', language, f'{name}.tex')
-            return get_in_zip(file)
+            return get_in_zip(file).rstrip('\n')
 
         def get_tags():
             return [e.attrib['value'] for e in root.findall('tags/tag')]
