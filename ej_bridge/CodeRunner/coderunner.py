@@ -18,10 +18,14 @@ class CodeRunner(Converter):
 
     Keep in mind that:
       - Files from CodeRunner must be exported as "Moodle XML".
-      - images must be "HTML friendly",
+      - Images must be "HTML friendly".
+      - The question is defined by a single solution's programming language.
     """
 
     accepted_images = ('.jpg', '.png')
+    accepted_types = {'c': 'c_program',
+                      'cpp': 'cpp_program',
+                      'py': 'python3'}
 
     def add_dest_parser(self, parser):
         """Adds a parser for creating a file formatted for a CodeRunner EJudge.
@@ -40,7 +44,7 @@ class CodeRunner(Converter):
                             dest='all_or_nothing',
                             help='Set all-or-nothing marking behavior.')
         parser.add_argument('-l', '--language', choices=sorted(list(
-                                Evaluation.accepted_sources)),
+                                CodeRunner.accepted_types.keys())),
                             default='c', help='Set programming language.')
 
     def add_origin_parser(self, subparsers):
@@ -86,13 +90,10 @@ class CodeRunner(Converter):
 
         def add_solution(evaluation):
             def cr_type(lang):
-                if lang == 'c':
-                    return 'c_program'
-                elif lang == 'cpp':
-                    return 'cpp_program'
-                elif lang == 'py':
-                    return 'python3'
-                raise ValueError(f'{lang} source file not supported.')
+                try:
+                    return CodeRunner.accepted_types[lang]
+                except KeyError:
+                    raise ValueError(f'{lang} source file not supported.')
 
             for lang, source in evaluation.solutions['main'].items():
                 if lang == args.language:
@@ -107,7 +108,8 @@ class CodeRunner(Converter):
                         break
                 else:
                     langs = set(l for sols in evaluation.solutions.values()
-                                for l in sols.keys())
+                                for l in sols.keys()
+                                if l in CodeRunner.accepted_types.keys())
                     langs = ', '.join(l for l in sorted(langs))
                     raise ValueError(f'No {args.language} solution available.'
                                      f' Try one of [{langs}].')

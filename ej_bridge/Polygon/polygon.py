@@ -95,8 +95,7 @@ class Polygon(Converter):
             def solution_code(tag):
                 return {src(e.attrib['type']): get_in_zip(e.attrib['path'])
                         for e in root.findall(
-                            f'assets/solutions/solution[@tag="{tag}"]/source')
-                        if src(e.attrib['type']) in Evaluation.accepted_sources}
+                            f'assets/solutions/solution[@tag="{tag}"]/source')}
 
             return {'main': solution_code('main'),
                     'accepted': solution_code('accepted')}

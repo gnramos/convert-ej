@@ -43,12 +43,7 @@ class Statement():
 
 
 class Evaluation():
-    """Stores the information required to evaluate a problem.
-
-    Keep in mind that:
-      - source files must by C, C++, or Python.
-    """
-    accepted_sources = set(['c', 'cpp', 'py'])
+    """Stores the information required to evaluate a problem."""
 
     def __init__(self, test_cases, solutions, limits):
         """Class constructor.
@@ -65,11 +60,6 @@ class Evaluation():
         self.test_cases = test_cases
         self.solutions = solutions
         self.limits = limits
-
-        for solution in self.solutions.values():
-            for lang in solution.keys():
-                if lang not in Evaluation.accepted_sources:
-                    raise ValueError(f'Solution {solution} is not acceptable.')
 
 
 class EJudgeProblem():
