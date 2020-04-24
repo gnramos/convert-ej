@@ -29,6 +29,8 @@ class BOCA(Converter):
                             ' (default /tmp')
         parser.add_argument('-b', '--basename', default=None,
                             help='Basename for problem description.')
+        parser.add_argument('--tutorial', action='store_true',
+                            help='Include the tutorial in the PDF.')
 
     def add_origin_parser(self, parser):
         """Adds a parser for creating an EJudgeProblem from a file formatted
@@ -125,9 +127,11 @@ class BOCA(Converter):
                         return tex.replace(f'%<{name}>%\n%</{name}>%',
                                            f'%<{name}>%\n{text}\n%</{name}>%')
 
-                    def section(name, content):
+                    def section(name, content, secname=None):
+                        if not secname:
+                            secname = name
                         return replace(name,
-                                       f'\\textbf{{{name.capitalize()}}}%\n'
+                                       f'\\textbf{{{secname.capitalize()}}}%\n'
                                        f'{content}')
 
                     def title(text):
@@ -140,13 +144,24 @@ class BOCA(Converter):
                         tex = f.read()
 
                     stmt = problem.statement
+                    if stmt.tags:
+                        tags = ','.join(t for t in stmt.tags)
+                        tex = replace('TAGS', f'%{tags}')
                     tex = replace('TITLE', title(stmt.title))
                     tex = replace('DESCRIPTION', stmt.description)
                     tex = section('INPUT', stmt.input)
                     tex = section('OUTPUT', stmt.output)
-                    tex = section('EXAMPLES', table(stmt.examples))
+                    tex = section('EXAMPLES', table(stmt.examples), 'Exemplos')
                     if stmt.notes:
-                        tex = replace('NOTES', stmt.notes)
+                        tex = section('NOTES', stmt.notes, 'Observações')
+                    if stmt.tutorial:
+                        if args.tutorial:
+                            tex = section('TUTORIAL', stmt.tutorial)
+                        else:
+                            lines = stmt.tutorial.split('\n')
+                            tex = section('TUTORIAL',
+                                          '\n'.join(f'%{line}'
+                                                    for line in lines))
 
                     # To file, so the PDF can be generated.
                     with open(tex_file, 'w') as f:
@@ -195,7 +210,7 @@ class BOCA(Converter):
 
                     pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
-        def copy_template(dir_path):
+        def add_template(dir_path):
             with os.scandir(dir_path) as it:
                 dir_name = os.path.split(dir_path)[-1]
                 for entry in it:
@@ -215,4 +230,4 @@ class BOCA(Converter):
             with os.scandir(os.path.join(cwd, 'templates', 'zip')) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in processed:
-                        copy_template(entry.path)
+                        add_template(entry.path)
