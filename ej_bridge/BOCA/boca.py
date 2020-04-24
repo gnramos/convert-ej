@@ -64,7 +64,7 @@ class BOCA(Converter):
                             f.write(img)
 
                         # To the zip.
-                        zip_obj.writestr(os.path.join('tex', name), img)
+                        pzip.writestr(os.path.join('tex', name), img)
 
                 def write_pdf():
                     def pdflatex():
@@ -75,7 +75,8 @@ class BOCA(Converter):
                                tex_file]
                         with open(os.devnull, 'w') as DEVNULL:
                             try:
-                                subprocess.check_call(cmd, env=env, stdout=DEVNULL)
+                                subprocess.check_call(cmd, env=env,
+                                                      stdout=DEVNULL)
                             except subprocess.CalledProcessError:
                                 raise ValueError(f'Unable to create pdf from'
                                                  f' {tex_file}.')
@@ -92,7 +93,7 @@ class BOCA(Converter):
                     with open(pdf_file, 'rb') as f:
                         pdf = f.read()
 
-                    zip_obj.writestr(f'description/{problem.id}.pdf', pdf)
+                    pzip.writestr(f'description/{problem.id}.pdf', pdf)
 
                 def write_tex():
                     def table(examples):
@@ -107,7 +108,8 @@ class BOCA(Converter):
                                 return f'{verbatim(ex_in)}\n&' \
                                        f'\n{verbatim(ex_out)}'
 
-                            return [row(ex['in'], ex['out']) for ex in examples]
+                            return [row(ex['in'], ex['out'])
+                                    for ex in examples]
 
                         header = r'\textbf{Input} & \textbf{Output}'
                         lines = [header] + rows()
@@ -119,9 +121,9 @@ class BOCA(Converter):
                                f'{table}' \
                                '\n\\end{tabular}%'
 
-                    def replace(name, content):
+                    def replace(name, text):
                         return tex.replace(f'%<{name}>%\n%</{name}>%',
-                                           f'%<{name}>%\n{content}\n%</{name}>%')
+                                           f'%<{name}>%\n{text}\n%</{name}>%')
 
                     def section(name, content):
                         return replace(name,
@@ -151,8 +153,8 @@ class BOCA(Converter):
                         f.write(tex)
 
                     # To the zip.
-                    zip_obj.writestr(os.path.join('tex', f'{problem.id}.tex'),
-                                     tex)
+                    pzip.writestr(os.path.join('tex', f'{problem.id}.tex'),
+                                  tex)
 
                 tex_file = os.path.join(args.tmp, f'{problem.id}.tex')
                 write_tex()
@@ -161,10 +163,10 @@ class BOCA(Converter):
 
             def add_problem_info():
                 basename = args.basename if args.basename else problem.id
-                zip_obj.writestr('description/problem.info',
-                                 f'basename={basename}\n'
-                                 f'fullname={problem.statement.title}\n'
-                                 f'descfile={problem.id}.pdf\n')
+                pzip.writestr('description/problem.info',
+                              f'basename={basename}\n'
+                              f'fullname={problem.statement.title}\n'
+                              f'descfile={problem.id}.pdf\n')
 
             add_pdf()
             add_problem_info()
@@ -173,7 +175,7 @@ class BOCA(Converter):
             for key, tests in problem.evaluation.test_cases.items():
                 for name, files in tests.items():
                     for k, data in files.items():
-                        zip_obj.writestr(f'{k}put/{name}', data)
+                        pzip.writestr(f'{k}put/{name}', data)
 
         def add_limits():
             with os.scandir(os.path.join(cwd, 'templates', 'zip',
@@ -191,21 +193,20 @@ class BOCA(Converter):
                     limits[2] = f'echo {memory_MB}'
                     # limits[3] = f'echo {max_file_size_KB}'
 
-                    zip_obj.writestr(f'limits/{entry.name}', '\n'.join(limits))
+                    pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
-        def add_template(dir_path):
+        def copy_template(dir_path):
             with os.scandir(dir_path) as it:
                 dir_name = os.path.split(dir_path)[-1]
                 for entry in it:
-                    with open(entry.path, 'rb') as f_in:
-                        with zip_obj.open(f'{dir_name}/{entry.name}',
-                                          'w') as f_out:
-                            f_out.write(f_in.read())
+                    with open(entry.path, 'rb') as template:
+                        with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
+                            f.write(template.read())
 
         problem_zip = f'{problem.id}.zip'
         cwd = os.path.abspath(os.path.dirname(__file__))
 
-        with zipfile.ZipFile(problem_zip, 'w') as zip_obj:
+        with zipfile.ZipFile(problem_zip, 'w') as pzip:
             add_description()
             add_IO()
             add_limits()
@@ -214,4 +215,4 @@ class BOCA(Converter):
             with os.scandir(os.path.join(cwd, 'templates', 'zip')) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in processed:
-                        add_template(entry.path)
+                        copy_template(entry.path)
