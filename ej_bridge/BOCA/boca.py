@@ -55,87 +55,118 @@ class BOCA(Converter):
         problem -- the EJudgeProblem containing the data for the problem
         args -- the arguments for configuring the created file
         """
-
         def add_description():
             def add_pdf():
-                def image_files():
+                def write_image_files():
                     for name, img in problem.statement.images.items():
+                        # To file, so the PDF can be generated.
                         with open(os.path.join(args.tmp, name), 'wb') as f:
                             f.write(img)
 
-                def make_tex():
-                    def rows(examples):
-                        def verbatim(ex):
-                            return f'\\vspace{{-1.2\\baselineskip}}%\n' \
-                                   f'\\begin{{verbatim}}\n' \
-                                   f'{ex}\\end{{verbatim}}\n' \
-                                   f'\\vspace*{{-2\\baselineskip}}%'
+                        # To the zip.
+                        zip_obj.writestr(os.path.join('tex', name), img)
 
-                        return ''.join('{}\n&\n{}\n\\\\\hline'.format(
-                                       verbatim(ex['in']), verbatim(ex['out']))
-                                       for ex in examples)
+                def write_pdf():
+                    def pdflatex():
+                        env = os.environ.copy()
+                        env['TEXINPUTS'] = f'.:{args.tmp}//:'
+                        cmd = ['pdflatex', '-output-directory=' + args.tmp,
+                               '-interaction=nonstopmode', '-halt-on-error',
+                               tex_file]
+                        with open(os.devnull, 'w') as DEVNULL:
+                            try:
+                                subprocess.check_call(cmd, env=env, stdout=DEVNULL)
+                            except subprocess.CalledProcessError:
+                                raise ValueError(f'Unable to create pdf from'
+                                                 f' {tex_file}.')
+                                # try:
+                                #     # run again to show errors
+                                #     subprocess.check_call(cmd, env=env)
+                                # except Exception as e:
+                                #     raise ValueError(f'Unable to create pdf'
+                                #                      f' from {tex_file}.')
+
+                    pdflatex()
+
+                    pdf_file = tex_file.replace('.tex', '.pdf')
+                    with open(pdf_file, 'rb') as f:
+                        pdf = f.read()
+
+                    zip_obj.writestr(f'description/{problem.id}.pdf', pdf)
+
+                def write_tex():
+                    def table(examples):
+                        def rows():
+                            def verbatim(ex):
+                                return f'\\vspace{{-1.2\\baselineskip}}%\n' \
+                                       f'\\begin{{verbatim}}\n' \
+                                       f'{ex}\\end{{verbatim}}\n' \
+                                       f'\\vspace*{{-2\\baselineskip}}%'
+
+                            def row(ex_in, ex_out):
+                                return f'{verbatim(ex_in)}\n&' \
+                                       f'\n{verbatim(ex_out)}'
+
+                            return [row(ex['in'], ex['out']) for ex in examples]
+
+                        header = r'\textbf{Input} & \textbf{Output}'
+                        lines = [header] + rows()
+                        table = '\n\\\\\\hline%\n'.join(l for l in lines)
+                        return '\\noindent%\n' \
+                               '\\begin{tabular}[t]' \
+                               '{|p{.5\\textwidth}|p{.5\\textwidth}|}%\n' \
+                               '\\hline%\n' \
+                               f'{table}' \
+                               '\n\\end{tabular}%'
+
+                    def replace(name, content):
+                        return tex.replace(f'%<{name}>%\n%</{name}>%',
+                                           f'%<{name}>%\n{content}\n%</{name}>%')
+
+                    def section(name, content):
+                        return replace(name,
+                                       f'\\textbf{{{name.capitalize()}}}%\n'
+                                       f'{content}')
+
+                    def title(text):
+                        return f'\\begin{{center}}%\n' \
+                               f'\\LARGE\\textbf{{{text}}}%\n' \
+                               f'\\end{{center}}%'
 
                     with open(os.path.join(cwd, 'templates',
                                            'description.tex')) as f:
                         tex = f.read()
 
                     stmt = problem.statement
-                    tex = tex.replace('[[TITLE]]', stmt.title)
-                    tex = tex.replace('[[DESCRIPTION]]', stmt.description)
-                    tex = tex.replace('[[INPUT]]', stmt.input)
-                    tex = tex.replace('[[OUTPUT]]', stmt.output)
-                    tex = tex.replace('[[VERBATIM_EXAMPLE_PER_ROW]]',
-                                      rows(stmt.examples))
+                    tex = replace('TITLE', title(stmt.title))
+                    tex = replace('DESCRIPTION', stmt.description)
+                    tex = section('INPUT', stmt.input)
+                    tex = section('OUTPUT', stmt.output)
+                    tex = section('EXAMPLES', table(stmt.examples))
                     if stmt.notes:
-                        tex = tex.replace('[[NOTES]]', stmt.notes)
-                    else:
-                        tex = tex.replace(r'\textbf{Notes}', '')
-                        tex = tex.replace('[[NOTES]]', '')
+                        tex = replace('NOTES', stmt.notes)
 
+                    # To file, so the PDF can be generated.
                     with open(tex_file, 'w') as f:
                         f.write(tex)
 
-                def pdflatex():
-                    env = os.environ.copy()
-                    env['TEXINPUTS'] = f'.:{args.tmp}//:'
-                    cmd = ['pdflatex', '-output-directory=' + args.tmp,
-                           '-interaction=nonstopmode', '-halt-on-error',
-                           tex_file]
-                    with open(os.devnull, 'w') as DEVNULL:
-                        try:
-                            subprocess.check_call(cmd, env=env, stdout=DEVNULL)
-                        except subprocess.CalledProcessError:
-                            raise ValueError(f'Unable to create pdf from'
-                                             f' {tex_file}.')
-                            # try:
-                            #     # run again to show errors
-                            #     subprocess.check_call(cmd, env=env)
-                            # except Exception as e:
-                            #     raise ValueError(f'Unable to create pdf'
-                            #                      f' from {tex_file}.')
+                    # To the zip.
+                    zip_obj.writestr(os.path.join('tex', f'{problem.id}.tex'),
+                                     tex)
 
                 tex_file = os.path.join(args.tmp, f'{problem.id}.tex')
-                make_tex()
-                image_files()
-                pdflatex()
-
-                pdf_file = tex_file.replace('tex', 'pdf')
-                with open(pdf_file, 'rb') as f:
-                    pdf = f.read()
-
-                pdf_file = os.path.split(pdf_file)[-1]
-                zip_obj.writestr(f'description/{pdf_file}', pdf)
-
-                return pdf_file
+                write_tex()
+                write_image_files()
+                write_pdf()
 
             def add_problem_info():
                 basename = args.basename if args.basename else problem.id
                 zip_obj.writestr('description/problem.info',
                                  f'basename={basename}\n'
                                  f'fullname={problem.statement.title}\n'
-                                 f'descfile={pdf_file}\n')
+                                 f'descfile={problem.id}.pdf\n')
 
-            pdf_file = add_pdf()
+            add_pdf()
             add_problem_info()
 
         def add_IO():
