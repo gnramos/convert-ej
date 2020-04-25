@@ -41,6 +41,17 @@ class Statement():
         self.tutorial = tutorial
         self.notes = notes
 
+        assert title
+        assert description
+        assert in_format
+        assert out_format
+        assert examples
+        for ex in examples:
+            assert 'in' in ex
+            assert 'out' in ex
+        if images:
+            assert isinstance(images, dict)
+
 
 class Evaluation():
     """Stores the information required to evaluate a problem."""
@@ -52,14 +63,19 @@ class Evaluation():
         test_cases -- dict of 'examples' and 'hidden' test cases, each case
                       has a dict of 'in' (input) data and its expected 'out'
                       (output).
-        solutions -- list of solutions with 'main' (preferred) and 'accepted'
-                     dicts, where each entry is {file_extension: source_code}.
+        solutions -- list of solutions dicts, in preferred order, where each
+                     entry is {file_extension: source_code}.
         limits -- dict of 'time_sec' and 'memory_MB' limits for evaluation a
                   solution.
         """
         self.test_cases = test_cases
         self.solutions = solutions
         self.limits = limits
+
+        assert test_cases['examples'] or test_cases['hidden']
+        assert solutions[0] and isinstance(solutions[0], dict)
+        assert limits['time_sec']
+        assert limits['memory_MB']
 
 
 class EJudgeProblem():
@@ -76,6 +92,10 @@ class EJudgeProblem():
         self.id = id
         self.statement = statement
         self.evaluation = evaluation
+
+        assert id
+        assert isinstance(statement, Statement)
+        assert isinstance(evaluation, Evaluation)
 
 
 class Converter(ABC):
