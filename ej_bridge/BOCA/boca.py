@@ -1,6 +1,7 @@
 #  -*- coding: utf-8 -*-
 
 import os
+import shutil
 import subprocess
 import zipfile
 
@@ -15,7 +16,9 @@ class BOCA(Converter):
 
     http://bombonera.org/
 
-    Files from BOCA must be in the zip format.
+    BOCA works with zip files in a specific tree structure. This class
+    considers a "tex" folder with the Statement info in separate files.
+    PDF composition is simplified via boca.sty.
     """
 
     def add_dest_parser(self, parser):
@@ -26,9 +29,11 @@ class BOCA(Converter):
         """
         parser.add_argument('--tmp', default='/tmp',
                             help='Directory for storing temporary files.'
-                            ' (default /tmp')
+                            ' (default /tmp)')
         parser.add_argument('-b', '--basename', default=None,
                             help='Basename for problem description.')
+        parser.add_argument('--notes', action='store_true',
+                            help='Include the notes in the PDF.')
         parser.add_argument('--tutorial', action='store_true',
                             help='Include the tutorial in the PDF.')
 
@@ -59,122 +64,31 @@ class BOCA(Converter):
         """
         def add_description():
             def add_pdf():
-                def write_image_files():
-                    for name, img in problem.statement.images.items():
-                        # To file, so the PDF can be generated.
-                        with open(os.path.join(args.tmp, name), 'wb') as f:
-                            f.write(img)
+                def call_pdflatex():
+                    env = os.environ.copy()
+                    env['TEXINPUTS'] = f'.:{args.tmp}//:'
+                    cmd = ['pdflatex', '-output-directory=' + args.tmp,
+                           '-interaction=nonstopmode', '-halt-on-error',
+                           tex_file]
+                    with open(os.devnull, 'w') as DEVNULL:
+                        try:
+                            subprocess.check_call(cmd, env=env,
+                                                  stdout=DEVNULL)
+                        except subprocess.CalledProcessError:
+                            raise ValueError(f'Unable to create pdf'
+                                             f' from {tex_file}.')
+                            # try:
+                            #     # run again to show errors
+                            #     subprocess.check_call(cmd, env=env)
+                            # except Exception:
+                            #     raise ValueError(f'Unable to create pdf '
+                            #                      f'from {tex_file}.tex.')
 
-                        # To the zip.
-                        pzip.writestr(os.path.join('tex', name), img)
-
-                def write_pdf():
-                    def pdflatex():
-                        env = os.environ.copy()
-                        env['TEXINPUTS'] = f'.:{args.tmp}//:'
-                        cmd = ['pdflatex', '-output-directory=' + args.tmp,
-                               '-interaction=nonstopmode', '-halt-on-error',
-                               tex_file]
-                        with open(os.devnull, 'w') as DEVNULL:
-                            try:
-                                subprocess.check_call(cmd, env=env,
-                                                      stdout=DEVNULL)
-                            except subprocess.CalledProcessError:
-                                raise ValueError(f'Unable to create pdf from'
-                                                 f' {tex_file}.')
-                                # try:
-                                #     # run again to show errors
-                                #     subprocess.check_call(cmd, env=env)
-                                # except Exception as e:
-                                #     raise ValueError(f'Unable to create pdf'
-                                #                      f' from {tex_file}.')
-
-                    pdflatex()
-
-                    pdf_file = tex_file.replace('.tex', '.pdf')
-                    with open(pdf_file, 'rb') as f:
-                        pdf = f.read()
-
-                    pzip.writestr(f'description/{problem.id}.pdf', pdf)
-
-                def write_tex():
-                    def table(examples):
-                        def rows():
-                            def verbatim(ex):
-                                return f'\\vspace{{-1.2\\baselineskip}}%\n' \
-                                       f'\\begin{{verbatim}}\n' \
-                                       f'{ex}\\end{{verbatim}}\n' \
-                                       f'\\vspace*{{-2\\baselineskip}}%'
-
-                            def row(ex_in, ex_out):
-                                return f'{verbatim(ex_in)}\n&' \
-                                       f'\n{verbatim(ex_out)}'
-
-                            return [row(ex['in'], ex['out'])
-                                    for ex in examples]
-
-                        header = r'\textbf{Input} & \textbf{Output}'
-                        lines = [header] + rows()
-                        table = '\n\\\\\\hline%\n'.join(l for l in lines)
-                        return '\\noindent%\n' \
-                               '\\begin{tabular}[t]' \
-                               '{|p{.5\\textwidth}|p{.5\\textwidth}|}%\n' \
-                               '\\hline%\n' \
-                               f'{table}' \
-                               '\n\\end{tabular}%'
-
-                    def replace(name, text):
-                        return tex.replace(f'%<{name}>%\n%</{name}>%',
-                                           f'%<{name}>%\n{text}\n%</{name}>%')
-
-                    def section(name, content, secname=None):
-                        if not secname:
-                            secname = name
-                        return replace(name,
-                                       f'\\textbf{{{secname.capitalize()}}}%\n'
-                                       f'{content}')
-
-                    def title(text):
-                        return f'\\begin{{center}}%\n' \
-                               f'\\LARGE\\textbf{{{text}}}%\n' \
-                               f'\\end{{center}}%'
-
-                    with open(os.path.join(cwd, 'templates',
-                                           'description.tex')) as f:
-                        tex = f.read()
-
-                    stmt = problem.statement
-                    if stmt.tags:
-                        tags = ','.join(t for t in stmt.tags)
-                        tex = replace('TAGS', f'%{tags}')
-                    tex = replace('TITLE', title(stmt.title))
-                    tex = replace('DESCRIPTION', stmt.description)
-                    tex = section('INPUT', stmt.input)
-                    tex = section('OUTPUT', stmt.output)
-                    tex = section('EXAMPLES', table(stmt.examples), 'Exemplos')
-                    if stmt.notes:
-                        tex = section('NOTES', stmt.notes, 'Observações')
-                    if stmt.tutorial:
-                        if args.tutorial:
-                            tex = section('TUTORIAL', stmt.tutorial)
-                        else:
-                            lines = stmt.tutorial.split('\n')
-                            tex = section('TUTORIAL',
-                                          '\n'.join(f'%{line}'
-                                                    for line in lines))
-
-                    # To file, so the PDF can be generated.
-                    with open(tex_file, 'w') as f:
-                        f.write(tex)
-
-                    # To the zip.
-                    pzip.writestr(os.path.join('tex', f'{problem.id}.tex'),
-                                  tex)
-
-                tex_file = os.path.join(args.tmp, f'{problem.id}.tex')
-                write_tex()
-                write_image_files()
-                write_pdf()
+                tex_file = os.path.join(args.tmp, 'main.tex')
+                pdf_file = os.path.join(args.tmp, 'main.pdf')
+                call_pdflatex()
+                with open(pdf_file, 'rb') as f:
+                    pzip.writestr(f'description/{problem.id}.pdf', f.read())
 
             def add_problem_info():
                 basename = args.basename if args.basename else problem.id
@@ -183,18 +97,11 @@ class BOCA(Converter):
                               f'fullname={problem.statement.title}\n'
                               f'descfile={problem.id}.pdf\n')
 
-            add_pdf()
             add_problem_info()
-
-        def add_IO():
-            for key, tests in problem.evaluation.test_cases.items():
-                for name, files in tests.items():
-                    for k, data in files.items():
-                        pzip.writestr(f'{k}put/{name}', data)
+            add_pdf()
 
         def add_limits():
-            with os.scandir(os.path.join(cwd, 'templates', 'zip',
-                                         'limits')) as it:
+            with os.scandir(os.path.join(tmpl_dir, 'limits')) as it:
                 for entry in it:
                     with open(entry.path) as f:
                         limits = [line.rstrip('\r\n')
@@ -218,16 +125,105 @@ class BOCA(Converter):
                         with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
                             f.write(template.read())
 
+        def add_test_cases():
+            for key, tests in problem.evaluation.test_cases.items():
+                for name, files in tests.items():
+                    for k, data in files.items():
+                        pzip.writestr(f'{k}put/{name}', data)
+
+        def add_tex():
+            def write(name, content, mode='w', ext='.tex'):
+                # To temporary dir.
+                file = os.path.join(args.tmp, f'{name}{ext}')
+                with open(file, mode) as f:
+                    f.write(content)
+
+                # To the zip.
+                file = os.path.join('tex', f'{name}{ext}')
+                pzip.writestr(file, content)
+
+            def write_image_files():
+                for name, img in problem.statement.images.items():
+                    write(name, img, mode='wb', ext='')
+
+            def write_tex():
+                def write_examples(examples):
+                    def table(num_rows):
+                        def cell(file):
+                            return f'\\vspace{{-1.2\\baselineskip}}%\n' \
+                                   f'\\verbatiminput{{{file}}}%\n' \
+                                   f'\\vspace*{{-2\\baselineskip}}'
+
+                        def cells(i):
+                            return '\n&\n'.join(cell(f'{i:02}{ext}')
+                                                for ext in ('.in', '.out'))
+
+                        header = f'\\textbf{{Input}} & \\textbf{{Output}}%'
+                        end = '\n\\\\\\hline%\n'
+                        rows = end.join(cells(i)
+                                        for i in range(1, num_rows + 1))
+
+                        col = 'p{.5\\textwidth}'
+
+                        return f'\\noindent%\n' \
+                               f'\\begin{{tabular}}[t]' \
+                               f'{{|{col}|{col}|}}%\n' \
+                               f'\\hline%\n' \
+                               f'{header}{end}' \
+                               f'{rows}{end}' \
+                               f'\\end{{tabular}}%'
+
+                    for i in range(len(examples)):
+                        write(f'{i+1:02}', examples[i]['in'], ext='.in')
+                        write(f'{i+1:02}', examples[i]['out'], ext='.out')
+
+                    write('examples', table(len(examples)))
+
+                def write_main():
+                    main = os.path.join(tex_dir, 'main.tex')
+                    with open(main) as f:
+                        tex = f.read()
+                        if not (args.notes and problem.statement.notes):
+                            tex.replace('\\inputNotes%\n', '')
+                        if not (args.tutorial and
+                                problem.statement.tutorial):
+                            tex.replace('\\inputTutorial%\n', '')
+
+                        write('main', tex)
+
+                style = os.path.join(tex_dir, 'boca.sty')
+                shutil.copy(style, args.tmp)
+
+                write('title', problem.statement.title)
+                write('description', problem.statement.description)
+                write('input', problem.statement.input)
+                write('output', problem.statement.output)
+                write_examples(problem.statement.examples)
+                write('notes', problem.statement.notes)
+                write('tutorial', problem.statement.tutorial)
+                write_main()
+
+            def write_tags():
+                tags = ','.join(tag for tag in problem.statement.tags)
+                write('tags', tags, ext='.csv')
+
+            tex_dir = os.path.join(tmpl_dir, 'tex')
+            write_tex()
+            write_image_files()
+            write_tags()
+
         problem_zip = f'{problem.id}.zip'
         cwd = os.path.abspath(os.path.dirname(__file__))
+        tmpl_dir = os.path.join(cwd, 'templates')
 
         with zipfile.ZipFile(problem_zip, 'w') as pzip:
-            add_description()
-            add_IO()
+            add_tex()          # Generates TeX files
+            add_description()  # Includes creating the pdf from the TeX files
             add_limits()
+            add_test_cases()   # Populates the input/output directories
 
-            processed = ['description', 'input', 'output', 'limits']
-            with os.scandir(os.path.join(cwd, 'templates', 'zip')) as it:
+            processed = ['description', 'input', 'output', 'limits', 'tex']
+            with os.scandir(tmpl_dir) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in processed:
                         add_template(entry.path)
