@@ -235,7 +235,7 @@ class CodeRunner(Converter):
         for lang in languages:
             add_solution(lang)
 
-            file = f'{problem.id}-{lang}.xml'
+            file = os.path.join(args.output_dir, f'{problem.id}-{lang}.xml')
             tree.write(file, 'UTF-8')
             print(f'\tCreated {file}.')
 

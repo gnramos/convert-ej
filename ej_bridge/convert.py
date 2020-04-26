@@ -5,7 +5,7 @@ from importlib import import_module
 import os
 
 
-def check_files(path):
+def check_input(path):
     """Returns all the files inside path, in case it's a directory, otherwise
     return the single file path.
     """
@@ -17,7 +17,7 @@ def check_files(path):
             files = set(entry.path for entry in it
                         if entry.is_file() and not entry.name.startswith('.'))
     else:
-        raise ValueError('Must provide a valid file or directory.')
+        raise ValueError('Must provide a valid file or directory')
     return files
 
 
@@ -27,7 +27,13 @@ def check_ejudge(ejudge):
     if os.path.isdir(ejudge) and os.path.isfile(script):
         return ejudge
 
-    raise ValueError(f'{ejudge} is not a valid E-judge.')
+    raise ValueError(f'{ejudge} is not a valid E-judge')
+
+
+def check_output(path):
+    if os.path.isdir(path):
+        return path
+    raise ValueError(f'{path} is not a directory')
 
 
 if __name__ == "__main__":
@@ -55,9 +61,11 @@ if __name__ == "__main__":
                         help='Path for judge files for origin format.')
     parser.add_argument('dest', choices=sorted(options),
                         help='Path for judge files for destination format.')
-    parser.add_argument('-f', '--files', type=check_files, required=True,
+    parser.add_argument('-f', '--files', type=check_input, required=True,
                         help='Path of a file or a folder of files to convert'
                         ' from origin to destination formats.')
+    parser.add_argument('-o', '--output_dir', type=check_output, default='./',
+                        help='Path of folder to save converted file(s) into.')
 
     # 1st parsing.
     args, unknown = parser.parse_known_args()
@@ -90,8 +98,8 @@ if __name__ == "__main__":
 
     for file in args.files:
         try:
-            print(f'Processing {file}...')
+            print(f'Processing "{file}".')
             problem = origin.read(file, args)
             dest.write(problem, args)
         except ValueError as e:
-            print(f'\tError: {e}')
+            print(f'\tError: {e}.')

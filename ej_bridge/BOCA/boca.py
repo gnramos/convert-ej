@@ -121,7 +121,7 @@ class BOCA(Converter):
                         with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
                             f.write(template.read())
 
-        def add_test_cases():
+        def add_tests():
             for key, tests in problem.evaluation.tests.items():
                 for name, files in tests.items():
                     for k, data in files.items():
@@ -141,6 +141,10 @@ class BOCA(Converter):
             def write_image_files():
                 for name, img in problem.statement.images.items():
                     write(name, img, mode='wb', ext='')
+
+            def write_tags():
+                tags = ','.join(tag for tag in problem.statement.tags)
+                write('tags', tags, ext='.csv')
 
             def write_tex():
                 def write_examples(examples):
@@ -199,24 +203,20 @@ class BOCA(Converter):
                 write('tutorial', problem.statement.tutorial)
                 write_main()
 
-            def write_tags():
-                tags = ','.join(tag for tag in problem.statement.tags)
-                write('tags', tags, ext='.csv')
-
             tex_dir = os.path.join(tmpl_dir, 'tex')
             write_tex()
             write_image_files()
             write_tags()
 
-        problem_zip = f'{problem.id}.zip'
+        problem_zip = os.path.join(args.output_dir, f'{problem.id}.zip')
         cwd = os.path.abspath(os.path.dirname(__file__))
         tmpl_dir = os.path.join(cwd, 'templates')
 
         with zipfile.ZipFile(problem_zip, 'w') as pzip:
             add_tex()          # Generates TeX files
-            add_description()  # Includes creating the pdf from the TeX files
+            add_description()  # Also creates the pdf from the TeX files
             add_limits()
-            add_test_cases()   # Populates the input/output directories
+            add_tests()        # Populates the input/output directories
 
             processed = ['description', 'input', 'output', 'limits', 'tex']
             with os.scandir(tmpl_dir) as it:
