@@ -126,7 +126,7 @@ class BOCA(Converter):
                             f.write(template.read())
 
         def add_test_cases():
-            for key, tests in problem.evaluation.test_cases.items():
+            for key, tests in problem.evaluation.tests.items():
                 for name, files in tests.items():
                     for k, data in files.items():
                         pzip.writestr(f'{k}put/{name}', data)

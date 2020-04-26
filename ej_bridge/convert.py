@@ -90,8 +90,8 @@ if __name__ == "__main__":
 
     for file in args.files:
         try:
+            print(f'Processing {file}...')
             problem = origin.read(file, args)
             dest.write(problem, args)
-            print(f'Processed file {file}')
         except ValueError as e:
-            print(f'\nUnable to process file {file}\n{e}\n')
+            print(f'\tError: {e}')

@@ -20,13 +20,13 @@ class CodeRunner(Converter):
       - Files from CodeRunner must be exported as "Moodle XML".
       - Images must be "HTML friendly".
       - The question is defined by a single solution's programming language.
-      Choosing 'all' for language causes a new file per available solution.
+      Choosing 'all' for language creates a new file per available solution.
     """
 
-    accepted_images = ('.jpg', '.png')
-    accepted_types = {'c': 'c_program',
-                      'cpp': 'cpp_program',
-                      'py': 'python3'}
+    accepted = {'images': ('.jpg', '.png'),
+                'types': {'c': 'c_program',
+                          'cpp': 'cpp_program',
+                          'py': 'python3'}}
 
     def add_dest_parser(self, parser):
         """Adds a parser for creating a file formatted for a CodeRunner EJudge.
@@ -45,7 +45,7 @@ class CodeRunner(Converter):
                             dest='all_or_nothing',
                             help='Set all-or-nothing marking behavior.')
         parser.add_argument('-l', '--language', choices=sorted(list(
-                                CodeRunner.accepted_types.keys())),
+                                CodeRunner.accepted['types'].keys())),
                             default='all', help='Set programming language.')
 
     def add_origin_parser(self, subparsers):
@@ -89,9 +89,9 @@ class CodeRunner(Converter):
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
         #######################################################################
 
-        def add_solution(evaluation, language):
+        def add_solution(language):
             def find_source(language):
-                for solutions in evaluation.solutions:
+                for solutions in problem.evaluation.solutions:
                     if language in solutions.keys():
                         return solutions[language]
 
@@ -101,16 +101,16 @@ class CodeRunner(Converter):
 
             source = find_source(language)
             answer.append(CDATA(source))
-            set_text('coderunnertype', CodeRunner.accepted_types[language])
+            set_text('coderunnertype', CodeRunner.accepted['types'][language])
 
-        def add_tags(statement):
+        def add_tags():
             tags = root.find("tags")
-            for tag in statement.tags:
+            for tag in problem.statement.tags:
                 te = ET.Element('tag')
                 ET.SubElement(te, 'text').text = tag
                 tags.append(te)
 
-        def append_tests(evaluation):
+        def append_tests():
             def make_test(input, output, is_example):
                 xml = os.path.join(cwd, 'test.xml')
                 root = ET.parse(xml).getroot()
@@ -119,7 +119,7 @@ class CodeRunner(Converter):
                 root.set("useasexample", '1' if is_example else '0')
                 return root
 
-            for key, tests in problem.evaluation.test_cases.items():
+            for key, tests in problem.evaluation.tests.items():
                 for test in tests.values():
                     t = make_test(test['in'], test['out'], key == 'examples')
                     root.find("testcases").append(t)
@@ -130,14 +130,14 @@ class CodeRunner(Converter):
             return element
 
         def get_languages_from_solutions():
-            languages = set(CodeRunner.accepted_types.keys()
+            languages = set(CodeRunner.accepted['types'].keys()
                             if args.language == 'all' else [args.language])
             available = set([k
                             for solutions in problem.evaluation.solutions
                             for k in solutions.keys()])
             return available & languages
 
-        def set_questiontext(statement):
+        def set_questiontext():
             def to_html(header, content):
                 html = tex2html(content)
                 return f'{header}<p>\n{html}\n</p>\n'
@@ -147,14 +147,14 @@ class CodeRunner(Converter):
                        ('output', '\n<p>\n<b>Saída</b><br /></p>\n'),
                        ('notes', '\n<p>\n<b>Observações</b><br /></p>\n')]
 
-            html = '\n'.join(to_html(header, getattr(statement, name))
+            html = '\n'.join(to_html(header, getattr(problem.statement, name))
                              for name, header in formats)
 
             qt = root.find('questiontext')
             qt.find('text').append(CDATA(html))
 
-            for name, image in statement.images.items():
-                if not name.lower().endswith(CodeRunner.accepted_images):
+            for name, image in problem.statement.images.items():
+                if not name.lower().endswith(CodeRunner.accepted['images']):
                     raise ValueError(f'Image {name} is not HTML compatible.')
 
                 img = ET.Element('file')
@@ -219,13 +219,13 @@ class CodeRunner(Converter):
             raise ValueError(f'No {args.language} solution(s) available.')
 
         root.find('name').find('text').text = problem.statement.title
-        set_questiontext(problem.statement)
+        set_questiontext()
         if problem.statement.tutorial:
             root.find('generalfeedback').find(
                 'text').text = tex2html(problem.statement.tutorial)
 
-        append_tests(problem.evaluation)
-        add_tags(problem.statement)
+        append_tests()
+        add_tags()
 
         set_text('cputimelimitsecs', problem.evaluation.limits['time_sec'])
         set_text('memlimitmb', problem.evaluation.limits['memory_MB'])
@@ -233,11 +233,11 @@ class CodeRunner(Converter):
         set_text('allornothing', 1 if args.all_or_nothing else 0)
 
         for lang in languages:
-            add_solution(problem.evaluation, lang)
+            add_solution(lang)
 
             file = f'{problem.id}-{lang}.xml'
             tree.write(file, 'UTF-8')
-            print(f'Created {file}.')
+            print(f'\tCreated {file}.')
 
         #######################################################################
         # CDATA parsing isn't supported natively, so it needs an override.

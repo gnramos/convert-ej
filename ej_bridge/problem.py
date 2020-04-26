@@ -10,7 +10,6 @@ class Statement():
       - text is formatted for TeX processing;
       - images are stored as {file_name: binobj} entries in a dict where binobj
       is a bytes-like object.
-      - images must be "HTML friendly",
     """
 
     def __init__(self, title, description, in_format, out_format, examples,
@@ -48,7 +47,9 @@ class Statement():
         assert examples
         for ex in examples:
             assert 'in' in ex
+            assert ex['in']
             assert 'out' in ex
+            assert ex['out']
         if images:
             assert isinstance(images, dict)
 
@@ -56,26 +57,27 @@ class Statement():
 class Evaluation():
     """Stores the information required to evaluate a problem."""
 
-    def __init__(self, test_cases, solutions, limits):
+    def __init__(self, tests, solutions, limits):
         """Class constructor.
 
         Keyword arguments:
-        test_cases -- dict of 'examples' and 'hidden' test cases, each case
-                      has a dict of 'in' (input) data and its expected 'out'
+        tests -- dict of 'examples' and 'hidden' test cases, each case has a
+                      dict of 'in' (input) data and its expected 'out'
                       (output).
-        solutions -- list of solutions dicts, in preferred order, where each
-                     entry is {file_extension: source_code}.
+        solutions -- list of solutions dicts, in the preferred order, where
+                     each entry is {file_extension: source_code}.
         limits -- dict of 'time_sec' and 'memory_MB' limits for evaluation a
                   solution.
         """
-        self.test_cases = test_cases
+        self.tests = tests
         self.solutions = solutions
         self.limits = limits
 
-        assert test_cases['examples'] or test_cases['hidden']
+        assert tests['examples'] or tests['hidden']
+        assert solutions
         assert solutions[0] and isinstance(solutions[0], dict)
-        assert limits['time_sec']
-        assert limits['memory_MB']
+        assert limits['time_sec'] > 0
+        assert limits['memory_MB'] > 0
 
 
 class EJudgeProblem():
