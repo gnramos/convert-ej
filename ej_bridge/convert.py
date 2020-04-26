@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawTextHelpFormatter
 from importlib import import_module
 import os
 
@@ -41,11 +41,11 @@ if __name__ == "__main__":
     # arguments, so there are 2 parsing steps. The first is for "initial"
     # arguments, which define the e-judge formats and the problem files to be
     # processed. With this, the parser is updated to include e-judge-specific
-    # arguments, which are then parsed (and the "inital" are parsed again).
+    # arguments, which are then parsed (along with the "initial" ones).
     #
-    # However, the standard "help" action will be processed in the 1st parsing
-    # and then the program exits (as per argparse design), thus it will NOT
-    # show the e-judge-specific information.
+    # However, if required, the standard "help" action would be processed in
+    # the 1st parsing and then the program would exit (as per argparse design),
+    # thus it would NOT show the e-judge-specific information.
     #
     # To bypass this, "help" action is only added for the 2nd parsing.
 
@@ -55,7 +55,8 @@ if __name__ == "__main__":
                    if entry.is_dir() and not entry.name.startswith(('.', '_'))]
 
     parser = ArgumentParser(description='Convert between e-judge formats.',
-                            add_help=False)
+                            add_help=False,
+                            formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('origin', choices=sorted(options),
                         help='Path for judge files for origin format.')
@@ -65,7 +66,8 @@ if __name__ == "__main__":
                         help='Path of a file or a folder of files to convert'
                         ' from origin to destination formats.')
     parser.add_argument('-o', '--output_dir', type=check_output, default='./',
-                        help='Path of folder to save converted file(s) into.')
+                        help='Path of folder to save converted file(s) into.'
+                        ' (default ./)')
 
     # 1st parsing.
     args, unknown = parser.parse_known_args()
