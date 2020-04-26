@@ -65,21 +65,17 @@ class BOCA(Converter):
         def add_description():
             def add_pdf():
                 def call_pdflatex():
-                    env = os.environ.copy()
-                    env['TEXINPUTS'] = f'.:{args.tmp}//:'
-                    cmd = ['pdflatex', '-output-directory=' + args.tmp,
-                           '-interaction=nonstopmode', '-halt-on-error',
-                           tex_file]
+                    cmd = ['pdflatex', '-halt-on-error', tex_file]
                     with open(os.devnull, 'w') as DEVNULL:
                         try:
-                            subprocess.check_call(cmd, env=env,
+                            subprocess.check_call(cmd, cwd=args.tmp,
                                                   stdout=DEVNULL)
                         except subprocess.CalledProcessError:
                             raise ValueError(f'Unable to create pdf'
                                              f' from {tex_file}.')
                             # try:
                             #     # run again to show errors
-                            #     subprocess.check_call(cmd, env=env)
+                            #     subprocess.check_call(cmd, cwd=args.tmp)
                             # except Exception:
                             #     raise ValueError(f'Unable to create pdf '
                             #                      f'from {tex_file}.tex.')
