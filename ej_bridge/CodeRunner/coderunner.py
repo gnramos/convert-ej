@@ -244,6 +244,6 @@ class CodeRunner(Converter):
             print(f'\tCreated {file}.')
 
         #######################################################################
-        # CDATA parsing isn't supported natively, so it needs an override.
+        # Undo override to handle CDATA.
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
         #######################################################################
