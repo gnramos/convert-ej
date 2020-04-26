@@ -34,13 +34,17 @@ class CodeRunner(Converter):
         Keyword arguments:
         parser -- the parser to configure
         """
-        parser.add_argument('-p', '--penalty',
-                            choices=['0, 0, 10, 20, ...', '10, 20, ...',
-                                     '0, 0, ...'],
-                            default='0, 0, 10, 20, ...', metavar='P',
-                            help='Set marking penalty regime. Options are:\
-                                 \n\"0, 0, 10, 20, ...\" (default), \
-                                 \n\"0, 0, ...\",\n or \"10, 20, ...\"')
+        def check_attempts(choice):
+            choice = int(choice)
+            if choice < 0:
+                raise ValueError('Penalty {choice} cannot be negative.')
+
+            return ', '.join((['0'] * choice) + ['10', '20', '...'])
+
+        parser.add_argument('-a', '--attempts', type=check_attempts, default=2,
+                            metavar='penalty',
+                            help='Set number of attempts without penalty.' \
+                            ' (default 2)')
         parser.add_argument('-an', '--allornothing', action='store_true',
                             dest='all_or_nothing',
                             help='Set all-or-nothing marking behavior.')
@@ -73,22 +77,6 @@ class CodeRunner(Converter):
         problem -- the EJudgeProblem containing the data for the problem
         args -- the arguments for configuring the created file
         """
-
-        #######################################################################
-        # CDATA parsing isn't supported natively, so it needs an override.
-        _serialize_xml = ET._serialize_xml
-
-        def _serialize_xml_with_CDATA(write, elem, qnames, namespaces,
-                                      short_empty_elements, **kwargs):
-            if elem.tag == '![CDATA[':
-                write("\n<{}{}]]>\n".format(elem.tag, elem.text))
-            else:
-                return _serialize_xml(write, elem, qnames, namespaces,
-                                      short_empty_elements, **kwargs)
-
-        ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
-        #######################################################################
-
         def add_solution(language):
             def find_source(language):
                 for solutions in problem.evaluation.solutions:
@@ -209,6 +197,21 @@ class CodeRunner(Converter):
 
             return s
 
+        #######################################################################
+        # CDATA parsing isn't supported natively, so it needs an override.
+        _serialize_xml = ET._serialize_xml
+
+        def _serialize_xml_with_CDATA(write, elem, qnames, namespaces,
+                                      short_empty_elements, **kwargs):
+            if elem.tag == '![CDATA[':
+                write("\n<{}{}]]>\n".format(elem.tag, elem.text))
+            else:
+                return _serialize_xml(write, elem, qnames, namespaces,
+                                      short_empty_elements, **kwargs)
+
+        ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
+        #######################################################################
+
         cwd = os.path.abspath(os.path.dirname(__file__))
         xml = os.path.join(cwd, 'template.xml')
         tree = ET.parse(xml)
@@ -229,7 +232,7 @@ class CodeRunner(Converter):
 
         set_text('cputimelimitsecs', problem.evaluation.limits['time_sec'])
         set_text('memlimitmb', problem.evaluation.limits['memory_MB'])
-        set_text('penaltyregime', args.penalty)
+        set_text('penaltyregime', args.attempts)
         set_text('allornothing', 1 if args.all_or_nothing else 0)
 
         for lang in languages:
