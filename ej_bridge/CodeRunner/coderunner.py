@@ -21,6 +21,8 @@ class CodeRunner(Converter):
       - Images must be "HTML friendly".
       - The question is defined by a single solution's programming language.
       Choosing 'all' for language creates a new file per available solution.
+      - Penalties are defined in a 10% growing series, i.e., each wrong attempt
+      causes a 10% larges penalty in the question's points.
     """
 
     accepted = {'images': ('.jpg', '.png'),
@@ -34,16 +36,15 @@ class CodeRunner(Converter):
         Keyword arguments:
         parser -- the parser to configure
         """
-        def check_attempts(choice):
+        def check_penalty(choice):
             choice = int(choice)
             if choice < 0:
                 raise ValueError('Penalty {choice} cannot be negative.')
 
             return ', '.join((['0'] * choice) + ['10', '20', '...'])
 
-        parser.add_argument('-a', '--attempts', type=check_attempts, default=2,
-                            metavar='penalty',
-                            help='Set number of attempts without penalty.' \
+        parser.add_argument('-p', '--penalty', type=check_penalty, default=2,
+                            help='Number of attempts without penalty.' \
                             ' (default 2)')
         parser.add_argument('-an', '--allornothing', action='store_true',
                             dest='all_or_nothing',
@@ -232,7 +233,7 @@ class CodeRunner(Converter):
 
         set_text('cputimelimitsecs', problem.evaluation.limits['time_sec'])
         set_text('memlimitmb', problem.evaluation.limits['memory_MB'])
-        set_text('penaltyregime', args.attempts)
+        set_text('penaltyregime', args.penalty)
         set_text('allornothing', 1 if args.all_or_nothing else 0)
 
         for lang in languages:
