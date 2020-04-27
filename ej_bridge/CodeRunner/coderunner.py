@@ -43,8 +43,9 @@ class CodeRunner(Converter):
 
             return ', '.join((['0'] * choice) + ['10', '20', '...'])
 
-        parser.add_argument('-p', '--penalty', type=check_penalty, default=2,
-                            help='Number of attempts without penalty.' \
+        parser.add_argument('-p', '--penalty', type=check_penalty,
+                            default='2',
+                            help='Number of attempts without penalty.'
                             ' (default 2)')
         parser.add_argument('-an', '--allornothing', action='store_true',
                             dest='all_or_nothing',
@@ -128,13 +129,14 @@ class CodeRunner(Converter):
 
         def set_questiontext():
             def to_html(header, content):
-                html = tex2html(content)
-                return f'{header}<p>\n{html}\n</p>\n'
+                html = tex2html(content).strip()
+                header = html_tag(header, 'b')
+                return f'<p>\n{header}\n{html}\n</p>\n'
 
             formats = [('description', ''),
-                       ('input', '\n<p>\n<b>Entrada</b><br /></p>\n'),
-                       ('output', '\n<p>\n<b>Saída</b><br /></p>\n'),
-                       ('notes', '\n<p>\n<b>Observações</b><br /></p>\n')]
+                       ('input', 'Entrada'),
+                       ('output', 'Saída'),
+                       ('notes', 'Observações')]
 
             html = '\n'.join(to_html(header, getattr(problem.statement, name))
                              for name, header in formats)
@@ -156,45 +158,104 @@ class CodeRunner(Converter):
         def set_text(name, value):
             root.find(name).text = str(value)
 
+        def html_tag(text, tag='', options=''):
+            if text and tag:
+                if options:
+                    options = f' {options}'
+                return f'<{tag}{options}>{text}</{tag}>'
+            return text
+
         def tex2html(s):
-            # Convert the mathematical equations
-            s = re.sub(r'\$([^\$]*)\$', r'\\( \1 \\)', s)
-            s = re.sub(r'\$\$([^\$]*)\$\$', r'<p><br />\\( \1 \\)<br /></p>', s)
+            def environments(s):
+                # Process item before the environment, using \ as end delimiter.
+                s = re.sub(r'\\item ([.\s\S]*?)(?=\\)', r'<li>\1</li>\n', s)
 
-            # Image
-            s = re.sub(r'.eps', r'.png', s)
-            s = re.sub(r'\\includegraphics\[([^\]]*)\]\{([^\}]*)\}',
-                       r'<img src="@@PLUGINFILE@@/\2"><br>', s)
+                repl = {'itemize': 'ul', 'enumerate': 'ol'}
+                for env, t in repl.items():
+                    s = re.sub(f'\\\\begin{{{env}}}([.\s\S]*?)\\\\end{{{env}}}',
+                               html_tag('\\1', t), s)
 
-            # Dicts with all the substitution rules for a specific format
-            rules1 = {r'\\begin{itemize}': '<ul>',
-                      r'\\end{itemize}': '</ul>',
-                      r'\\begin{center}': '<p style="text-align: center;">',
-                      r'\\end{center}': '</p>',
-                      r'\`\`': '\"',
-                      r'\'\'': '\"',
-                      r'\\arrowvert': '|',
-                      r'\\\^': '^',
-                      r'\n\n': '</p>\n\n<p>\n'}
-            rules2 = {r'\\emph': 'i',
-                      r'\\textbf': 'b',
-                      r'\\textit': 'i',
-                      r'\\texttt': 'tt'}
-            rules3 = {r'\\item': 'li'}
+                s = re.sub(f'\\\\begin{{center}}([.\s\S]*?)\\\\end{{center}}',
+                           html_tag('\\1', 'p', 'style="text-align: center;"'),
+                           s)
 
-            # Apply the rules to the string
-            for l, h in rules1.items():
-                s = re.sub(l, h, s)
+                return s
 
-            for l, h in rules2.items():
-                l_str = r'%s{([^}]*)}' % l
-                h_str = r'<%s>\1</%s>' % (h, h)
-                s = re.sub(l_str, h_str, s)
+            def font(s):
+                repl = {'textbf': 'b', 'bf': 'b',
+                        'textit': 'i', 'it': 'i', 'emph': 'i',
+                        'textrm': None,
+                        'texttt': 'tt',
+                        't': 'tt'}  # This has issues with nested tags...
+                for cmd, t in repl.items():
+                    s = re.sub(f'\\\\{cmd}{{(.*?)}}', html_tag('\\1', tag=t), s)
+                return s
 
-            for l, h in rules3.items():
-                l_str = r'%s([^\n]*)' % l
-                h_str = r'<%s>\1</%s>' % (h, h)
-                s = re.sub(l_str, h_str, s)
+            def images(s):
+                def parse(options):
+                    opts = []
+
+                    if options:
+                        options = options.lower()
+
+                        pattern = r'scale.*?= *([0-9]*\.?[0-9]+)'
+                        m = re.search(pattern, options)
+                        if m:
+                            width = int(float(m.group(1)) * 100)
+                            opts.append(f'width="{width}%"')
+                        else:
+                            pattern = r'width.*?= *([0-9]*\.?[0-9]+)' \
+                                      ' *\\textwidth'
+                            m = re.search(pattern, options)
+                            if m:
+                                width = int(float(m.group(1)) * 100)
+                                opts.append(f'width="{width}%"')
+                            else:
+                                print(f'\tImage {file} has unknown options '
+                                      '({options}).')
+
+                    return ' '.join(o for o in opts)
+
+                def check_file(file):
+                    if file in problem.statement.images:
+                        return file
+
+                    for img in problem.statement.images:
+                        if img.startswith(f'{file}.'):
+                            return img
+
+                    raise ValueError('Cannot find {file} image.')
+
+                pattern = r'\\includegraphics([\[].*[\]])?{(.*?)}'
+                for options, file in re.findall(pattern, s):
+                    c_file = check_file(file)
+                    options = parse(options)
+
+                    pattern = f'\\\\includegraphics.*?{{{file}}}'
+                    image = f'src="@@PLUGINFILE@@/{c_file}" {options}'
+                    s = re.sub(pattern, html_tag(' ', 'img', image), s)
+                return s
+
+            def math(s):
+                s = re.sub(r'\$\$(.*?)\$\$', '\\[\\1\\]', s)
+                s = re.sub(r'\$([^\$]*)\$', '\\(\\1\\)', s)
+                return s
+
+            def text(s):
+                s = re.sub(r'``(.*?)\'\'', '"\\1"', s)
+                s = re.sub(r'`(.*?)\'', '\'\\1\'', s)
+                s = re.sub(r'\n\n', '\n</p>\n<p>\n', s)
+
+                for cmd in re.findall(r'(\\\w+)', s):
+                    print(f'\tPossible unformatted TeX command: {cmd}')
+
+                return s
+
+            s = math(s)
+            s = font(s)
+            s = images(s)
+            s = environments(s)
+            s = text(s)
 
             return s
 
@@ -226,7 +287,7 @@ class CodeRunner(Converter):
         set_questiontext()
         if problem.statement.tutorial:
             root.find('generalfeedback').find(
-                'text').text = tex2html(problem.statement.tutorial)
+                'text').text = tex2html(problem.statement.tutorial.strip())
 
         append_tests()
         add_tags()
