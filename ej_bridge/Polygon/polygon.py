@@ -69,8 +69,8 @@ class Polygon(Converter):
             try:
                 with pzip.open(file) as f:
                     return f.read().decode('utf-8')
-            except KeyError:
-                return ''
+            except KeyError as e:
+                raise ValueError(e)
 
         def get_limits():
             testset = root.find('judging/testset')
@@ -103,7 +103,7 @@ class Polygon(Converter):
             test_files = [entry
                           for entry in pzip.namelist()
                           if entry.startswith('tests/') and entry != 'tests/'
-                          and not entry.endswith('a')]
+                          and not entry.endswith('.a')]
             test_samples = ['sample' in e.attrib
                             for e in root.findall(
                                 'judging/testset/tests/test')]
