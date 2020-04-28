@@ -72,7 +72,7 @@ class BOCA(Converter):
                                                   stdout=DEVNULL)
                         except subprocess.CalledProcessError:
                             raise ValueError(f'Unable to create pdf'
-                                             f' from {tex_file}.')
+                                             f' from {tex_file}')
                             # try:
                             #     # run again to show errors
                             #     subprocess.check_call(cmd, cwd=args.tmp)

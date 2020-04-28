@@ -39,7 +39,7 @@ class CodeRunner(Converter):
         def check_penalty(choice):
             choice = int(choice)
             if choice < 0:
-                raise ValueError('Penalty {choice} cannot be negative.')
+                raise ValueError('Penalty {choice} cannot be negative')
 
             return ', '.join((['0'] * choice) + ['10', '20', '...'])
 
@@ -146,7 +146,7 @@ class CodeRunner(Converter):
 
             for name, image in problem.statement.images.items():
                 if not name.lower().endswith(CodeRunner.accepted['images']):
-                    raise ValueError(f'Image {name} is not HTML compatible.')
+                    raise ValueError(f'Image {name} is not HTML compatible')
 
                 img = ET.Element('file')
                 img.set('name', name)
@@ -224,7 +224,7 @@ class CodeRunner(Converter):
                         if img.startswith(f'{file}.'):
                             return img
 
-                    raise ValueError('Cannot find {file} image.')
+                    raise ValueError('Cannot find {file} image')
 
                 pattern = r'\\includegraphics([\[].*[\]])?{(.*?)}'
                 for options, file in re.findall(pattern, s):
@@ -281,7 +281,7 @@ class CodeRunner(Converter):
 
         languages = get_languages_from_solutions()
         if not languages:
-            raise ValueError(f'No {args.language} solution(s) available.')
+            raise ValueError(f'No {args.language} solution(s) available')
 
         root.find('name').find('text').text = problem.statement.title
         set_questiontext()
