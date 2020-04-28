@@ -1,35 +1,22 @@
 #  -*- coding: utf-8 -*-
 
 import os
+import problem
 import xml.etree.ElementTree as ET
 import zipfile
 
-# Import problem.py classes.
-import sys
-sys.path.append('..')
-from problem import Converter, EJudgeProblem, Evaluation, Statement
 
-
-class Polygon(Converter):
-    """Class for converting problems to/from Polygon.
+class Polygon(problem.Reader):
+    """Class for reading a Polygon package from CodeForces e-judge.
 
     https://polygon.codeforces.com/
 
-    Files from Polygon must be generated from a "full package", and the zip
-    must be the "Linux" version in order to include all test files.
+    Keep in mind that:
+      - Files from Polygon must be generated from a "full package", and the zip
+      must be the "Linux" version in order to include all test files.
     """
-
-    def add_dest_parser(self, parser):
-        """Adds a parser for creating a file formatted for a Polygon EJudge.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        raise NotImplementedError
-
-    def add_origin_parser(self, parser):
-        """Adds a parser for creating an EJudgeProblem from a file formatted
-        for a Polygon EJudge.
+    def __init__(self, parser):
+        """Adds arguments for creating a file formatted for CodeForces e-judge.
 
         Keyword arguments:
         parser -- the parser to configure
@@ -82,7 +69,14 @@ class Polygon(Converter):
 
         def get_stmt_tex(name):
             file = os.path.join('statement-sections', language, f'{name}.tex')
-            return get_in_zip(file).rstrip('\n')
+            try:
+                return get_in_zip(file).strip()
+            except Exception as e:
+                if name not in ['notes', 'tutorial']:
+                    raise e
+
+            print(f'\t{file} not in zip.')
+            return ''
 
         def get_tags():
             return [e.attrib['value'] for e in root.findall('tags/tag')]
@@ -127,29 +121,20 @@ class Polygon(Converter):
                 problem_id = root.attrib['short-name']
 
                 images, examples = get_images_and_examples()
-                statement = Statement(get_stmt_tex('name'),
-                                      get_stmt_tex('legend'),
-                                      get_stmt_tex('input'),
-                                      get_stmt_tex('output'),
-                                      examples,
-                                      images,
-                                      get_tags(),
-                                      get_stmt_tex('tutorial'),
-                                      get_stmt_tex('notes'))
+                statement = problem.Statement(get_stmt_tex('name'),
+                                              get_stmt_tex('legend'),
+                                              get_stmt_tex('input'),
+                                              get_stmt_tex('output'),
+                                              examples,
+                                              images,
+                                              get_tags(),
+                                              get_stmt_tex('tutorial'),
+                                              get_stmt_tex('notes'))
 
-                evaluation = Evaluation(get_tests(),
-                                        get_solutions(),
-                                        get_limits())
+                evaluation = problem.Evaluation(get_tests(),
+                                                get_solutions(),
+                                                get_limits())
         except zipfile.BadZipFile as e:
             raise ValueError(f'{e}')
 
-        return EJudgeProblem(problem_id, statement, evaluation)
-
-    def write(self, problem, args):
-        """Writes the given EJudgeProblem into a Polygon file.
-
-        Keyword arguments:
-        problem -- the EJudgeProblem containing the data for the problem
-        args -- the arguments for configuring the created file
-        """
-        raise NotImplementedError
+        return problem.EJudgeProblem(problem_id, statement, evaluation)

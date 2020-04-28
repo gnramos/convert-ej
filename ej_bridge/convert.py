@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-from importlib import import_module
+import inspect
 import os
+import problem
+import readers
+import writers
+
+
+options = {'readers': {m[0]: m[1]
+                       for m in inspect.getmembers(readers, inspect.isclass)
+                       if issubclass(m[1], problem.Reader)},
+           'writers': {m[0]: m[1]
+                       for m in inspect.getmembers(writers, inspect.isclass)
+                       if issubclass(m[1], problem.Writer)}}
 
 
 def check_input(path):
@@ -19,15 +30,6 @@ def check_input(path):
     else:
         raise ValueError('Must provide a valid file or directory')
     return files
-
-
-def check_ejudge(ejudge):
-    """Checks if the given name is a valid directory."""
-    script = os.path.join(ejudge, f'{ejudge.lower()}.py')
-    if os.path.isdir(ejudge) and os.path.isfile(script):
-        return ejudge
-
-    raise ValueError(f'{ejudge} is not a valid E-judge')
 
 
 def check_output(path):
@@ -49,51 +51,40 @@ if __name__ == "__main__":
     #
     # To bypass this, "help" action is only added for the 2nd parsing.
 
-    with os.scandir() as it:
-        options = [entry.name
-                   for entry in it
-                   if entry.is_dir() and not entry.name.startswith(('.', '_'))]
-
     parser = ArgumentParser(description='Convert between e-judge formats.',
                             add_help=False,
                             formatter_class=RawTextHelpFormatter)
 
-    parser.add_argument('origin', choices=sorted(options),
-                        help='Path for judge files for origin format.')
-    parser.add_argument('dest', choices=sorted(options),
-                        help='Path for judge files for destination format.')
+    parser.add_argument('reader', choices=sorted(list(options[
+                                            'readers'].keys())),
+                        help='Input e-judge format.')
+    parser.add_argument('writer', choices=sorted(list(options[
+                                            'writers'].keys())),
+                        help='Output e-judge format.')
     parser.add_argument('-f', '--files', type=check_input, required=True,
                         help='Path of a file or a folder of files to convert'
-                        ' from origin to destination formats.')
+                        ' from reader to writer formats.')
     parser.add_argument('-o', '--output_dir', type=check_output, default='./',
                         help='Path of folder to save converted file(s) into.'
                         ' (default ./)')
-
     # 1st parsing.
     args, unknown = parser.parse_known_args()
-    if args.origin == args.dest:
+    if args.reader == args.writer:
         exit(0)
 
-    # Get classes from origin/dest modules.
-    mod_origin = import_module(args.origin + '.' + args.origin.lower())
-    mod_dest = import_module(args.dest + '.' + args.dest.lower())
-
-    origin = getattr(mod_origin, args.origin)()
-    dest = getattr(mod_dest, args.dest)()
-
     # Update parser.
-    parser.description = f'Convert from {args.origin} to {args.dest} ' \
+    parser.description = f'Convert from {args.reader} to {args.writer} ' \
                          'e-judge formats.'
-    parser._actions[0].choices = [args.origin]
-    parser._actions[0].help = f'Convert from {args.origin} format.'
-    parser._actions[1].choices = [args.dest]
-    parser._actions[1].help = f'Convert to {args.dest} format.'
+    parser._actions[0].choices = [args.reader]
+    parser._actions[0].help = f'Convert from {args.reader} format.'
+    parser._actions[1].choices = [args.writer]
+    parser._actions[1].help = f'Convert to {args.writer} format.'
 
     parser.add_argument('-h', '--help', action='help',
                         help='show this help message and exit')
 
-    origin.add_origin_parser(parser)
-    dest.add_dest_parser(parser)
+    reader = getattr(readers, args.reader)(parser)
+    writer = getattr(writers, args.writer)(parser)
 
     # 2nd parsing.
     args = parser.parse_args()
@@ -101,7 +92,8 @@ if __name__ == "__main__":
     for file in args.files:
         try:
             print(f'Processing "{file}".')
-            problem = origin.read(file, args)
-            dest.write(problem, args)
+            problem = reader.read(file, args)
+            writer.write(problem, args)
         except ValueError as e:
             print(f'\tError: {e}.')
+            print(f'\tFAILED to process "{file}".\n')

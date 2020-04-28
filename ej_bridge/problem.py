@@ -100,21 +100,13 @@ class EJudgeProblem():
         assert isinstance(evaluation, Evaluation)
 
 
-class Converter(ABC):
-    """Base class for converting between E-Judges formats."""
+class Reader(ABC):
+    """Base class for reading from an EJudge file."""
+    # @abstractmethod
+    # def add_arguments(self, parser):
     @abstractmethod
-    def add_dest_parser(self, parser):
-        """Adds arguments for creating a file formatted for this EJudge.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_origin_parser(self, parser):
-        """Adds arguments for creating an EJudgeProblem from a file formatted
-        for this EJudge.
+    def __init__(self, parser):
+        """Adds arguments for reading a file formatted for this Reader.
 
         Keyword arguments:
         parser -- the parser to configure
@@ -128,6 +120,18 @@ class Converter(ABC):
         Keyword arguments:
         file -- the file containing the data for the problem
         args -- the arguments for configuring the EJudgeProblem
+        """
+        raise NotImplementedError
+
+
+class Writer(ABC):
+    """Base class for reading to an EJudge file."""
+    @abstractmethod
+    def __init__(self, parser):
+        """Adds arguments for reading a file formatted for this Writer.
+
+        Keyword arguments:
+        parser -- the parser to configure
         """
         raise NotImplementedError
 
