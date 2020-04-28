@@ -246,7 +246,8 @@ class CodeRunner(Converter):
                 s = re.sub(r'`(.*?)\'', '\'\\1\'', s)
                 s = re.sub(r'\n\n', '\n</p>\n<p>\n', s)
 
-                for cmd in re.findall(r'(\\\w+)', s):
+                no_math = re.sub(r'(\\[\(\[].*?\\[\)\]])', '', s)
+                for cmd in re.findall(r'(\\\w+)', no_math):
                     print(f'\tPossible unformatted TeX command: {cmd}')
 
                 return s
@@ -255,7 +256,7 @@ class CodeRunner(Converter):
             s = font(s)
             s = images(s)
             s = environments(s)
-            s = text(s)
+            s = text(s)  # must be processed after "math"
 
             return s
 
