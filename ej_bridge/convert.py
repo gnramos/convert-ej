@@ -5,10 +5,19 @@ from abc import ABC
 from argparse import ArgumentParser, RawTextHelpFormatter
 import inspect
 import os
-import problem
+from problem import Reader as ProblemReader, Writer as ProblemWriter
 import readers
 import sys
 import writers
+
+
+class DefaultHelpParser(ArgumentParser):
+    def error(self, message):
+        self.print_help()
+        e_msg = f'error: {message}'
+        print('-' * len(e_msg))
+        print(e_msg)
+        sys.exit(2)
 
 
 class HasParser(ABC):
@@ -28,14 +37,13 @@ class BOCAWriter(HasParser, writers.BOCA):
         super().__init__(parser)
 
         self.parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
-                                 help='Directory for storing temporary files.'
-                                 ' (default /tmp)')
+                                 help='Directory for storing temporary files')
         self.parser.add_argument('-b', '--basename', default=None,
-                                 help='Basename for problem description.')
+                                 help='Basename for problem description')
         self.parser.add_argument('--notes', action='store_true',
-                                 help='Include the notes in the PDF.')
+                                 help='Include the notes in the PDF')
         self.parser.add_argument('--tutorial', action='store_true',
-                                 help='Include the tutorial in the PDF.')
+                                 help='Include the tutorial in the PDF')
 
     def write(self, problem, args):
         """Writes the given EJudgeProblem into a BOCA file.
@@ -60,33 +68,32 @@ class CodeRunnerWriter(HasParser, writers.CodeRunner):
         Keyword arguments:
         parser -- the parser to configure
         """
+        def check_penalty(penalty):
+            """Checks the penalty value."""
+            if penalty < 0:
+                raise ValueError('Penalty {penalty} cannot be negative')
+
+            return penalty
+
         super().__init__(parser)
 
         self.parser.add_argument('--penalty',
-                                 type=self.check_penalty,
+                                 type=check_penalty,
                                  default=2,
-                                 help='Number of attempts without penalty.'
+                                 help='Number of attempts without penalty'
                                  ' (default 2)')
 
         self.parser.add_argument('-aon', '--all-or-nothing',
                                  action='store_true',
                                  dest='all_or_nothing',
-                                 help='Set all-or-nothing marking behavior.')
+                                 help='Set all-or-nothing marking behavior')
 
         languages = sorted(list(writers.CodeRunner.accepted['types'].keys()))
         self.parser.add_argument('-al', '--answer-language',
                                  dest='answer_language',
                                  choices=languages,
                                  default='all',
-                                 help='Set programming language for '
-                                      'answer(s).')
-
-    def _check_penalty(penalty):
-        """Checks the penalty value."""
-        if penalty < 0:
-            raise ValueError('Penalty {penalty} cannot be negative')
-
-        return penalty
+                                 help='Set programming language for answer(s)')
 
     def write(self, problem, args):
         """Writes the given EJudgeProblem into a CodeRunner file.
@@ -118,7 +125,7 @@ class PolygonReader(HasParser, readers.Polygon):
         self.parser.add_argument('-sl', '--statement-language',
                                  dest='stmt_lang',
                                  default='english',
-                                 help='Set statement language.')
+                                 help='Set statement language')
 
     def read(self, file, args):
         """Reads a problem from file and returns it as an EJudgeProblem.
@@ -132,9 +139,12 @@ class PolygonReader(HasParser, readers.Polygon):
 
 ###############################################################################
 def first_parsing():
-    def check_input(path):
-        """Returns all the files inside path, in case it's a directory, otherwise
-        return the single file path.
+    """Creates a parser with default arguments and parses it."""
+    def list_input(path):
+        """Returns a list of the input files.
+
+        Returns all the files inside path, in case it's a directory, otherwise
+        returns the single file path.
         """
         files = set()
         if os.path.isfile(path):
@@ -147,74 +157,68 @@ def first_parsing():
             raise ValueError('Must provide a valid file or directory')
         return files
 
-    def check_output(path):
+    def check_dir(path):
+        """Check if the given path is of a directory."""
         if os.path.isdir(path):
             return path
         raise ValueError(f'{path} is not a directory')
 
-    options = {'readers': {m[0]: m[1]
-                           for m in inspect.getmembers(readers, inspect.isclass)
-                           if issubclass(m[1], problem.Reader)},
-               'writers': {m[0]: m[1]
-                           for m in inspect.getmembers(writers, inspect.isclass)
-                           if issubclass(m[1], problem.Writer)}}
+    def list_readers():
+        return sorted([m[0]
+                       for m in inspect.getmembers(readers, inspect.isclass)
+                       if issubclass(m[1], ProblemReader)])
 
-    parser = ArgumentParser(description='Convert between e-judge formats.',
-                            add_help=False,
-                            formatter_class=RawTextHelpFormatter)
+    def list_writers():
+        return sorted([m[0]
+                       for m in inspect.getmembers(writers, inspect.isclass)
+                       if issubclass(m[1], ProblemWriter)])
 
-    parser.add_argument('reader', choices=sorted(list(options[
-                                            'readers'].keys())),
-                        help='Input e-judge format.')
-    parser.add_argument('writer', choices=sorted(list(options[
-                                            'writers'].keys())),
-                        help='Output e-judge format.')
-    parser.add_argument('-f', '--files', type=check_input, required=True,
+    # If required, the standard "help" action is processed in the 1st parsing
+    # step and then the program exits (as per argparse design), thus it would
+    # NOT show the e-judge-specific information that is added in runtime. Thus,
+    # help is not added here.
+    parser = DefaultHelpParser(description='Convert between e-judge formats',
+                               add_help=False,
+                               formatter_class=RawTextHelpFormatter)
+
+    parser.add_argument('reader', choices=list_readers(),
+                        help='Input e-judge format')
+    parser.add_argument('writer', choices=list_writers(),
+                        help='Output e-judge format')
+    parser.add_argument('files', type=list_input,
                         help='Path of a file or a folder of files to convert'
-                        ' from reader to writer formats.')
-    parser.add_argument('-o', '--output_dir', type=check_output, default='./',
-                        help='Path of folder to save converted file(s) into.'
-                        ' (default ./)')
+                        ' from reader to writer formats')
+    parser.add_argument('-o', '--output_dir', type=check_dir, default='./',
+                        help='Path of folder to save converted file(s) into')
 
     # 1st parsing.
     args, unknown = parser.parse_known_args()
-    if args.reader == args.writer:
-        exit(0)
-
-    # Update parser
-    args, unknown = parser.parse_known_args()
-
-    parser.description = f'Convert from {args.reader} to {args.writer} ' \
-                         'e-judge formats.'
-    parser._actions[0].choices = [args.reader]
-    parser._actions[0].help = f'Convert from {args.reader} format.'
-    parser._actions[1].choices = [args.writer]
-    parser._actions[1].help = f'Convert to {args.writer} format.'
-
-    parser.add_argument('-h', '--help', action='help',
-                        help='show this help message and exit')
-
     return parser, args
+
+
+def get_instances(parser):
+    """Return reader/writer instances."""
+    current_module = sys.modules[__name__]
+    reader = getattr(current_module, f'{args.reader}Reader')(parser)
+    writer = getattr(current_module, f'{args.writer}Writer')(parser)
+
+    return reader, writer
 
 
 if __name__ == "__main__":
     # Parsing arguments are added dynamically according to command line
-    # arguments, so there are 2 parsing steps. The first is for "initial"
-    # arguments, which define the e-judge formats and the problem files to be
-    # processed. With this, the parser is updated to include e-judge-specific
-    # arguments, which are then parsed (along with the "initial" ones).
-    #
-    # However, if required, the standard "help" action would be processed in
-    # the 1st parsing and then the program would exit (as per argparse design),
-    # thus it would NOT show the e-judge-specific information.
-    #
-    # To bypass this, "help" action is only added for the 2nd parsing.
-
+    # arguments, so there are 2 parsing steps.
     parser, args = first_parsing()
 
-    current_module = sys.modules[__name__]
-    reader = getattr(current_module, f'{args.reader}Reader')(parser)
-    writer = getattr(current_module, f'{args.writer}Writer')(parser)
+    if args.reader == args.writer:
+        exit(0)
+
+    # Instances also update the parser with their specific arguments.
+    reader, writer = get_instances(parser)
+
+    # Add help for parsing all arguments, if required.
+    parser.add_argument('-h', '--help', action='help',
+                        help='show this help message and exit')
 
     # 2nd parsing.
     args = parser.parse_args()
