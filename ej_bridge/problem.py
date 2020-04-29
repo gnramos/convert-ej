@@ -102,45 +102,26 @@ class EJudgeProblem():
 
 class Reader(ABC):
     """Base class for reading from an EJudge file."""
-    # @abstractmethod
-    # def add_arguments(self, parser):
-    @abstractmethod
-    def __init__(self, parser):
-        """Adds arguments for reading a file formatted for this Reader.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        raise NotImplementedError
 
     @abstractmethod
-    def read(self, file, args):
+    def read(self, file):
         """Reads a problem from file and returns it as an EJudgeProblem.
 
         Keyword arguments:
         file -- the file containing the data for the problem
-        args -- the arguments for configuring the EJudgeProblem
         """
         raise NotImplementedError
 
 
 class Writer(ABC):
-    """Base class for reading to an EJudge file."""
-    @abstractmethod
-    def __init__(self, parser):
-        """Adds arguments for reading a file formatted for this Writer.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        raise NotImplementedError
+    """Base class for reading to an e-judge file."""
 
     @abstractmethod
-    def write(self, problem, args):
+    def write(self, problem, output_dir='./'):
         """Writes the given EJudgeProblem into a file.
 
         Keyword arguments:
         problem -- the EJudgeProblem containing the data for the problem
-        args -- the arguments for configuring the created file
+        output_dir -- the directory to write the file created
         """
         raise NotImplementedError

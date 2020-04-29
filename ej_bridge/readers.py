@@ -15,26 +15,18 @@ class Polygon(problem.Reader):
       - Files from Polygon must be generated from a "full package", and the zip
       must be the "Linux" version in order to include all test files.
     """
-    def __init__(self, parser):
-        """Adds arguments for creating a file formatted for CodeForces e-judge.
 
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        pass
-
-    def read(self, file, args, language='english'):
+    def read(self, file, stmt_lang='english'):
         """Reads a problem from file and returns it as an EJudgeProblem.
 
         Keyword arguments:
         file -- the file containing the data for the problem
-        args -- the arguments for configuring the EJudgeProblem
-        language -- the language the statement of the problem is written in.
+        stmt_lang -- the language the statement of the problem is written in.
         """
         def get_images_and_examples():
             images = {}
             examples = {}
-            path = os.path.join('statement-sections', language)
+            path = os.path.join('statement-sections', stmt_lang)
             for entry in pzip.namelist():
                 if not pzip.getinfo(entry).is_dir() and entry.startswith(path):
                     entry_name = os.path.split(entry)[1]
@@ -68,7 +60,7 @@ class Polygon(problem.Reader):
                     'memory_MB': memory_B // (2 ** 20)}
 
         def get_stmt_tex(name):
-            file = os.path.join('statement-sections', language, f'{name}.tex')
+            file = os.path.join('statement-sections', stmt_lang, f'{name}.tex')
             try:
                 return get_in_zip(file).strip()
             except Exception as e:

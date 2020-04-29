@@ -24,28 +24,18 @@ class BOCA(problem.Writer):
       - PDF composition is defined in and style are simplified via boca.sty.
     """
 
-    def __init__(self, parser):
-        """Adds arguments for creating a file formatted for BOCA e-judge.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        parser.add_argument('--tmp', default='/tmp',
-                            help='Directory for storing temporary files.'
-                            ' (default /tmp)')
-        parser.add_argument('-b', '--basename', default=None,
-                            help='Basename for problem description.')
-        parser.add_argument('--notes', action='store_true',
-                            help='Include the notes in the PDF.')
-        parser.add_argument('--tutorial', action='store_true',
-                            help='Include the tutorial in the PDF.')
-
-    def write(self, problem, args):
+    def write(self, problem, output_dir='./', tmp_dir='/tmp', basename=None,
+              add_notes=True, add_tutorial=False):
         """Writes the given EJudgeProblem into a BOCA file.
 
         Keyword arguments:
         problem -- the EJudgeProblem containing the data for the problem
-        args -- the arguments for configuring the created file
+        output_dir -- the directory to write the file created
+        tmp_dir -- the directory to write temporary files, if necessary
+        basename -- the basename for problem info
+        add_notes -- boolean to include (or not) the "notes" in the PDF file
+        add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
+                        file
         """
         def add_description():
             def add_pdf():
@@ -53,28 +43,28 @@ class BOCA(problem.Writer):
                     cmd = ['pdflatex', '-halt-on-error', tex_file]
                     with open(os.devnull, 'w') as DEVNULL:
                         try:
-                            subprocess.check_call(cmd, cwd=args.tmp,
+                            subprocess.check_call(cmd, cwd=tmp_dir,
                                                   stdout=DEVNULL)
                         except subprocess.CalledProcessError:
                             raise ValueError(f'Unable to create pdf'
                                              f' from {tex_file}')
                             # try:
                             #     # run again to show errors
-                            #     subprocess.check_call(cmd, cwd=args.tmp)
+                            #     subprocess.check_call(cmd, cwd=tmp_dir)
                             # except Exception:
                             #     raise ValueError(f'Unable to create pdf '
                             #                      f'from {tex_file}.tex')
 
-                tex_file = os.path.join(args.tmp, 'main.tex')
-                pdf_file = os.path.join(args.tmp, 'main.pdf')
+                tex_file = os.path.join(tmp_dir, 'main.tex')
+                pdf_file = os.path.join(tmp_dir, 'main.pdf')
                 call_pdflatex()
                 with open(pdf_file, 'rb') as f:
                     pzip.writestr(f'description/{problem.id}.pdf', f.read())
 
             def add_problem_info():
-                basename = args.basename if args.basename else problem.id
+                bn = basename if basename else problem.id
                 pzip.writestr('description/problem.info',
-                              f'basename={basename}\n'
+                              f'basename={bn}\n'
                               f'fullname={problem.statement.title}\n'
                               f'descfile={problem.id}.pdf\n')
 
@@ -82,7 +72,7 @@ class BOCA(problem.Writer):
             add_pdf()
 
         def add_limits():
-            with os.scandir(os.path.join(tmpl_dir, 'limits')) as it:
+            with os.scandir(os.path.join(template_dir, 'limits')) as it:
                 for entry in it:
                     with open(entry.path) as f:
                         limits = [line.rstrip('\r\n')
@@ -115,7 +105,7 @@ class BOCA(problem.Writer):
         def add_tex():
             def write(name, content, mode='w', ext='.tex'):
                 # To temporary dir.
-                file = os.path.join(args.tmp, f'{name}{ext}')
+                file = os.path.join(tmp_dir, f'{name}{ext}')
                 with open(file, mode) as f:
                     f.write(content)
 
@@ -168,16 +158,16 @@ class BOCA(problem.Writer):
                     main = os.path.join(tex_dir, 'main.tex')
                     with open(main) as f:
                         tex = f.read()
-                        if not (args.notes and problem.statement.notes):
+                        if not (add_notes and problem.statement.notes):
                             tex.replace('\\inputNotes%\n', '')
-                        if not (args.tutorial and
+                        if not (add_tutorial and
                                 problem.statement.tutorial):
                             tex.replace('\\inputTutorial%\n', '')
 
                         write('main', tex)
 
                 style = os.path.join(tex_dir, 'boca.sty')
-                shutil.copy(style, args.tmp)
+                shutil.copy(style, tmp_dir)
 
                 write('title', problem.statement.title)
                 write('description', problem.statement.description)
@@ -188,14 +178,14 @@ class BOCA(problem.Writer):
                 write('tutorial', problem.statement.tutorial)
                 write_main()
 
-            tex_dir = os.path.join(tmpl_dir, 'tex')
+            tex_dir = os.path.join(template_dir, 'tex')
             write_tex()
             write_image_files()
             write_tags()
 
-        problem_zip = os.path.join(args.output_dir, f'{problem.id}.zip')
+        problem_zip = os.path.join(output_dir, f'{problem.id}.zip')
         cwd = os.path.abspath(os.path.dirname(__file__))
-        tmpl_dir = os.path.join(cwd, 'templates', 'BOCA')
+        template_dir = os.path.join(cwd, 'templates', 'BOCA')
 
         with zipfile.ZipFile(problem_zip, 'w') as pzip:
             add_tex()          # Generates TeX files
@@ -204,7 +194,7 @@ class BOCA(problem.Writer):
             add_tests()        # Populates the input/output directories
 
             processed = ['description', 'input', 'output', 'limits', 'tex']
-            with os.scandir(tmpl_dir) as it:
+            with os.scandir(template_dir) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in processed:
                         add_template(entry.path)
@@ -228,50 +218,32 @@ class CodeRunner(problem.Writer):
                           'cpp': 'cpp_program',
                           'py': 'python3'}}
 
-    def __init__(self, parser):
-        """Adds arguments for creating a file formatted for CodeRunner e-judge.
-
-        Keyword arguments:
-        parser -- the parser to configure
-        """
-        def check_penalty(choice):
-            choice = int(choice)
-            if choice < 0:
-                raise ValueError('Penalty {choice} cannot be negative')
-
-            return ', '.join((['0'] * choice) + ['10', '20', '...'])
-
-        parser.add_argument('-p', '--penalty', type=check_penalty,
-                            default='2',
-                            help='Number of attempts without penalty.'
-                            ' (default 2)')
-        parser.add_argument('-an', '--allornothing', action='store_true',
-                            dest='all_or_nothing',
-                            help='Set all-or-nothing marking behavior.')
-        parser.add_argument('-l', '--language', choices=sorted(list(
-                                CodeRunner.accepted['types'].keys())),
-                            default='all', help='Set programming language.')
-
-    def write(self, problem, args):
+    def write(self, problem, output_dir='./', src_lang='all',
+              all_or_nothing=False, penalty_after=2):
         """Writes the given EJudgeProblem into a CodeRunner file.
 
         Keyword arguments:
         problem -- the EJudgeProblem containing the data for the problem
-        args -- the arguments for configuring the created file
+        output_dir -- the directory to write the file created
+        src_lang -- the specific language to create a file
+        all_or_nothing -- boolean defining the all-or-nothing marking behavior
+        penalty_after -- start the penalty regime (10% per mistake) after this
+                         number of attempts
         """
-        def add_solution(language):
-            def find_source(language):
+        def add_solution(src_lang):
+            def find_source(lang):
                 for solutions in problem.evaluation.solutions:
-                    if language in solutions.keys():
-                        return solutions[language]
+                    if lang in solutions.keys():
+                        return solutions[lang]
+                raise ValueError(f'No {lang} solution')
 
             answer = root.find('answer')
             if answer.getchildren():
                 answer.remove(answer.getchildren()[0])
 
-            source = find_source(language)
+            source = find_source(src_lang)
             answer.append(CDATA(source))
-            set_text('coderunnertype', CodeRunner.accepted['types'][language])
+            set_text('coderunnertype', CodeRunner.accepted['types'][src_lang])
 
         def add_tags():
             tags = root.find("tags")
@@ -301,7 +273,7 @@ class CodeRunner(problem.Writer):
 
         def get_languages_from_solutions():
             languages = set(CodeRunner.accepted['types'].keys()
-                            if args.language == 'all' else [args.language])
+                            if src_lang == 'all' else [src_lang])
             available = set([k
                             for solutions in problem.evaluation.solutions
                             for k in solutions.keys()])
@@ -455,14 +427,19 @@ class CodeRunner(problem.Writer):
         ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
         #######################################################################
 
+        # Parse arguments #####################################################
+        languages = get_languages_from_solutions()
+        if not languages:
+            raise ValueError(f'No {src_lang} solution(s) available')
+
+        if penalty_after < 0:
+            raise ValueError(f'Penalty {penalty_after} cannot be negative')
+        #######################################################################
+
         cwd = os.path.abspath(os.path.dirname(__file__))
         xml = os.path.join(cwd, 'templates', 'CodeRunner', 'problem.xml')
         tree = ET.parse(xml)
         root = tree.getroot()[0]  # question root
-
-        languages = get_languages_from_solutions()
-        if not languages:
-            raise ValueError(f'No {args.language} solution(s) available')
 
         root.find('name').find('text').text = problem.statement.title
         set_questiontext()
@@ -475,13 +452,15 @@ class CodeRunner(problem.Writer):
 
         set_text('cputimelimitsecs', problem.evaluation.limits['time_sec'])
         set_text('memlimitmb', problem.evaluation.limits['memory_MB'])
-        set_text('penaltyregime', args.penalty)
-        set_text('allornothing', 1 if args.all_or_nothing else 0)
+        set_text('allornothing', 1 if all_or_nothing else 0)
+
+        penalty_regime = ', '.join((['0'] * penalty_after) + ['10', '20', '...'])
+        set_text('penaltyregime', penalty_regime)
 
         for lang in languages:
             add_solution(lang)
 
-            file = os.path.join(args.output_dir, f'{problem.id}-{lang}.xml')
+            file = os.path.join(output_dir, f'{problem.id}-{lang}.xml')
             tree.write(file, 'UTF-8')
             print(f'\tCreated {file}.')
 
