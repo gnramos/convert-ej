@@ -155,8 +155,7 @@ class BOCA(problem.Writer):
                     write('examples', table(len(examples)))
 
                 def write_main():
-                    main = os.path.join(tex_dir, 'main.tex')
-                    with open(main) as f:
+                    with open(os.path.join(tex_dir, 'main.tex')) as f:
                         tex = f.read()
                         if not (add_notes and problem.statement.notes):
                             tex.replace('\\inputNotes%\n', '')
@@ -166,8 +165,9 @@ class BOCA(problem.Writer):
 
                         write('main', tex)
 
-                style = os.path.join(tex_dir, 'boca.sty')
-                shutil.copy(style, tmp_dir)
+                    shutil.copy(os.path.join(tex_dir, 'boca.sty'), tmp_dir)
+                    with open(os.path.join(tex_dir, 'boca.sty')) as f:
+                        write('boca', f.read(), ext='.sty')
 
                 write('title', problem.statement.title)
                 write('description', problem.statement.description)
