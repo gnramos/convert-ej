@@ -82,6 +82,7 @@ class Evaluation():
 
 class EJudgeProblem():
     """Stores the information required to present and evaluate a problem."""
+
     def __init__(self, id, statement, evaluation):
         """Class constructor.
 

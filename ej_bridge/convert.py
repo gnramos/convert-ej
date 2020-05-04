@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser, RawTextHelpFormatter
 import inspect
 import os
@@ -20,13 +20,14 @@ class DefaultHelpParser(ArgumentParser):
         sys.exit(2)
 
 
-class HasParser(ABC):
-    """Base class for parsing command line arguments."""
+class AddsArguments(ABC):
+    """Base class for adding parser arguments."""
+    @abstractmethod
     def __init__(self, parser):
-        self.parser = parser
+        raise NotImplementedError
 
 
-class BOCAWriter(HasParser, writers.BOCA):
+class BOCAWriter(AddsArguments, writers.BOCA):
     """Parses command line arguments for BOCA e-judge."""
     def __init__(self, parser):
         """Adds arguments for creating a file formatted for BOCA e-judge.
@@ -34,16 +35,14 @@ class BOCAWriter(HasParser, writers.BOCA):
         Keyword arguments:
         parser -- the parser to configure
         """
-        super().__init__(parser)
-
-        self.parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
-                                 help='Directory for storing temporary files')
-        self.parser.add_argument('-b', '--basename', default=None,
-                                 help='Basename for problem description')
-        self.parser.add_argument('--notes', action='store_true',
-                                 help='Include the notes in the PDF')
-        self.parser.add_argument('--tutorial', action='store_true',
-                                 help='Include the tutorial in the PDF')
+        parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
+                            help='Directory for storing temporary files')
+        parser.add_argument('-b', '--basename', default=None,
+                            help='Basename for problem description')
+        parser.add_argument('--notes', action='store_true',
+                            help='Include the notes in the PDF')
+        parser.add_argument('--tutorial', action='store_true',
+                            help='Include the tutorial in the PDF')
 
     def write(self, problem, args):
         """Writes the given EJudgeProblem into a BOCA file.
@@ -60,7 +59,7 @@ class BOCAWriter(HasParser, writers.BOCA):
                              add_tutorial=args.tutorial)
 
 
-class CodeRunnerWriter(HasParser, writers.CodeRunner):
+class CodeRunnerWriter(AddsArguments, writers.CodeRunner):
     """Parses command line arguments for CodeRunner e-judge."""
     def __init__(self, parser):
         """Adds arguments for creating a file formatted for CodeRunner e-judge.
@@ -75,25 +74,23 @@ class CodeRunnerWriter(HasParser, writers.CodeRunner):
 
             return penalty
 
-        super().__init__(parser)
+        parser.add_argument('--penalty',
+                            type=check_penalty,
+                            default=2,
+                            help='Number of attempts without penalty'
+                            ' (default 2)')
 
-        self.parser.add_argument('--penalty',
-                                 type=check_penalty,
-                                 default=2,
-                                 help='Number of attempts without penalty'
-                                 ' (default 2)')
-
-        self.parser.add_argument('-aon', '--all-or-nothing',
-                                 action='store_true',
-                                 dest='all_or_nothing',
-                                 help='Set all-or-nothing marking behavior')
+        parser.add_argument('-aon', '--all-or-nothing',
+                            action='store_true',
+                            dest='all_or_nothing',
+                            help='Set all-or-nothing marking behavior')
 
         languages = sorted(list(writers.CodeRunner.accepted['types'].keys()))
-        self.parser.add_argument('-al', '--answer-language',
-                                 dest='answer_language',
-                                 choices=languages,
-                                 default='all',
-                                 help='Set programming language for answer(s)')
+        parser.add_argument('-al', '--answer-language',
+                            dest='answer_language',
+                            choices=languages,
+                            default='all',
+                            help='Set programming language for answer(s)')
 
     def write(self, problem, args):
         """Writes the given EJudgeProblem into a CodeRunner file.
@@ -109,7 +106,7 @@ class CodeRunnerWriter(HasParser, writers.CodeRunner):
                              penalty_after=args.penalty)
 
 
-class PolygonReader(HasParser, readers.Polygon):
+class PolygonReader(AddsArguments, readers.Polygon):
     """Parses command line arguments for a Polygon package from CodeForces
     e-judge.
     """
@@ -120,12 +117,10 @@ class PolygonReader(HasParser, readers.Polygon):
         Keyword arguments:
         parser -- the parser to configure
         """
-        super().__init__(parser)
-
-        self.parser.add_argument('-sl', '--statement-language',
-                                 dest='stmt_lang',
-                                 default='english',
-                                 help='Set statement language')
+        parser.add_argument('-sl', '--statement-language',
+                            dest='stmt_lang',
+                            default='english',
+                            help='Set statement language')
 
     def read(self, file, args):
         """Reads a problem from file and returns it as an EJudgeProblem.
