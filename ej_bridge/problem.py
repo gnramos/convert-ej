@@ -1,7 +1,5 @@
 #  -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-
 
 class Statement():
     """Stores the information required to state a problem.
@@ -99,30 +97,3 @@ class EJudgeProblem():
         assert id
         assert isinstance(statement, Statement)
         assert isinstance(evaluation, Evaluation)
-
-
-class Reader(ABC):
-    """Base class for reading from an EJudge file."""
-
-    @abstractmethod
-    def read(self, file):
-        """Reads a problem from file and returns it as an EJudgeProblem.
-
-        Keyword arguments:
-        file -- the file containing the data for the problem
-        """
-        raise NotImplementedError
-
-
-class Writer(ABC):
-    """Base class for reading to an e-judge file."""
-
-    @abstractmethod
-    def write(self, problem, output_dir='./'):
-        """Writes the given EJudgeProblem into a file.
-
-        Keyword arguments:
-        problem -- the EJudgeProblem containing the data for the problem
-        output_dir -- the directory to write the file created
-        """
-        raise NotImplementedError
