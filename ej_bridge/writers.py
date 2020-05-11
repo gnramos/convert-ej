@@ -1,6 +1,7 @@
 #  -*- coding: utf-8 -*-
 
 import base64
+import math
 import os
 import re
 import shutil
@@ -93,10 +94,12 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                         f.write(template.read())
 
     def add_tests():
-        for key, tests in problem.evaluation.tests.items():
+        num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
+        num_digits = int(math.log10(num_tests)) + 1
+        for tests in problem.evaluation.tests.values():
             for name, files in tests.items():
-                for k, data in files.items():
-                    pzip.writestr(f'{k}put/{name}', data)
+                for io, data in files.items():
+                    pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
 
     def add_tex():
         def write(name, content, mode='w', ext='.tex'):
