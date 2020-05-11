@@ -1,7 +1,6 @@
 #  -*- coding: utf-8 -*-
 
 import base64
-import math
 import os
 import re
 import shutil
@@ -96,7 +95,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
 
     def add_tests():
         num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
-        num_digits = int(math.log10(num_tests)) + 1
+        num_digits = len(str(num_tests))
         for tests in problem.evaluation.tests.values():
             for name, files in tests.items():
                 for io, data in files.items():
