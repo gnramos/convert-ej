@@ -11,7 +11,7 @@ import zipfile
 
 
 def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
-         add_notes=True, add_tutorial=False):
+         add_notes=True, add_tutorial=False, contest_id='A'):
     """Writes the given EJudgeProblem into a BOCA file.
 
     http://bombonera.org/
@@ -33,6 +33,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
     add_notes -- boolean to include (or not) the "notes" in the PDF file
     add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
                     file
+    contest_id -- the problem's id in a BOCA contest (usually a letter)
     """
     def add_description():
         def add_pdf():
@@ -137,7 +138,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                     rows = end.join(cells(i)
                                     for i in range(1, num_rows + 1))
 
-                    col = 'p{.5\\textwidth}'
+                    col = 'p{.475\\textwidth}'
 
                     return f'\\noindent%\n' \
                            f'\\begin{{tabular}}[t]' \
@@ -154,7 +155,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                 write('examples', table(len(examples)))
 
             def write_main():
-                with open(os.path.join(tex_dir, 'main.tex')) as f:
+                with open(os.path.join(tex_dir, 'problem.tex')) as f:
                     tex = f.read()
                     if not (add_notes and problem.statement.notes):
                         tex.replace('\\inputNotes%\n', '')
@@ -162,13 +163,18 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                             problem.statement.tutorial):
                         tex.replace('\\inputTutorial%\n', '')
 
-                    write('main', tex)
+                    write('problem', tex)
 
                 shutil.copy(os.path.join(tex_dir, 'boca.sty'), tmp_dir)
                 with open(os.path.join(tex_dir, 'boca.sty')) as f:
                     write('boca', f.read(), ext='.sty')
 
+            write('contest_id', f'Problema {contest_id}')
             write('title', problem.statement.title)
+
+            time_sec = problem.evaluation.limits['time_sec']
+            write('limits', f'Limite de tempo: {time_sec}s')
+
             write('description', problem.statement.description)
             write('input', problem.statement.input)
             write('output', problem.statement.output)

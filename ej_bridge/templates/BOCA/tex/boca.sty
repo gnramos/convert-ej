@@ -4,9 +4,21 @@
 \usepackage{graphicx}%
 \usepackage{verbatim}%
 
-\newcommand{\inputTitle}{%
+\newcommand{\inputProblemID}{%
+\begin{center}%
+\LARGE\textbf{\input{problemID}}%
+\end{center}%
+}%
+
+\newcommand{\inputTitle}[1][A]{%
 \begin{center}%
 \LARGE\textbf{\input{title}}%
+\end{center}%
+}%
+
+\newcommand{\inputLimits}{%
+\begin{center}%
+\footnotesize\textbf{\input{limits}}%
 \end{center}%
 }%
 
@@ -40,7 +52,9 @@
 }%
 
 \newcommand{\inputProblem}{%
+\inputProblemID%
 \inputTitle%
+\inputLimits%
 \inputDescription%
 \inputInput%
 \inputOutput%
