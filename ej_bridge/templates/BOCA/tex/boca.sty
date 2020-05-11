@@ -4,13 +4,13 @@
 \usepackage{graphicx}%
 \usepackage{verbatim}%
 
-\newcommand{\inputProblemID}{%
+\newcommand{\inputContestID}{%
 \begin{center}%
-\LARGE\textbf{\input{problemID}}%
+\textbf{\input{contestID}%
 \end{center}%
 }%
 
-\newcommand{\inputTitle}[1][A]{%
+\newcommand{\inputTitle}{%
 \begin{center}%
 \LARGE\textbf{\input{title}}%
 \end{center}%
@@ -52,7 +52,7 @@
 }%
 
 \newcommand{\inputProblem}{%
-\inputProblemID%
+\inputContestID%
 \inputTitle%
 \inputLimits%
 \inputDescription%
