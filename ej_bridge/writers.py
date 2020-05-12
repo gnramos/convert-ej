@@ -121,40 +121,19 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
             write('tags', tags, ext='.csv')
 
         def write_tex():
-            def write_examples(examples):
-                def table(num_rows):
-                    def cell(file):
-                        return f'\\vspace{{-1.2\\baselineskip}}%\n' \
-                               f'\\verbatiminput{{{file}}}%\n' \
-                               f'\\vspace*{{-2\\baselineskip}}'
+            def write_examples():
+                examples = []
+                prob_ex = problem.statement.examples
+                for i in range(len(prob_ex)):
+                    ex_file_name = f'{i+1:02}'
+                    write(ex_file_name, prob_ex[i]['in'], ext='.in')
+                    write(ex_file_name, prob_ex[i]['out'], ext='.out')
+                    examples.append(ex_file_name)
 
-                    def cells(i):
-                        return '\n&\n'.join(cell(f'{i:02}{ext}')
-                                            for ext in ('.in', '.out'))
-
-                    header = f'\\textbf{{Input}} & \\textbf{{Output}}%'
-                    end = '\n\\\\\\hline%\n'
-                    rows = end.join(cells(i)
-                                    for i in range(1, num_rows + 1))
-
-                    col = 'p{.475\\textwidth}'
-
-                    return f'\\noindent%\n' \
-                           f'\\begin{{tabular}}[t]' \
-                           f'{{|{col}|{col}|}}%\n' \
-                           f'\\hline%\n' \
-                           f'{header}{end}' \
-                           f'{rows}{end}' \
-                           f'\\end{{tabular}}%'
-
-                for i in range(len(examples)):
-                    write(f'{i+1:02}', examples[i]['in'], ext='.in')
-                    write(f'{i+1:02}', examples[i]['out'], ext='.out')
-
-                write('examples', table(len(examples)))
+                write('examples', ','.join(examples), ext='.csv')
 
             def write_main():
-                with open(os.path.join(tex_dir, 'problem.tex')) as f:
+                with open(os.path.join(tex_dir, 'main.tex')) as f:
                     tex = f.read()
                     if not (add_notes and problem.statement.notes):
                         tex.replace('\\inputNotes%\n', '')
@@ -162,22 +141,21 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                             problem.statement.tutorial):
                         tex.replace('\\inputTutorial%\n', '')
 
-                    write('problem', tex)
+                    write('main', tex)
 
-                shutil.copy(os.path.join(tex_dir, 'boca.sty'), tmp_dir)
-                with open(os.path.join(tex_dir, 'boca.sty')) as f:
-                    write('boca', f.read(), ext='.sty')
+                shutil.copy(os.path.join(tex_dir, 'boca.cls'), tmp_dir)
+                with open(os.path.join(tex_dir, 'boca.cls')) as f:
+                    write('boca', f.read(), ext='.cls')
 
             write('contest_id', f'Problema {contest_id}')
             write('title', problem.statement.title)
 
-            time_sec = problem.evaluation.limits['time_sec']
-            write('limits', f'Limite de tempo: {time_sec}s')
+            write('time_limit', str(problem.evaluation.limits['time_sec']))
 
             write('description', problem.statement.description)
             write('input', problem.statement.input)
             write('output', problem.statement.output)
-            write_examples(problem.statement.examples)
+            write_examples()
             write('notes', problem.statement.notes)
             write('tutorial', problem.statement.tutorial)
             write_main()
