@@ -36,7 +36,7 @@
 	\@iotable{\textbf{Entrada}}{\textbf{Saída}}%
 
 	\foreach \ex in \examplelist {
-		\@iotable{\@exampleCell{#1/\ex.in}}{\@exampleCell{#1/\ex.out}}%
+		\@iotable{\@exampleCell{#1/../input/\ex}}{\@exampleCell{#1/../output/\ex}}%
 	}
 }%
 

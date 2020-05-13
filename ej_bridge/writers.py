@@ -10,7 +10,7 @@ import zipfile
 
 
 def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
-         add_notes=True, add_tutorial=False, contest_id='A'):
+         add_notes=True, add_tutorial=False):
     """Writes the given EJudgeProblem into a BOCA file.
 
     http://bombonera.org/
@@ -21,8 +21,9 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
       directory.
       - This class adds a "tex" folder with the tree structure, where Statement
       info is split into separate files.
-      - Thecomposition of PDF sections from the files is defined in the
-      boca.sty file.
+      - The composition of PDF is defined in main.tex file, "Notes" and
+      "Tutorial" are included in the class options. Any necessary auxililary
+      files should be in that directory.
 
     Keyword arguments:
     problem -- the EJudgeProblem containing the data for the problem
@@ -32,43 +33,48 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
     add_notes -- boolean to include (or not) the "notes" in the PDF file
     add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
                     file
-    contest_id -- the problem's id in a BOCA contest (usually a letter)
     """
-    def add_description():
+    def add_description_dir():
         def add_pdf():
             def call_pdflatex():
                 cmd = ['pdflatex', '-halt-on-error', tex_file]
                 with open(os.devnull, 'w') as DEVNULL:
                     try:
-                        subprocess.check_call(cmd, cwd=tmp_dir,
+                        subprocess.check_call(cmd, cwd=tmp_tex_dir,
                                               stdout=DEVNULL)
                     except subprocess.CalledProcessError:
                         raise ValueError(f'Unable to create pdf'
                                          f' from {tex_file}')
                         # try:
                         #     # run again to show errors
-                        #     subprocess.check_call(cmd, cwd=tmp_dir)
+                        #     subprocess.check_call(cmd, cwd=tmp_tex_dir)
                         # except Exception:
                         #     raise ValueError(f'Unable to create pdf '
                         #                      f'from {tex_file}.tex')
 
-            tex_file = os.path.join(tmp_dir, 'main.tex')
-            pdf_file = os.path.join(tmp_dir, 'main.pdf')
+            tex_file = os.path.join(tmp_tex_dir, 'main.tex')
             call_pdflatex()
-            with open(pdf_file, 'rb') as f:
+            with open(os.path.join(tmp_tex_dir, 'main.pdf'), 'rb') as f:
                 pzip.writestr(f'description/{problem.id}.pdf', f.read())
 
         def add_problem_info():
-            bn = basename if basename else problem.id
             pzip.writestr('description/problem.info',
-                          f'basename={bn}\n'
+                          f'basename={problem.id}\n'
                           f'fullname={problem.statement.title}\n'
                           f'descfile={problem.id}.pdf\n')
 
         add_problem_info()
         add_pdf()
 
-    def add_limits():
+    def add_IO_dirs():
+        num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
+        num_digits = len(str(num_tests))
+        for tests in problem.evaluation.tests.values():
+            for name, files in tests.items():
+                for io, data in files.items():
+                    pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
+
+    def add_limits_dir():
         with os.scandir(os.path.join(template_dir, 'limits')) as it:
             for entry in it:
                 with open(entry.path) as f:
@@ -85,26 +91,25 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
 
                 pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
-    def add_template(dir_path):
-        with os.scandir(dir_path) as it:
-            dir_name = os.path.split(dir_path)[-1]
+    def add_other_dirs(exceptions):
+        def add_dir(dir_path):
+            with os.scandir(dir_path) as it:
+                dir_name = os.path.split(dir_path)[-1]
+                for entry in it:
+                    with open(entry.path, 'rb') as template:
+                        with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
+                            f.write(template.read())
+
+        with os.scandir(template_dir) as it:
             for entry in it:
-                with open(entry.path, 'rb') as template:
-                    with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
-                        f.write(template.read())
+                if entry.is_dir() and entry.name not in exceptions:
+                    add_dir(entry.path)
 
-    def add_tests():
-        num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
-        num_digits = len(str(num_tests))
-        for tests in problem.evaluation.tests.values():
-            for name, files in tests.items():
-                for io, data in files.items():
-                    pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
 
-    def add_tex():
+    def add_tex_dir():
         def write(name, content, mode='w', ext='.tex'):
             # To temporary dir.
-            file = os.path.join(tmp_dir, f'{name}{ext}')
+            file = os.path.join(tmp_tex_dir, f'{name}{ext}')
             with open(file, mode) as f:
                 f.write(content)
 
@@ -123,35 +128,32 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         def write_tex():
             def write_examples():
                 examples = []
-                prob_ex = problem.statement.examples
-                for i in range(len(prob_ex)):
-                    ex_file_name = f'{i+1:02}'
-                    write(ex_file_name, prob_ex[i]['in'], ext='.in')
-                    write(ex_file_name, prob_ex[i]['out'], ext='.out')
-                    examples.append(ex_file_name)
+                # Write examples to temporary dir
+                os.mkdir(os.path.join(tmp_dir, 'input'))
+                os.mkdir(os.path.join(tmp_dir, 'output'))
+                for e, io in problem.evaluation.tests['examples'].items():
+                    examples.append(e)
+                    for key, value in io.items():
+                        file = os.path.join(tmp_dir, f'{key}put', e)
+                        with open(file, 'w') as f:
+                            f.write(value)
 
+                # Write list to TeX
                 write('examples', ','.join(examples), ext='.csv')
 
             def write_main():
-                with open(os.path.join(tex_dir, 'main.tex')) as f:
-                    tex = f.read()
-                    if not (add_notes and problem.statement.notes):
-                        tex.replace('\\inputNotes%\n', '')
-                    if not (add_tutorial and
-                            problem.statement.tutorial):
-                        tex.replace('\\inputTutorial%\n', '')
+                notes = 'notes' if add_notes and problem.statement.notes else ''
+                tutorial = 'tutorial' if add_tutorial and problem.statement.tutorial else ''
 
-                    write('main', tex)
+                with open(os.path.join(template_tex_dir, 'main.tex')) as f:
+                    main = f.read()
+                    if notes or tutorial:
+                        main = main.replace('documentclass',
+                            f'documentclass[{notes},{tutorial}]')
+                    write('main', main)
 
-                shutil.copy(os.path.join(tex_dir, 'boca.cls'), tmp_dir)
-                with open(os.path.join(tex_dir, 'boca.cls')) as f:
-                    write('boca', f.read(), ext='.cls')
-
-            write('contest_id', f'Problema {contest_id}')
             write('title', problem.statement.title)
-
             write('time_limit', str(problem.evaluation.limits['time_sec']))
-
             write('description', problem.statement.description)
             write('input', problem.statement.input)
             write('output', problem.statement.output)
@@ -160,26 +162,41 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
             write('tutorial', problem.statement.tutorial)
             write_main()
 
-        tex_dir = os.path.join(template_dir, 'tex')
+        template_tex_dir = os.path.join(template_dir, 'tex')
+
+        with os.scandir(template_tex_dir) as it:
+            for entry in it:
+                if entry.is_file and not entry.name.startswith(('.', 'main.tex')):
+                    with open(entry.path) as template:
+                        write(entry.name, template.read(), ext='')
+
         write_tex()
         write_image_files()
         write_tags()
 
+    # Setup
+    if not os.path.isdir(tmp_dir):
+        os.mkdir(tmp_dir)
+    tmp_dir = os.path.join(tmp_dir, problem.id)
+    if not os.path.isdir(tmp_dir):
+        os.mkdir(tmp_dir)
+    tmp_tex_dir = os.path.join(tmp_dir, 'tex')
+    os.mkdir(tmp_tex_dir)
+
+    # Processing
     problem_zip = os.path.join(output_dir, f'{problem.id}.zip')
     cwd = os.path.abspath(os.path.dirname(__file__))
     template_dir = os.path.join(cwd, 'templates', 'BOCA')
 
     with zipfile.ZipFile(problem_zip, 'w') as pzip:
-        add_tex()          # Generates TeX files
-        add_description()  # Also creates the pdf from the TeX files
-        add_limits()
-        add_tests()        # Populates the input/output directories
+        add_tex_dir()          # Generates TeX files
+        add_description_dir()  # Also creates the pdf from the TeX files
+        add_limits_dir()
+        add_IO_dirs()          # Populates the input/output directories
+        add_other_dirs(exceptions=['limits', 'tex'])
 
-        processed = ['description', 'input', 'output', 'limits', 'tex']
-        with os.scandir(template_dir) as it:
-            for entry in it:
-                if entry.is_dir() and entry.name not in processed:
-                    add_template(entry.path)
+    # Cleanup
+    shutil.rmtree(tmp_dir)
 
 
 # Define accepted image and source code file types for dealing with CodeRunner.
