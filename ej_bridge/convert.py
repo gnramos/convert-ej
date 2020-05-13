@@ -27,7 +27,7 @@ def boca_writer_add_arguments(parser):
                         help='Basename for problem description')
     parser.add_argument('--notes', action='store_true',
                         help='Include the notes in the PDF')
-    parser.add_argument('--tutorial', action='store_false',
+    parser.add_argument('--tutorial', action='store_true',
                         help='Include the tutorial in the PDF')
 
 
