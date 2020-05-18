@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}[1999/12/01]%
 
-\ProvidesClass{boca}[2020/05/12 Formatação de problemas/contests para o juíz eletrônico BOCA.]%
+\ProvidesClass{boca}[2020/05/12 Formatacao de problemas/contests para o juiz eletronico BOCA.]%
 
 \DeclareOption{notes}{\def\notes@boca{1}}%
 \DeclareOption{tutorial}{\def\tutorial@boca{1}}%
