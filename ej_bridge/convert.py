@@ -31,16 +31,6 @@ def boca_writer_add_arguments(parser):
                         help='Include the tutorial in the PDF')
 
 
-def boca_write(ejproblem, args):
-    """Writes the problem in the BOCA format."""
-    writers.boca(ejproblem,
-                 output_dir=args.output_dir,
-                 tmp_dir=args.tmp_dir,
-                 basename=args.basename,
-                 add_notes=args.notes,
-                 add_tutorial=args.tutorial)
-
-
 def coderunner_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in CodeRunner format."""
     def check_penalty(penalty):
@@ -50,7 +40,7 @@ def coderunner_writer_add_arguments(parser):
 
         return penalty
 
-    parser.add_argument('--penalty',
+    parser.add_argument('-p', '--penalty',
                         type=check_penalty,
                         default=2,
                         help='Number of attempts without penalty'
@@ -69,6 +59,25 @@ def coderunner_writer_add_arguments(parser):
                         help='Set programming language for answer(s)')
 
 
+def polygon_reader_add_arguments(parser):
+    """Adds command line arguments for reading a problem in Polygon format."""
+    parser.add_argument('-sl', '--statement-language',
+                        dest='stmt_lang',
+                        default='english',
+                        help='Set statement language')
+
+
+###############################################################################
+def boca_write(ejproblem, args):
+    """Writes the problem in the BOCA format."""
+    writers.boca(ejproblem,
+                 output_dir=args.output_dir,
+                 tmp_dir=args.tmp_dir,
+                 basename=args.basename,
+                 add_notes=args.notes,
+                 add_tutorial=args.tutorial)
+
+
 def coderunner_write(ejproblem, args):
     """Writes the problem in the CodeRunner format."""
     writers.coderunner(ejproblem,
@@ -78,16 +87,8 @@ def coderunner_write(ejproblem, args):
                        penalty_after=args.penalty)
 
 
-def polygon_reader_add_arguments(parser):
-    """Adds command line arguments for reading a problem in Polygon format."""
-    parser.add_argument('-sl', '--statement-language',
-                        dest='stmt_lang',
-                        default='english',
-                        help='Set statement language')
-
-
 def polygon_read(file, args):
-    """Writes the problem in the BOCA format."""
+    """Reads the problem in the Polygon format."""
     return readers.polygon(file, args.stmt_lang)
 
 
