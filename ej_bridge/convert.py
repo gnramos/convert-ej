@@ -73,8 +73,9 @@ def polygon_reader_add_arguments(parser):
 
 
 ###############################################################################
-def boca_read(ejproblem, args):
-    pass
+def boca_read(file, args):
+    """Reads the problem in the BOCA format."""
+    return readers.boca(file)
 
 
 def boca_write(ejproblem, args):
