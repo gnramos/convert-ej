@@ -19,6 +19,11 @@ class DefaultHelpParser(ArgumentParser):
         sys.exit(2)
 
 
+def boca_reader_add_arguments(parser):
+    """Adds command line arguments for reading a problem in BOCA format."""
+    pass
+
+
 def boca_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in BOCA format."""
     parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
@@ -68,6 +73,10 @@ def polygon_reader_add_arguments(parser):
 
 
 ###############################################################################
+def boca_read(ejproblem, args):
+    pass
+
+
 def boca_write(ejproblem, args):
     """Writes the problem in the BOCA format."""
     writers.boca(ejproblem,

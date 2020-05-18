@@ -39,12 +39,12 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
             def call_pdflatex():
                 cmd = ['pdflatex', '-halt-on-error', tex_file]
                 with open(os.devnull, 'w') as DEVNULL:
-                    try:
-                        subprocess.check_call(cmd, cwd=tmp_tex_dir,
-                                              stdout=DEVNULL)
-                    except subprocess.CalledProcessError:
-                        raise ValueError(f'Unable to create pdf'
-                                         f' from {tex_file}')
+                    # try:
+                    subprocess.check_call(cmd, cwd=tmp_tex_dir,
+                                          stdout=DEVNULL)
+                    # except subprocess.CalledProcessError:
+                    #     raise ValueError(f'Unable to create pdf'
+                    #                      f' from {tex_file}')
                         # try:
                         #     # run again to show errors
                         #     subprocess.check_call(cmd, cwd=tmp_tex_dir)
@@ -104,7 +104,6 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
             for entry in it:
                 if entry.is_dir() and entry.name not in exceptions:
                     add_dir(entry.path)
-
 
     def add_tex_dir():
         def write(name, content, mode='w', ext='.tex'):

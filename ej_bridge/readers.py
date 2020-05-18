@@ -6,8 +6,24 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
+def boca(file):
+    """Reads a BOCA problem from file and returns it as an EJudgeProblem.
+
+    http://bombonera.org/
+
+    Keep in mind that:
+      - BOCA doesn't have a defaut structure for the text, so it's assumed that
+        the text is in the "tex" folder, where Statement info is split into
+        separate files, just like a boca file when written. (melhorar)
+
+    Keyword arguments:
+    file -- the file containing the data for the problem
+    """
+    pass
+
+
 def polygon(file, stmt_lang='english'):
-    """Reads a problem from file and returns it as an EJudgeProblem.
+    """Reads a polygon problem from file and returns it as an EJudgeProblem.
 
     Keyword arguments:
     file -- the file containing the data for the problem
