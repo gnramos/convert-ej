@@ -19,7 +19,45 @@ def boca(file):
     Keyword arguments:
     file -- the file containing the data for the problem
     """
-    pass
+
+    def get_in_zip(file):
+        try:
+            with pzip.open(file) as f:
+                return f.read().decode('utf-8')
+        except KeyError as e:
+            raise ValueError(e)
+
+    def get_images_examples_and_tags():
+        images = {}
+        examples = {}
+        tags = []
+        for entry in pzip.namelist():
+            if not pzip.getinfo(entry).is_dir() and entry.startswith('tex'):
+                entry_name = os.path.split(entry)[1]
+                if entry_name == 'examples.csv':
+                    exps = get_in_zip(entry).split(',')
+                    for num in exps:
+                        examples[num] = {}
+                        examples[num]['in'] = get_in_zip(f'input/{num}')
+                        examples[num]['out'] = get_in_zip(f'output/{num}')
+                elif entry_name == 'tags.csv':
+                    tags = get_in_zip(entry).split(',')
+                elif not entry_name.lower().endswith('.tex')\
+                        and not entry_name.lower().endswith('.cls'):
+                    with pzip.open(entry) as f:
+                        images[entry_name] = f.read()
+
+        return images, [examples[k] for k in sorted(examples.keys())], tags
+
+    try:
+        with zipfile.ZipFile(file) as pzip:
+            examples, images, tags = get_images_examples_and_tags()
+
+    except zipfile.BadZipFile as e:
+        raise ValueError(f'{e}')
+
+    # return problem.EJudgeProblem(problem_id, statement, evaluation)
+    return NotImplementedError
 
 
 def polygon(file, stmt_lang='english'):
@@ -29,6 +67,14 @@ def polygon(file, stmt_lang='english'):
     file -- the file containing the data for the problem
     stmt_lang -- the language the statement of the problem is written in.
     """
+
+    def get_in_zip(file):
+        try:
+            with pzip.open(file) as f:
+                return f.read().decode('utf-8')
+        except KeyError as e:
+            raise ValueError(e)
+
     def get_images_and_examples():
         images = {}
         examples = {}
@@ -49,13 +95,6 @@ def polygon(file, stmt_lang='english'):
                         images[entry_name] = f.read()
 
         return images, [examples[k] for k in sorted(examples.keys())]
-
-    def get_in_zip(file):
-        try:
-            with pzip.open(file) as f:
-                return f.read().decode('utf-8')
-        except KeyError as e:
-            raise ValueError(e)
 
     def get_limits():
         testset = root.find('judging/testset')
