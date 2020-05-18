@@ -42,6 +42,8 @@ def boca(file):
                         examples[num]['out'] = get_in_zip(f'output/{num}')
                 elif entry_name == 'tags.csv':
                     tags = get_in_zip(entry).split(',')
+                    if not tags[0]:  # Deals with empty the empty string
+                        tags = []
                 elif not entry_name.lower().endswith('.tex')\
                         and not entry_name.lower().endswith('.cls'):
                     with pzip.open(entry) as f:
@@ -79,18 +81,23 @@ def boca(file):
         return tests
 
     def get_limits():
+        # Implementar get_solutions() antes de implementar
         time_msec = 1000
         memory_B = 10000000
 
         return {'time_sec': time_msec // 1000,
                 'memory_MB': memory_B // (2 ** 20)}
 
+    def get_id_and_title():
+        info = get_in_zip('description/problem.info').split('\n')
+        return info[0].split('=')[1], info[1].split('=')[1]
+
     try:
         with zipfile.ZipFile(file) as pzip:
-            problem_id = 'nome temporário'  # Implementar
+            problem_id, title = get_id_and_title()
 
             images, examples, tags = get_images_examples_and_tags()
-            statement = problem.Statement(get_tex('title'),
+            statement = problem.Statement(title,
                                           get_tex('description'),
                                           get_tex('input'),
                                           get_tex('output'),
