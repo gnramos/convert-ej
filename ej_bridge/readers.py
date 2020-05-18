@@ -60,9 +60,36 @@ def boca(file):
         print(f'\t{file} not in zip.')
         return ''
 
+    def get_solutions():
+        # Incluir solução no writers.boca antes de implementar
+        return [{'cpp': 'sem solução'}]
+
+    def get_tests():
+        test_files = [os.path.split(entry)[-1]
+                      for entry in pzip.namelist()
+                      if entry.startswith('input/') and entry != 'input/']
+
+        test_samples = get_in_zip('tex/examples.csv').split(',')
+
+        tests = {'examples': {}, 'hidden': {}}
+        for name in sorted(test_files):
+            test = 'examples' if (name in test_samples) else 'hidden'
+            tests[test][name] = {'in': get_in_zip(f'input/{name}'),
+                                 'out': get_in_zip(f'output/{name}')}
+        return tests
+
+    def get_limits():
+        time_msec = 1000
+        memory_B = 10000000
+
+        return {'time_sec': time_msec // 1000,
+                'memory_MB': memory_B // (2 ** 20)}
+
     try:
         with zipfile.ZipFile(file) as pzip:
-            examples, images, tags = get_images_examples_and_tags()
+            problem_id = 'nome temporário'  # Implementar
+
+            images, examples, tags = get_images_examples_and_tags()
             statement = problem.Statement(get_tex('title'),
                                           get_tex('description'),
                                           get_tex('input'),
@@ -72,11 +99,14 @@ def boca(file):
                                           tags,
                                           get_tex('tutorial'),
                                           get_tex('notes'))
+            evaluation = problem.Evaluation(get_tests(),
+                                            get_solutions(),
+                                            get_limits())
 
     except zipfile.BadZipFile as e:
         raise ValueError(f'{e}')
 
-    # return problem.EJudgeProblem(problem_id, statement, evaluation)
+    return problem.EJudgeProblem(problem_id, statement, evaluation)
     return NotImplementedError
 
 
