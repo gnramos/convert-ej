@@ -67,7 +67,8 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_pdf()
 
     def add_IO_dirs():
-        num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
+        num_tests = sum(len(tests)
+                        for tests in problem.evaluation.tests.values())
         num_digits = len(str(num_tests))
         for tests in problem.evaluation.tests.values():
             for name, files in tests.items():
@@ -105,7 +106,6 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                 if entry.is_dir() and entry.name not in exceptions:
                     add_dir(entry.path)
 
-
     def add_tex_dir():
         def write(name, content, mode='w', ext='.tex'):
             # To temporary dir.
@@ -142,14 +142,16 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                 write('examples', ','.join(examples), ext='.csv')
 
             def write_main():
-                notes = 'notes' if add_notes and problem.statement.notes else ''
-                tutorial = 'tutorial' if add_tutorial and problem.statement.tutorial else ''
+                options = ''
+                if add_notes and problem.statement.notes:
+                    options = f'{notes}'
+                if add_tutorial and problem.statement.tutorial:
+                    options = f',{tutorial}'
 
                 with open(os.path.join(template_tex_dir, 'main.tex')) as f:
                     main = f.read()
-                    if notes or tutorial:
-                        main = main.replace('documentclass',
-                            f'documentclass[{notes},{tutorial}]')
+                    main = main.replace('documentclass',
+                                        f'documentclass[{options}]')
                     write('main', main)
 
             write('title', problem.statement.title)
@@ -166,7 +168,8 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
 
         with os.scandir(template_tex_dir) as it:
             for entry in it:
-                if entry.is_file and not entry.name.startswith(('.', 'main.tex')):
+                if entry.is_file and not entry.name.startswith(('.',
+                                                                'main.tex')):
                     with open(entry.path) as template:
                         write(entry.name, template.read(), ext='')
 
@@ -251,17 +254,20 @@ def coderunner(problem, output_dir='./', src_lang='all',
             tags.append(te)
 
     def append_tests():
-        def make_test(input, output, is_example):
+        def use_as_example(key):
+            return '1' if key == 'examples' else '0'
+
+        def set_test(test, key):
             xml = os.path.join(cwd, 'templates', 'CodeRunner', 'test.xml')
             root = ET.parse(xml).getroot()
-            root.find("stdin").find("text").text = input
-            root.find("expected").find("text").text = output
-            root.set("useasexample", '1' if is_example else '0')
+            root.find("stdin").find("text").text = test['in']
+            root.find("expected").find("text").text = test['out']
+            root.set("useasexample", use_as_example(key))
             return root
 
         for key, tests in problem.evaluation.tests.items():
-            for test in tests.values():
-                t = make_test(test['in'], test['out'], key == 'examples')
+            for case in tests.values():
+                t = set_test(case, key)
                 root.find("testcases").append(t)
 
     def CDATA(content):
