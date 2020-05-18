@@ -49,9 +49,29 @@ def boca(file):
 
         return images, [examples[k] for k in sorted(examples.keys())], tags
 
+    def get_tex(name):
+        file = os.path.join('tex', f'{name}.tex')
+        try:
+            return get_in_zip(file).strip()
+        except Exception as e:
+            if name not in ['notes', 'tutorial']:
+                raise e
+
+        print(f'\t{file} not in zip.')
+        return ''
+
     try:
         with zipfile.ZipFile(file) as pzip:
             examples, images, tags = get_images_examples_and_tags()
+            statement = problem.Statement(get_tex('title'),
+                                          get_tex('description'),
+                                          get_tex('input'),
+                                          get_tex('output'),
+                                          examples,
+                                          images,
+                                          tags,
+                                          get_tex('tutorial'),
+                                          get_tex('notes'))
 
     except zipfile.BadZipFile as e:
         raise ValueError(f'{e}')
