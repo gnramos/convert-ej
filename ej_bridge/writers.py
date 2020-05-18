@@ -148,7 +148,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                     main = f.read()
                     if notes or tutorial:
                         main = main.replace('documentclass',
-                            f'documentclass[{notes},{tutorial}]')
+                                            f'documentclass[{notes},{tutorial}]')
                     write('main', main)
 
             write('title', problem.statement.title)
