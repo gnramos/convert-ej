@@ -41,9 +41,8 @@ def boca(file):
                         examples[num]['in'] = get_in_zip(f'input/{num}')
                         examples[num]['out'] = get_in_zip(f'output/{num}')
                 elif entry_name == 'tags.csv':
-                    tags = get_in_zip(entry).split(',')
-                    if not tags[0]:  # Deals with empty the empty string
-                        tags = []
+                    tags = [x.strip() for x in get_in_zip(entry).split(',')
+                            if x.strip()]
                 elif not entry_name.lower().endswith('.tex')\
                         and not entry_name.lower().endswith('.cls'):
                     with pzip.open(entry) as f:
