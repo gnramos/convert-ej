@@ -19,9 +19,15 @@ class DefaultHelpParser(ArgumentParser):
         sys.exit(2)
 
 
+###############################################################################
 def boca_reader_add_arguments(parser):
     """Adds command line arguments for reading a problem in BOCA format."""
     pass
+
+
+def boca_read(file, args):
+    """Reads the problem in the BOCA format."""
+    return readers.boca(file)
 
 
 def boca_writer_add_arguments(parser):
@@ -36,6 +42,17 @@ def boca_writer_add_arguments(parser):
                         help='Include the tutorial in the PDF')
 
 
+def boca_write(ejproblem, args):
+    """Writes the problem in the BOCA format."""
+    writers.boca(ejproblem,
+                 output_dir=args.output_dir,
+                 tmp_dir=args.tmp_dir,
+                 basename=args.basename,
+                 add_notes=args.notes,
+                 add_tutorial=args.tutorial)
+
+
+###############################################################################
 def coderunner_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in CodeRunner format."""
     def check_penalty(penalty):
@@ -64,30 +81,6 @@ def coderunner_writer_add_arguments(parser):
                         help='Set programming language for answer(s)')
 
 
-def polygon_reader_add_arguments(parser):
-    """Adds command line arguments for reading a problem in Polygon format."""
-    parser.add_argument('-sl', '--statement-language',
-                        dest='stmt_lang',
-                        default='english',
-                        help='Set statement language')
-
-
-###############################################################################
-def boca_read(file, args):
-    """Reads the problem in the BOCA format."""
-    return readers.boca(file)
-
-
-def boca_write(ejproblem, args):
-    """Writes the problem in the BOCA format."""
-    writers.boca(ejproblem,
-                 output_dir=args.output_dir,
-                 tmp_dir=args.tmp_dir,
-                 basename=args.basename,
-                 add_notes=args.notes,
-                 add_tutorial=args.tutorial)
-
-
 def coderunner_write(ejproblem, args):
     """Writes the problem in the CodeRunner format."""
     writers.coderunner(ejproblem,
@@ -95,6 +88,15 @@ def coderunner_write(ejproblem, args):
                        src_lang=args.answer_language,
                        all_or_nothing=args.all_or_nothing,
                        penalty_after=args.penalty)
+
+
+###############################################################################
+def polygon_reader_add_arguments(parser):
+    """Adds command line arguments for reading a problem in Polygon format."""
+    parser.add_argument('-sl', '--statement-language',
+                        dest='stmt_lang',
+                        default='english',
+                        help='Set statement language')
 
 
 def polygon_read(file, args):
