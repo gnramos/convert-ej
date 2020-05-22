@@ -105,6 +105,10 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                 if entry.is_dir() and entry.name not in exceptions:
                     add_dir(entry.path)
 
+    def write_tags():
+        pzip.writestr('tags.csv',
+                      ','.join(tag for tag in problem.statement.tags))
+
     def add_tex_dir():
         def write(name, content, mode='w', ext='.tex'):
             # To temporary dir.
@@ -119,10 +123,6 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         def write_image_files():
             for name, img in problem.statement.images.items():
                 write(name, img, mode='wb', ext='')
-
-        def write_tags():
-            tags = ','.join(tag for tag in problem.statement.tags)
-            write('tags', tags, ext='.csv')
 
         def write_tex():
             def write_examples():
@@ -171,7 +171,6 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
 
         write_tex()
         write_image_files()
-        write_tags()
 
     # Setup
     if not os.path.isdir(tmp_dir):
@@ -191,11 +190,12 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_tex_dir()          # Generates TeX files
         add_description_dir()  # Also creates the pdf from the TeX files
         add_limits_dir()
+        write_tags()
         add_IO_dirs()          # Populates the input/output directories
         add_other_dirs(exceptions=['limits', 'tex'])
 
     # Cleanup
-    shutil.rmtree(tmp_dir)
+    # shutil.rmtree(tmp_dir)
 
     print(f'\tCreated {problem_zip}.')
 
