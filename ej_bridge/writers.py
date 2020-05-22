@@ -110,6 +110,13 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         pzip.writestr('tags.csv',
                       ','.join(tag for tag in problem.statement.tags))
 
+    def write_solutions():
+        sol = problem.evaluation.solutions
+        for ext, solution in sol[0].items():
+            pzip.writestr(f'solutions/main.{ext}', solution)
+        for ext, solution in sol[1].items():
+            pzip.writestr(f'solutions/accepted.{ext}', solution)
+
     def add_tex_dir():
         def write(name, content, mode='w', ext='.tex'):
             # To temporary dir.
@@ -192,6 +199,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_description_dir()  # Also creates the pdf from the TeX files
         add_limits_dir()
         write_tags()
+        write_solutions()
         add_IO_dirs()          # Populates the input/output directories
         add_other_dirs(exceptions=['limits', 'tex'])
 
