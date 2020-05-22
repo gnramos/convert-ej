@@ -20,7 +20,8 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
       - Template values for most configurations are defined in "templates"
       directory.
       - This class adds a "tex" folder with the tree structure, where Statement
-      info is split into separate files.
+      info is split into separate files, a "solutions" folder and a "tags.csv"
+      file, where the solutions and tags can be found.
       - The composition of PDF is defined in main.tex file, "Notes" and
       "Tutorial" are included in the class options. Any necessary auxililary
       files should be in that directory.
@@ -195,7 +196,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_other_dirs(exceptions=['limits', 'tex'])
 
     # Cleanup
-    # shutil.rmtree(tmp_dir)
+    shutil.rmtree(tmp_dir)
 
     print(f'\tCreated {problem_zip}.')
 
