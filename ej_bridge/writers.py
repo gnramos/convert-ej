@@ -184,8 +184,9 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
     if not os.path.isdir(tmp_dir):
         os.mkdir(tmp_dir)
     tmp_dir = os.path.join(tmp_dir, problem.id)
-    if not os.path.isdir(tmp_dir):
-        os.mkdir(tmp_dir)
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir)
+    os.mkdir(tmp_dir)
     tmp_tex_dir = os.path.join(tmp_dir, 'tex')
     os.mkdir(tmp_tex_dir)
 
