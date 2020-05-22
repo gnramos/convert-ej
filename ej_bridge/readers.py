@@ -27,10 +27,9 @@ def boca(file):
         except KeyError as e:
             raise ValueError(e)
 
-    def get_images_examples_and_tags():
+    def get_images_and_examples():
         images = {}
         examples = {}
-        tags = []
         for entry in pzip.namelist():
             if not pzip.getinfo(entry).is_dir() and entry.startswith('tex'):
                 entry_name = os.path.split(entry)[1]
@@ -40,15 +39,16 @@ def boca(file):
                         examples[num] = {}
                         examples[num]['in'] = get_in_zip(f'input/{num}')
                         examples[num]['out'] = get_in_zip(f'output/{num}')
-                elif entry_name == 'tags.csv':
-                    tags = [x.strip() for x in get_in_zip(entry).split(',')
-                            if x.strip()]
                 elif not entry_name.lower().endswith('.tex')\
                         and not entry_name.lower().endswith('.cls'):
                     with pzip.open(entry) as f:
                         images[entry_name] = f.read()
 
-        return images, [examples[k] for k in sorted(examples.keys())], tags
+        return images, [examples[k] for k in sorted(examples.keys())]
+
+    def get_tags():
+        return [x.strip() for x in get_in_zip('tags.csv').split(',')
+                if x.strip()]
 
     def get_tex(name):
         file = os.path.join('tex', f'{name}.tex')
@@ -98,15 +98,14 @@ def boca(file):
     try:
         with zipfile.ZipFile(file) as pzip:
             problem_id, title = get_id_and_title()
-
-            images, examples, tags = get_images_examples_and_tags()
+            images, examples = get_images_and_examples()
             statement = problem.Statement(title,
                                           get_tex('description'),
                                           get_tex('input'),
                                           get_tex('output'),
                                           examples,
                                           images,
-                                          tags,
+                                          get_tags(),
                                           get_tex('tutorial'),
                                           get_tex('notes'))
             evaluation = problem.Evaluation(get_tests(),
