@@ -62,8 +62,12 @@ def boca(file):
         return ''
 
     def get_solutions():
-        # Incluir solução no writers.boca antes de implementar
-        return [{'cpp': 'sem solução'}]
+        def solution_code(tag):
+            return {os.path.splitext(entry)[1][1:]: get_in_zip(entry)
+                    for entry in pzip.namelist()
+                    if entry.startswith(f'solutions/{tag}')}
+
+        return [solution_code('main'), solution_code('accepted')]
 
     def get_tests():
         test_files = [os.path.split(entry)[-1]
