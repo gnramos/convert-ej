@@ -75,10 +75,11 @@ def coderunner_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in CodeRunner format."""
     def check_penalty(penalty):
         """Checks the penalty value."""
-        if penalty < 0:
+        ipenalty = int(penalty)
+        if ipenalty < 0:
             raise ValueError('Penalty {penalty} cannot be negative')
 
-        return penalty
+        return ipenalty
 
     parser.add_argument('-p', '--penalty',
                         type=check_penalty,
