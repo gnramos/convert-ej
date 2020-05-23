@@ -22,12 +22,30 @@ class DefaultHelpParser(ArgumentParser):
 ###############################################################################
 def boca_reader_add_arguments(parser):
     """Adds command line arguments for reading a problem in BOCA format."""
-    pass
+    def check_limit(limit):
+        """Checks the limit value."""
+        ilimit = int(limit)
+        if ilimit <= 0:
+            raise ValueError('Limit {limit} cannot be negative or zero')
+        return ilimit
+
+    parser.add_argument('-tl', '--time-limit',
+                        type=check_limit,
+                        default=1,
+                        dest='time_limit',
+                        help='Time limit value in seconds (default 1)')
+    parser.add_argument('-ml', '--memory-limit',
+                        type=check_limit,
+                        default=256,
+                        dest='memory_limit',
+                        help='Memory limit value in megabytes (defaut 256)')
 
 
 def boca_read(file, args):
     """Reads the problem in the BOCA format."""
-    return readers.boca(file)
+    return readers.boca(file,
+                        time_limit=args.time_limit,
+                        memory_limit=args.memory_limit)
 
 
 def boca_writer_add_arguments(parser):

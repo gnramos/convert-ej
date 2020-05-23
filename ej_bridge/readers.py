@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-def boca(file):
+def boca(file, time_limit, memory_limit):
     """Reads a BOCA problem from file and returns it as an EJudgeProblem.
 
     http://bombonera.org/
@@ -84,12 +84,8 @@ def boca(file):
         return tests
 
     def get_limits():
-        # Implementar get_solutions() antes de implementar
-        time_msec = 1000
-        memory_B = 10000000
-
-        return {'time_sec': time_msec // 1000,
-                'memory_MB': memory_B // (2 ** 20)}
+        return {'time_sec': time_limit,
+                'memory_MB': memory_limit}
 
     def get_id_and_title():
         info = get_in_zip('description/problem.info').split('\n')
