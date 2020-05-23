@@ -112,7 +112,6 @@ def boca(file, time_limit, memory_limit):
         raise ValueError(f'{e}')
 
     return problem.EJudgeProblem(problem_id, statement, evaluation)
-    return NotImplementedError
 
 
 def polygon(file, stmt_lang='english'):
