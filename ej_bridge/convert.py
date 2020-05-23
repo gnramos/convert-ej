@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter, ArgumentTypeError
 import inspect
 import os
 import readers
@@ -26,7 +26,7 @@ def boca_reader_add_arguments(parser):
         """Checks the limit value."""
         ilimit = int(limit)
         if ilimit <= 0:
-            raise ValueError('Limit {limit} cannot be negative or zero')
+            raise ArgumentTypeError(f'Limit "{limit}" cannot be nonpositive')
         return ilimit
 
     parser.add_argument('-tl', '--time-limit',
@@ -77,8 +77,7 @@ def coderunner_writer_add_arguments(parser):
         """Checks the penalty value."""
         ipenalty = int(penalty)
         if ipenalty < 0:
-            raise ValueError('Penalty {penalty} cannot be negative')
-
+            raise ArgumentTypeError(f'Penalty "{penalty}" cannot be negative')
         return ipenalty
 
     parser.add_argument('-p', '--penalty',
@@ -142,14 +141,14 @@ def first_parsing():
                             if (entry.is_file() and
                                 not entry.name.startswith('.')))
         else:
-            raise ValueError('Must provide a valid file or directory')
+            raise ArgumentTypeError('Must provide a valid file or directory')
         return files
 
     def check_dir(path):
         """Check if the given path is of a directory."""
         if os.path.isdir(path):
             return path
-        raise ValueError(f'{path} is not a directory')
+        raise ArgumentTypeError(f'{path} is not a directory')
 
     def list_readers():
         return sorted([m[0]
