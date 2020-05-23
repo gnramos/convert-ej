@@ -1,8 +1,7 @@
 #  -*- coding: utf-8 -*-
 
 import os
-# from . import problem
-import problem
+from . import problem
 import xml.etree.ElementTree as ET
 import zipfile
 

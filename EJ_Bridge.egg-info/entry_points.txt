@@ -1,0 +1,3 @@
+[console_scripts]
+ejbridge = ej_bridge.convert:main
+
