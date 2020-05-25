@@ -1,13 +1,13 @@
 #  -*- coding: utf-8 -*-
 
 import os
-# from . import problem
 import problem
+import re
 import xml.etree.ElementTree as ET
 import zipfile
 
 
-def boca(file, time_limit, memory_limit):
+def boca(file):
     """Reads a BOCA problem from file and returns it as an EJudgeProblem.
 
     http://bombonera.org/
@@ -32,26 +32,35 @@ def boca(file, time_limit, memory_limit):
         images = {}
         examples = {}
         for entry in pzip.namelist():
-            if not pzip.getinfo(entry).is_dir() and entry.startswith('tex'):
-                entry_name = os.path.split(entry)[1]
+            if entry.startswith('tex/') and not pzip.getinfo(entry).is_dir():
+                print(f'processing {entry}')
+                entry_name = os.path.split(entry)[-1]
                 if entry_name == 'examples.csv':
-                    exps = get_in_zip(entry).split(',')
-                    for num in exps:
-                        examples[num] = {}
-                        examples[num]['in'] = get_in_zip(f'input/{num}')
-                        examples[num]['out'] = get_in_zip(f'output/{num}')
-                elif not entry_name.lower().endswith('.tex')\
-                        and not entry_name.lower().endswith('.cls'):
+                    files = get_in_zip(entry).split(',')
+                    for file in files:
+                        examples[file] = {}
+                        examples[file]['in'] = get_in_zip(f'input/{file}')
+                        examples[file]['out'] = get_in_zip(f'output/{file}')
+                elif not entry_name.lower().endswith(('.tex', '.cls')):
                     with pzip.open(entry) as f:
                         images[entry_name] = f.read()
 
         return images, [examples[k] for k in sorted(examples.keys())]
 
     def get_tags():
-        return [x.strip() for x in get_in_zip('tags.csv').split(',')
-                if x.strip()]
+        return [tag.strip()
+                for tag in get_in_zip('description/tags.csv').split(',')
+                if tag.strip()]
 
-    def get_tex(name):
+    def get_solutions():
+        def solution_code(tag):
+            return {os.path.splitext(entry)[1][1:]: get_in_zip(entry)
+                    for entry in pzip.namelist()
+                    if entry.lower().startswith(f'solutions/{tag}')}
+
+        return [solution_code('main'), solution_code('accepted')]
+
+    def get_stmt_tex(name):
         file = os.path.join('tex', f'{name}.tex')
         try:
             return get_in_zip(file).strip()
@@ -61,14 +70,6 @@ def boca(file, time_limit, memory_limit):
 
         print(f'\t{file} not in zip.')
         return ''
-
-    def get_solutions():
-        def solution_code(tag):
-            return {os.path.splitext(entry)[1][1:]: get_in_zip(entry)
-                    for entry in pzip.namelist()
-                    if entry.startswith(f'solutions/{tag}')}
-
-        return [solution_code('main'), solution_code('accepted')]
 
     def get_tests():
         test_files = [os.path.split(entry)[-1]
@@ -85,26 +86,49 @@ def boca(file, time_limit, memory_limit):
         return tests
 
     def get_limits():
-        return {'time_sec': time_limit,
-                'memory_MB': memory_limit}
+        def get(file):
+            limits = get_in_zip(f'limits/{file}')
+            (time_sec, num_repetitions, memory_MB,
+             max_file_size_KB) = re.findall(r'echo (\d+)', limits)
+            return {'time_sec': int(time_sec),
+                    'memory_MB': int(memory_MB)}
+
+        def try_for_python():
+            for version in ['', '3', '2']:  # this order matters
+                try:
+                    limits = get(f'py{version}')
+                    return limits
+                except ValueError:
+                    continue
+            else:
+                raise ValueError('Limits not found.')
+
+        for entry in pzip.namelist():
+            if entry.lower().startswith(f'solutions/main'):
+                _, ext = os.path.splitext(entry)
+                ext = ext[1:]  # remove leading '.'
+                return try_for_python() if ext == 'py' else get(ext)
+        else:
+            raise ValueError('Limits not found.')
 
     def get_id_and_title():
         info = get_in_zip('description/problem.info').split('\n')
-        return info[0].split('=')[1], info[1].split('=')[1]
+        basename, fullname = info[0], info[1]
+        return basename.split('=')[1], fullname.split('=')[1]
 
     try:
         with zipfile.ZipFile(file) as pzip:
             problem_id, title = get_id_and_title()
             images, examples = get_images_and_examples()
             statement = problem.Statement(title,
-                                          get_tex('description'),
-                                          get_tex('input'),
-                                          get_tex('output'),
+                                          get_stmt_tex('description'),
+                                          get_stmt_tex('input'),
+                                          get_stmt_tex('output'),
                                           examples,
                                           images,
                                           get_tags(),
-                                          get_tex('tutorial'),
-                                          get_tex('notes'))
+                                          get_stmt_tex('tutorial'),
+                                          get_stmt_tex('notes'))
             evaluation = problem.Evaluation(get_tests(),
                                             get_solutions(),
                                             get_limits())
