@@ -19,12 +19,13 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
       - BOCA works with zip files in a specific tree structure.
       - Template values for most configurations are defined in "templates"
       directory.
-      - This class adds a "tex" folder with the tree structure, where Statement
-      info is split into separate files, a "solutions" folder and a "tags.csv"
-      file, where the solutions and tags can be found.
+      - This adds to the tree structure:
+        - "/description/tags.csv" for listing keywords describing the problem.
+        - "/solutions/" to store source code solutions to the problem; and
+        - "/tex/" where Statement info split into separate files.
       - The composition of PDF is defined in main.tex file, "Notes" and
       "Tutorial" are included in the class options. Any necessary auxililary
-      files should be in that directory.
+      files (like images) should be in that directory.
 
     Keyword arguments:
     problem -- the EJudgeProblem containing the data for the problem
@@ -68,7 +69,8 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_pdf()
 
     def add_IO_dirs():
-        num_tests = sum(len(tests) for tests in problem.evaluation.tests.values())
+        num_tests = sum(len(tests)
+                        for tests in problem.evaluation.tests.values())
         num_digits = len(str(num_tests))
         for tests in problem.evaluation.tests.values():
             for name, files in tests.items():
@@ -107,7 +109,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                     add_dir(entry.path)
 
     def write_tags():
-        pzip.writestr('tags.csv',
+        pzip.writestr('description/tags.csv',
                       ','.join(tag for tag in problem.statement.tags))
 
     def write_solutions():
@@ -149,14 +151,17 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
                 write('examples', ','.join(examples), ext='.csv')
 
             def write_main():
-                notes = 'notes' if add_notes and problem.statement.notes else ''
-                tutorial = 'tutorial' if add_tutorial and problem.statement.tutorial else ''
+                options = []
+                if add_notes and problem.statement.notes:
+                    options.append('notes')
+                if add_tutorial and problem.statement.tutorial:
+                    options.append('tutorial')
 
                 with open(os.path.join(template_tex_dir, 'main.tex')) as f:
                     main = f.read()
-                    if notes or tutorial:
-                        main = main.replace('documentclass',
-                                            f'documentclass[{notes},{tutorial}]')
+                    options = ','.join(options)
+                    main = main.replace('documentclass',
+                                        f'documentclass[{options}]')
                     write('main', main)
 
             write('title', problem.statement.title)
@@ -183,6 +188,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
     # Setup
     if not os.path.isdir(tmp_dir):
         os.mkdir(tmp_dir)
+
     tmp_dir = os.path.join(tmp_dir, problem.id)
     if os.path.isdir(tmp_dir):
         shutil.rmtree(tmp_dir)
@@ -199,7 +205,7 @@ def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
         add_tex_dir()          # Generates TeX files
         add_description_dir()  # Also creates the pdf from the TeX files
         add_limits_dir()
-        write_tags()
+        write_tags()           # Writes CSV in the description directory.
         write_solutions()
         add_IO_dirs()          # Populates the input/output directories
         add_other_dirs(exceptions=['limits', 'tex'])
@@ -262,18 +268,20 @@ def coderunner(problem, output_dir='./', src_lang='all',
             tags.append(te)
 
     def append_tests():
-        def make_test(input, output, is_example):
+        def use_as_example(key):
+            return '1' if key == 'examples' else '0'
+
+        def set_test(test, key):
             xml = os.path.join(cwd, 'templates', 'CodeRunner', 'test.xml')
             root = ET.parse(xml).getroot()
-            root.find("stdin").find("text").text = input
-            root.find("expected").find("text").text = output
-            root.set("useasexample", '1' if is_example else '0')
+            root.find("stdin").find("text").text = test['in']
+            root.find("expected").find("text").text = test['out']
+            root.set("useasexample", use_as_example(key))
             return root
 
         for key, tests in problem.evaluation.tests.items():
-            for test in tests.values():
-                t = make_test(test['in'], test['out'], key == 'examples')
-                root.find("testcases").append(t)
+            for case in tests.values():
+                root.find("testcases").append(set_test(case, key))
 
     def CDATA(content):
         element = ET.Element('![CDATA[')
