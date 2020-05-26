@@ -2,6 +2,7 @@
 
 import base64
 import os
+import problem
 import re
 import shutil
 import subprocess
@@ -9,223 +10,217 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-def boca(problem, output_dir='./', tmp_dir='/tmp', basename=None,
-         add_notes=True, add_tutorial=False):
-    """Writes the given EJudgeProblem into a BOCA file.
+class BOCA(problem.Writer):
+    """Writes an E-judge problem in BOCA format."""
+    def _write(self, name, content, mode='w', ext='.tex'):
+        # To temporary dir.
+        file = os.path.join(self.tmp_tex_dir, f'{name}{ext}')
+        with open(file, mode) as f:
+            f.write(content)
 
-    http://bombonera.org/
+        # To the zip.
+        file = os.path.join('tex', f'{name}{ext}')
+        self.pzip.writestr(file, content)
 
-    Keep in mind that:
-      - BOCA works with zip files in a specific tree structure.
-      - Template values for most configurations are defined in "templates"
-      directory.
-      - This adds to the tree structure:
-        - "/description/tags.csv" for listing keywords describing the problem.
-        - "/solutions/" to store source code solutions to the problem; and
-        - "/tex/" where Statement info split into separate files.
-      - The composition of PDF is defined in main.tex file, "Notes" and
-      "Tutorial" are included in the class options. Any necessary auxililary
-      files (like images) should be in that directory.
+    def _write_aux_files(self):
+        def aux_files():
+            for name, file in self.problem.statement.aux_files.items():
+                self._write(name, file, mode='wb', ext='')
 
-    Keyword arguments:
-    problem -- the EJudgeProblem containing the data for the problem
-    output_dir -- the directory to write the file created
-    tmp_dir -- the directory to write temporary files, if necessary
-    basename -- the basename for problem info
-    add_notes -- boolean to include (or not) the "notes" in the PDF file
-    add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
-                    file
-    """
-    def add_description_dir():
-        def add_pdf():
-            def call_pdflatex():
-                cmd = ['pdflatex', '-halt-on-error', tex_file]
-                with open(os.devnull, 'w') as DEVNULL:
-                    try:
-                        subprocess.check_call(cmd, cwd=tmp_tex_dir,
-                                              stdout=DEVNULL)
-                    except subprocess.CalledProcessError:
-                        raise ValueError(f'Unable to create pdf'
-                                         f' from {tex_file}')
-                        # try:
-                        #     # run again to show errors
-                        #     subprocess.check_call(cmd, cwd=tmp_tex_dir)
-                        # except Exception:
-                        #     raise ValueError(f'Unable to create pdf '
-                        #                      f'from {tex_file}.tex')
+        def template_dirs():
+            def write_tmpl(dir_path):
+                with os.scandir(dir_path) as it:
+                    dir_name = os.path.split(dir_path)[-1]
+                    for entry in it:
+                        with open(entry.path, 'rb') as template:
+                            with self.pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
+                                f.write(template.read())
 
-            tex_file = os.path.join(tmp_tex_dir, 'main.tex')
-            call_pdflatex()
-            with open(os.path.join(tmp_tex_dir, 'main.pdf'), 'rb') as f:
-                pzip.writestr(f'description/{problem.id}.pdf', f.read())
+            with os.scandir(self.template_dir) as it:
+                for entry in it:
+                    if entry.is_dir() and entry.name not in ['limits', 'tex']:
+                        write_tmpl(entry.path)
+        aux_files()
+        template_dirs()
 
-        def add_problem_info():
-            pzip.writestr('description/problem.info',
-                          f'basename={problem.id}\n'
-                          f'fullname={problem.statement.title}\n'
-                          f'descfile={problem.id}.pdf\n')
+    def _write_description(self):
+        self._write('description', self.problem.statement.description)
 
-        add_problem_info()
-        add_pdf()
+    def _write_examples(self):
+        examples = []
+        # Write examples to temporary dir
+        os.mkdir(os.path.join(self.tmp_dir, 'input'))
+        os.mkdir(os.path.join(self.tmp_dir, 'output'))
+        for e, io in self.problem.evaluation.tests['examples'].items():
+            examples.append(e)
+            for key, value in io.items():
+                file = os.path.join(self.tmp_dir, f'{key}put', e)
+                with open(file, 'w') as f:
+                    f.write(value)
 
-    def add_IO_dirs():
-        num_tests = sum(len(tests)
-                        for tests in problem.evaluation.tests.values())
-        num_digits = len(str(num_tests))
-        for tests in problem.evaluation.tests.values():
-            for name, files in tests.items():
-                for io, data in files.items():
-                    pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
+        # Write list to TeX
+        self._write('examples', ','.join(examples), ext='.csv')
 
-    def add_limits_dir():
-        with os.scandir(os.path.join(template_dir, 'limits')) as it:
+    def _write_id(self):
+        self.pzip.writestr('description/problem.info',
+                           f'basename={self.problem.id}\n'
+                           f'fullname={self.problem.statement.title}\n'
+                           f'descfile={self.problem.id}.pdf\n')
+
+    def _write_input(self):
+        self._write('input', self.problem.statement.input)
+
+    def _write_output(self):
+        self._write('output', self.problem.statement.output)
+
+    def _write_limits(self):
+        self._write('time_limit', str(self.problem.evaluation.limits['time_sec']))
+
+        with os.scandir(os.path.join(self.template_dir, 'limits')) as it:
             for entry in it:
                 with open(entry.path) as f:
                     limits = [line.rstrip('\r\n')
                               for line in f.readlines()
                               if not line.startswith('#')]
 
-                time_sec = problem.evaluation.limits['time_sec']
-                memory_MB = problem.evaluation.limits['memory_MB']
+                time_sec = self.problem.evaluation.limits['time_sec']
+                memory_MB = self.problem.evaluation.limits['memory_MB']
                 limits[0] = f'echo {time_sec}'
                 # limits[1] = f'echo {num_repetitions}'
                 limits[2] = f'echo {memory_MB}'
                 # limits[3] = f'echo {max_file_size_KB}'
 
-                pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
+                self.pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
-    def add_other_dirs(exceptions):
-        def add_dir(dir_path):
-            with os.scandir(dir_path) as it:
-                dir_name = os.path.split(dir_path)[-1]
+    def _write_notes(self):
+        self._write('notes', self.problem.statement.notes)
+
+    def _write_pdf(self, options):
+        def call_pdflatex(tex_file):
+            cmd = ['pdflatex', '-halt-on-error', tex_file]
+            with open(os.devnull, 'w') as DEVNULL:
+                try:
+                    subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
+                                          stdout=DEVNULL)
+                except subprocess.CalledProcessError:
+                    raise ValueError(f'Unable to create pdf'
+                                     f' from {tex_file}')
+                    # try:
+                    #     # run again to show errors
+                    #     subprocess.check_call(cmd, cwd=tmp_tex_dir)
+                    # except Exception:
+                    #     raise ValueError(f'Unable to create pdf '
+                    #                      f'from {tex_file}.tex')
+
+        def write_templates():
+            with os.scandir(self.template_tex_dir) as it:
                 for entry in it:
-                    with open(entry.path, 'rb') as template:
-                        with pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
-                            f.write(template.read())
+                    if entry.is_file and not entry.name.startswith(('.', 'main.tex')):
+                        with open(entry.path) as tmpl_file:
+                            self._write(entry.name, tmpl_file.read(), ext='')
 
-        with os.scandir(template_dir) as it:
-            for entry in it:
-                if entry.is_dir() and entry.name not in exceptions:
-                    add_dir(entry.path)
+        def write_main():
+            with open(os.path.join(self.template_tex_dir, 'main.tex')) as f:
+                main = f.read()
+                main = main.replace('documentclass',
+                                    f'documentclass[{options}]')
+                self._write('main', main)
 
-    def write_tags():
-        pzip.writestr('description/tags.csv',
-                      ','.join(tag for tag in problem.statement.tags))
+        write_templates()
+        write_main()
+        call_pdflatex(os.path.join(self.tmp_tex_dir, 'main.tex'))
+        with open(os.path.join(self.tmp_tex_dir, 'main.pdf'), 'rb') as f:
+            self.pzip.writestr(f'description/{self.problem.id}.pdf',
+                               f.read())
 
-    def write_solutions():
-        sol = problem.evaluation.solutions
+    def _write_solutions(self):
+        sol = self.problem.evaluation.solutions
         for ext, solution in sol[0].items():
-            pzip.writestr(f'solutions/main.{ext}', solution)
+            self.pzip.writestr(f'solutions/main.{ext}', solution)
         for ext, solution in sol[1].items():
-            pzip.writestr(f'solutions/accepted.{ext}', solution)
+            self.pzip.writestr(f'solutions/accepted.{ext}', solution)
 
-    def add_tex_dir():
-        def write(name, content, mode='w', ext='.tex'):
-            # To temporary dir.
-            file = os.path.join(tmp_tex_dir, f'{name}{ext}')
-            with open(file, mode) as f:
-                f.write(content)
+    def _write_tags(self):
+        self.pzip.writestr('description/tags.csv',
+                           ','.join(tag for tag in self.problem.statement.tags))
 
-            # To the zip.
-            file = os.path.join('tex', f'{name}{ext}')
-            pzip.writestr(file, content)
+    def _write_tests(self):
+        num_tests = sum(len(tests)
+                        for tests in self.problem.evaluation.tests.values())
+        num_digits = len(str(num_tests))
+        for tests in self.problem.evaluation.tests.values():
+            for name, files in tests.items():
+                for io, data in files.items():
+                    self.pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
 
-        def write_image_files():
-            for name, img in problem.statement.images.items():
-                write(name, img, mode='wb', ext='')
+    def _write_title(self):
+        self._write('title', self.problem.statement.title)
 
-        def write_tex():
-            def write_examples():
-                examples = []
-                # Write examples to temporary dir
-                os.mkdir(os.path.join(tmp_dir, 'input'))
-                os.mkdir(os.path.join(tmp_dir, 'output'))
-                for e, io in problem.evaluation.tests['examples'].items():
-                    examples.append(e)
-                    for key, value in io.items():
-                        file = os.path.join(tmp_dir, f'{key}put', e)
-                        with open(file, 'w') as f:
-                            f.write(value)
+    def _write_tutorial(self):
+        self._write('tutorial', self.problem.statement.tutorial)
 
-                # Write list to TeX
-                write('examples', ','.join(examples), ext='.csv')
+    def write(self, problem, output_dir='./', tmp_dir='/tmp', add_notes=True,
+              add_tutorial=False):
+        """Writes the given EJudgeProblem into a BOCA file.
 
-            def write_main():
-                options = []
-                if add_notes and problem.statement.notes:
-                    options.append('notes')
-                if add_tutorial and problem.statement.tutorial:
-                    options.append('tutorial')
+        http://bombonera.org/
 
-                with open(os.path.join(template_tex_dir, 'main.tex')) as f:
-                    main = f.read()
-                    options = ','.join(options)
-                    main = main.replace('documentclass',
-                                        f'documentclass[{options}]')
-                    write('main', main)
+        Keep in mind that:
+          - BOCA works with zip files in a specific tree structure.
+          - Template values for most configurations are defined in "templates"
+          directory.
+          - This adds to the tree structure:
+            - "/description/tags.csv" for listing keywords describing the problem.
+            - "/solutions/" to store source code solutions to the problem; and
+            - "/tex/" where Statement info split into separate files.
+          - The composition of PDF is defined in main.tex file, "Notes" and
+          "Tutorial" are included in the class options. Any necessary auxililary
+          files (like images) should be in that directory.
 
-            write('title', problem.statement.title)
-            write('time_limit', str(problem.evaluation.limits['time_sec']))
-            write('description', problem.statement.description)
-            write('input', problem.statement.input)
-            write('output', problem.statement.output)
-            write_examples()
-            write('notes', problem.statement.notes)
-            write('tutorial', problem.statement.tutorial)
-            write_main()
+        Keyword arguments:
+        problem -- the EJudgeProblem containing the data for the problem
+        output_dir -- the directory to write the file created
+        tmp_dir -- the directory to write temporary files, if necessary
+        add_notes -- boolean to include (or not) the "notes" in the PDF file
+        add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
+                        file
+        """
+        # Setup
+        if not os.path.isdir(tmp_dir):
+            os.mkdir(tmp_dir)
 
-        template_tex_dir = os.path.join(template_dir, 'tex')
+        self.tmp_dir = os.path.join(tmp_dir, problem.id)
+        if os.path.isdir(self.tmp_dir):
+            shutil.rmtree(self.tmp_dir)
+        os.mkdir(self.tmp_dir)
+        self.tmp_tex_dir = os.path.join(self.tmp_dir, 'tex')
+        os.mkdir(self.tmp_tex_dir)
 
-        with os.scandir(template_tex_dir) as it:
-            for entry in it:
-                if entry.is_file and not entry.name.startswith(('.', 'main.tex')):
-                    with open(entry.path) as template:
-                        write(entry.name, template.read(), ext='')
+        class_options = []
+        if add_notes and problem.statement.notes:
+            class_options.append('notes')
+        if add_tutorial and problem.statement.tutorial:
+            class_options.append('tutorial')
 
-        write_tex()
-        write_image_files()
+        # Processing
+        problem_zip = os.path.join(output_dir, f'{problem.id}.zip')
+        cwd = os.path.abspath(os.path.dirname(__file__))
+        self.template_dir = os.path.join(cwd, 'templates', 'BOCA')
+        self.template_tex_dir = os.path.join(self.template_dir, 'tex')
 
-    # Setup
-    if not os.path.isdir(tmp_dir):
-        os.mkdir(tmp_dir)
+        with zipfile.ZipFile(problem_zip, 'w') as pzip:
+            self.pzip = pzip
+            super().write(problem, output_dir=output_dir)
+            self._write_pdf(','.join(class_options))
 
-    tmp_dir = os.path.join(tmp_dir, problem.id)
-    if os.path.isdir(tmp_dir):
-        shutil.rmtree(tmp_dir)
-    os.mkdir(tmp_dir)
-    tmp_tex_dir = os.path.join(tmp_dir, 'tex')
-    os.mkdir(tmp_tex_dir)
+        # Cleanup
+        shutil.rmtree(self.tmp_dir)
 
-    # Processing
-    problem_zip = os.path.join(output_dir, f'{problem.id}.zip')
-    cwd = os.path.abspath(os.path.dirname(__file__))
-    template_dir = os.path.join(cwd, 'templates', 'BOCA')
-
-    with zipfile.ZipFile(problem_zip, 'w') as pzip:
-        add_tex_dir()          # Generates TeX files
-        add_description_dir()  # Also creates the pdf from the TeX files
-        add_limits_dir()
-        write_tags()           # Writes CSV in the description directory.
-        write_solutions()
-        add_IO_dirs()          # Populates the input/output directories
-        add_other_dirs(exceptions=['limits', 'tex'])
-
-    # Cleanup
-    shutil.rmtree(tmp_dir)
-
-    print(f'\tCreated {problem_zip}.')
+        print(f'\tCreated {problem_zip}.')
 
 
-# Define accepted image and source code file types for dealing with CodeRunner.
-CODERUNNER = {'images': ('.jpg', '.png'),
-              'types': {'c': 'c_program',
-                        'cpp': 'cpp_program',
-                        'py': 'python3'}}
-
-
-def coderunner(problem, output_dir='./', src_lang='all',
-               all_or_nothing=False, penalty_after=2):
-    """Writes the given EJudgeProblem into a CodeRunner file.
+class CodeRunner(problem.Writer):
+    """Writes an E-judge problem in CodeRunner format.
 
     https://coderunner.org.nz/
 
@@ -236,105 +231,59 @@ def coderunner(problem, output_dir='./', src_lang='all',
       Choosing 'all' for language creates a new file per available solution.
       - Penalties are defined in a 10% growing series, i.e., each wrong attempt
       causes a 10% larges penalty in the question's points.
-
-    Keyword arguments:
-    problem -- the EJudgeProblem containing the data for the problem
-    output_dir -- the directory to write the file created
-    src_lang -- the specific language to create a file
-    all_or_nothing -- boolean defining the all-or-nothing marking behavior
-    penalty_after -- start the penalty regime (10% per mistake) after this
-                     number of attempts
     """
-    def add_solution(src_lang):
+
+    # Define accepted file types for dealing with CodeRunner.
+    FILES = {'source': {'c': 'c_program',
+                        'cpp': 'cpp_program',
+                        'py': 'python3'},
+             'raster images': ('jpeg', 'jpg', 'gif', 'png')}
+
+    def __init__(self):
+        cwd = os.path.abspath(os.path.dirname(__file__))
+        template_path = os.path.join(cwd, 'templates', 'CodeRunner')
+        self.problem_xml = os.path.join(template_path, 'problem.xml')
+        self.test_xml = os.path.join(template_path, 'test.xml')
+
+    def _add_solution(self, src_lang):
         def find_source(lang):
-            for solutions in problem.evaluation.solutions:
+            for solutions in self.problem.evaluation.solutions:
                 if lang in solutions.keys():
                     return solutions[lang]
             raise ValueError(f'No {lang} solution')
 
-        answer = root.find('answer')
-        if answer.getchildren():
-            answer.remove(answer.getchildren()[0])
+        answer = self.root.find('answer')
+        for a in answer:
+            answer.remove(a)
 
         source = find_source(src_lang)
-        answer.append(CDATA(source))
-        set_text('coderunnertype', CODERUNNER['types'][src_lang])
+        answer.append(self._CDATA(source))
+        self._set_text('coderunnertype', CodeRunner.FILES['source'][src_lang])
 
-    def add_tags():
-        tags = root.find("tags")
-        for tag in problem.statement.tags:
-            te = ET.Element('tag')
-            ET.SubElement(te, 'text').text = tag
-            tags.append(te)
-
-    def append_tests():
-        def use_as_example(key):
-            return '1' if key == 'examples' else '0'
-
-        def set_test(test, key):
-            xml = os.path.join(cwd, 'templates', 'CodeRunner', 'test.xml')
-            root = ET.parse(xml).getroot()
-            root.find("stdin").find("text").text = test['in']
-            root.find("expected").find("text").text = test['out']
-            root.set("useasexample", use_as_example(key))
-            return root
-
-        for key, tests in problem.evaluation.tests.items():
-            for case in tests.values():
-                root.find("testcases").append(set_test(case, key))
-
-    def CDATA(content):
+    def _CDATA(self, content):
         element = ET.Element('![CDATA[')
         element.text = content
         return element
 
-    def get_languages_from_solutions():
-        languages = set(CODERUNNER['types'].keys()
-                        if src_lang == 'all' else [src_lang])
-        available = set([k
-                        for solutions in problem.evaluation.solutions
-                        for k in solutions.keys()])
-        return available & languages
-
-    def set_questiontext():
-        def to_html(header, content):
-            html = tex2html(content).strip()
-            header = html_tag(header, 'b')
-            return f'<p>\n{header}\n{html}\n</p>\n'
-
-        formats = [('description', ''),
-                   ('input', 'Entrada'),
-                   ('output', 'Saída'),
-                   ('notes', 'Observações')]
-
-        html = '\n'.join(to_html(header, getattr(problem.statement, name))
-                         for name, header in formats)
-
-        qt = root.find('questiontext')
-        qt.find('text').append(CDATA(html))
-
-        for name, image in problem.statement.images.items():
-            if not name.lower().endswith(CODERUNNER['images']):
-                raise ValueError(f'Image {name} is not HTML compatible')
-
-            img = ET.Element('file')
-            img.set('name', name)
-            img.set('path', '/')
-            img.set('encoding', 'base64')
-            img.text = str(base64.b64encode(image), 'utf-8')
-            qt.append(img)
-
-    def set_text(name, value):
-        root.find(name).text = str(value)
-
-    def html_tag(text, tag='', options=''):
+    def _html_tag(self, text, tag='', options=''):
         if text and tag:
             if options:
                 options = f' {options}'
             return f'<{tag}{options}>{text}</{tag}>'
         return text
 
-    def tex2html(s):
+    def _set_languages(self, src_lang, solutions):
+        languages = set(CodeRunner.FILES['source'].keys()
+                        if src_lang == 'all' else [src_lang])
+        available = set([k
+                        for sol in solutions
+                        for k in sol.keys()])
+        return available & languages
+
+    def _set_text(self, name, value):
+        self.root.find(name).text = str(value)
+
+    def _tex2html(self, s):
         def environments(s):
             # Process item before the environment, using \ as end delimiter.
             s = re.sub(r'\\item ([.\s\S]*?)(?=\\)', r'<li>\1</li>\n', s)
@@ -342,10 +291,10 @@ def coderunner(problem, output_dir='./', src_lang='all',
             repl = {'itemize': 'ul', 'enumerate': 'ol'}
             for env, t in repl.items():
                 s = re.sub(f'\\\\begin{{{env}}}([.\s\S]*?)\\\\end{{{env}}}',
-                           html_tag('\\1', t), s)
+                           self._html_tag('\\1', t), s)
 
             s = re.sub(f'\\\\begin{{center}}([.\s\S]*?)\\\\end{{center}}',
-                       html_tag('\\1', 'p', 'style="text-align: center;"'),
+                       self._html_tag('\\1', 'p', 'style="text-align: center;"'),
                        s)
 
             return s
@@ -357,7 +306,7 @@ def coderunner(problem, output_dir='./', src_lang='all',
                     'texttt': 'tt',
                     't': 'tt'}  # This has issues with nested tags...
             for cmd, t in repl.items():
-                s = re.sub(f'\\\\{cmd}{{(.*?)}}', html_tag('\\1', tag=t), s)
+                s = re.sub(f'\\\\{cmd}{{(.*?)}}', self._html_tag('\\1', tag=t), s)
             return s
 
         def images(s):
@@ -386,10 +335,11 @@ def coderunner(problem, output_dir='./', src_lang='all',
                 return ' '.join(o for o in opts)
 
             def check_file(file):
-                if file in problem.statement.images:
+                if file in problem.statement.aux_files:
                     return file
 
-                for img in problem.statement.images:
+                # Extension may have been omitted
+                for img in problem.statement.aux_files:
                     if img.startswith(f'{file}.'):
                         return img
 
@@ -429,59 +379,150 @@ def coderunner(problem, output_dir='./', src_lang='all',
 
         return s
 
-    #######################################################################
-    # CDATA parsing isn't supported natively, so it needs an override.
-    _serialize_xml = ET._serialize_xml
+    def _write_aux_files(self):
+        for name, data in self.problem.statement.aux_files.items():
+            if name.lower().endswith(CodeRunner.FILES['raster images']):
+                img = ET.Element('file')
+                img.set('name', name)
+                img.set('path', '/')
+                img.set('encoding', 'base64')
+                img.text = str(base64.b64encode(data), 'utf-8')
+                self.question_text.append(img)
 
-    def _serialize_xml_with_CDATA(write, elem, qnames, namespaces,
-                                  short_empty_elements, **kwargs):
-        if elem.tag == '![CDATA[':
-            write("\n<{}{}]]>\n".format(elem.tag, elem.text))
-        else:
-            return _serialize_xml(write, elem, qnames, namespaces,
-                                  short_empty_elements, **kwargs)
+    def _write_description(self):
+        def to_html(header, content):
+            html = self._tex2html(content).strip()
+            header = self._html_tag(header, 'b')
+            return f'<p>\n{header}\n{html}\n</p>\n'
 
-    ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
-    #######################################################################
+        formats = [('description', ''),
+                   ('input', 'Entrada'),
+                   ('output', 'Saída')]
 
-    # Parse arguments #####################################################
-    languages = get_languages_from_solutions()
-    if not languages:
-        raise ValueError(f'No {src_lang} solution(s) available')
+        if self.problem.statement.notes:
+            formats.append(('notes', 'Observações'))
 
-    if penalty_after < 0:
-        raise ValueError(f'Penalty {penalty_after} cannot be negative')
-    #######################################################################
+        html = '\n'.join(to_html(header, getattr(self.problem.statement, name))
+                         for name, header in formats)
 
-    cwd = os.path.abspath(os.path.dirname(__file__))
-    xml = os.path.join(cwd, 'templates', 'CodeRunner', 'problem.xml')
-    tree = ET.parse(xml)
-    root = tree.getroot()[0]  # question root
+        self.root.find('questiontext').find('text').append(self._CDATA(html))
 
-    root.find('name').find('text').text = problem.statement.title
-    set_questiontext()
-    if problem.statement.tutorial:
-        root.find('generalfeedback').find(
-            'text').text = tex2html(problem.statement.tutorial.strip())
+    def _write_examples(self):
+        # Done in _write_tests
+        pass
 
-    append_tests()
-    add_tags()
+    def _write_id(self):
+        # Unecessary
+        pass
 
-    set_text('cputimelimitsecs', problem.evaluation.limits['time_sec'])
-    set_text('memlimitmb', problem.evaluation.limits['memory_MB'])
-    set_text('allornothing', 1 if all_or_nothing else 0)
+    def _write_input(self):
+        # Done in _write_description
+        pass
 
-    penalty_regime = ', '.join((['0'] * penalty_after) + ['10', '20', '...'])
-    set_text('penaltyregime', penalty_regime)
+    def _write_output(self):
+        # Done in _write_description
+        pass
 
-    for lang in languages:
-        add_solution(lang)
+    def _write_limits(self):
+        self._set_text('cputimelimitsecs', self.problem.evaluation.limits['time_sec'])
+        self._set_text('memlimitmb', self.problem.evaluation.limits['memory_MB'])
 
-        file = os.path.join(output_dir, f'{problem.id}-{lang}.xml')
-        tree.write(file, 'UTF-8')
-        print(f'\tCreated {file}.')
+    def _write_notes(self):
+        # Done in _write_description
+        pass
 
-    #######################################################################
-    # Undo override to handle CDATA.
-    ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
-    #######################################################################
+    def _write_solutions(self):
+        # Since there is a file for each language, solutions are written in a
+        # loop in "write", using _add_solution.
+        pass
+
+    def _write_tags(self):
+        tags = self.root.find("tags")
+        for tag in self.problem.statement.tags:
+            te = ET.Element('tag')
+            ET.SubElement(te, 'text').text = tag
+            tags.append(te)
+
+    def _write_tests(self):
+        def use_as_example(key):
+            return '1' if key == 'examples' else '0'
+
+        def set_test(test, key):
+            xml = os.path.join(self.test_xml)
+            root = ET.parse(xml).getroot()
+            root.find("stdin").find("text").text = test['in']
+            root.find("expected").find("text").text = test['out']
+            root.set("useasexample", use_as_example(key))
+            return root
+
+        for key, tests in self.problem.evaluation.tests.items():
+            for case in tests.values():
+                self.root.find("testcases").append(set_test(case, key))
+
+    def _write_title(self):
+        self.root.find('name').find('text').text = self.problem.statement.title
+
+    def _write_tutorial(self):
+        if self.problem.statement.tutorial:
+            tutorial = self._tex2html(self.problem.statement.tutorial.strip())
+            self.root.find('generalfeedback').find('text').text = tutorial
+
+    def write(self, problem, output_dir='./', src_lang='all',
+              all_or_nothing=False, penalty_after=2):
+        """Writes the given EJudgeProblem into a CodeRunner file.
+
+        Keyword arguments:
+        problem -- the EJudgeProblem containing the data for the problem
+        output_dir -- the directory to write the file created
+        src_lang -- the specific language to create a file
+        all_or_nothing -- boolean defining the all-or-nothing marking behavior
+        penalty_after -- start the penalty regime (10% per mistake) after this
+                         number of attempts
+        """
+        #######################################################################
+        # CDATA parsing isn't supported natively, so it needs an override.
+        _serialize_xml = ET._serialize_xml
+
+        def _serialize_xml_with_CDATA(write, elem, qnames, namespaces,
+                                      short_empty_elements, **kwargs):
+            if elem.tag == '![CDATA[':
+                write("\n<{}{}]]>\n".format(elem.tag, elem.text))
+            else:
+                return _serialize_xml(write, elem, qnames, namespaces,
+                                      short_empty_elements, **kwargs)
+
+        ET._serialize_xml = ET._serialize['xml'] = _serialize_xml_with_CDATA
+        #######################################################################
+
+        # Parse arguments #####################################################
+        languages = self._set_languages(src_lang, problem.evaluation.solutions)
+        if not languages:
+            raise ValueError(f'No {src_lang} solution(s) available')
+
+        if penalty_after < 0:
+            raise ValueError(f'Penalty {penalty_after} cannot be negative')
+        #######################################################################
+
+        tree = ET.parse(self.problem_xml)
+        self.root = tree.getroot()[0]  # question root
+
+        super().write(problem, output_dir=output_dir)
+
+        self._set_text('allornothing', 1 if all_or_nothing else 0)
+
+        penalty_regime = ', '.join((['0'] * penalty_after) + ['10', '20', '...'])
+        self._set_text('penaltyregime', penalty_regime)
+
+        for lang in languages:
+            self._add_solution(lang)
+
+            file = os.path.join(output_dir, f'{problem.id}-{lang}.xml')
+            tree.write(file, 'UTF-8')
+            print(f'\tCreated {file}.')
+
+        self.root = None
+
+        #######################################################################
+        # Undo override to handle CDATA.
+        ET._serialize_xml = ET._serialize['xml'] = _serialize_xml
+        #######################################################################

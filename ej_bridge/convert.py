@@ -7,8 +7,6 @@ import os
 import sys
 import readers
 import writers
-# from . import readers
-# from . import writers
 
 
 class DefaultHelpParser(ArgumentParser):
@@ -22,40 +20,39 @@ class DefaultHelpParser(ArgumentParser):
 
 
 ###############################################################################
-def boca_reader_add_arguments(parser):
+def BOCA_reader_add_arguments(parser):
     """Adds command line arguments for reading a problem in BOCA format."""
     pass
 
 
-def boca_read(file, args):
+def BOCA_read(file, args):
     """Reads the problem in the BOCA format."""
-    return readers.boca(file)
+    boca = readers.BOCA()
+    return boca.read(file)
 
 
-def boca_writer_add_arguments(parser):
+def BOCA_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in BOCA format."""
     parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
                         help='Directory for storing temporary files')
-    parser.add_argument('-b', '--basename', default=None,
-                        help='Basename for problem description')
     parser.add_argument('--notes', action='store_true',
                         help='Include the notes in the PDF')
     parser.add_argument('--tutorial', action='store_true',
                         help='Include the tutorial in the PDF')
 
 
-def boca_write(ejproblem, args):
+def BOCA_write(ejproblem, args):
     """Writes the problem in the BOCA format."""
-    writers.boca(ejproblem,
-                 output_dir=args.output_dir,
-                 tmp_dir=args.tmp_dir,
-                 basename=args.basename,
-                 add_notes=args.notes,
-                 add_tutorial=args.tutorial)
+    boca = writers.BOCA()
+    boca.write(ejproblem,
+               output_dir=args.output_dir,
+               tmp_dir=args.tmp_dir,
+               add_notes=args.notes,
+               add_tutorial=args.tutorial)
 
 
 ###############################################################################
-def coderunner_writer_add_arguments(parser):
+def CodeRunner_writer_add_arguments(parser):
     """Adds command line arguments for writing a problem in CodeRunner format."""
     def check_penalty(penalty):
         """Checks the penalty value."""
@@ -75,7 +72,7 @@ def coderunner_writer_add_arguments(parser):
                         dest='all_or_nothing',
                         help='Set all-or-nothing marking behavior')
 
-    languages = sorted(list(writers.CODERUNNER['types'].keys()))
+    languages = sorted(list(writers.CodeRunner.FILES['source'].keys()))
     parser.add_argument('-al', '--answer-language',
                         dest='answer_language',
                         choices=languages,
@@ -83,17 +80,18 @@ def coderunner_writer_add_arguments(parser):
                         help='Set programming language for answer(s)')
 
 
-def coderunner_write(ejproblem, args):
+def CodeRunner_write(ejproblem, args):
     """Writes the problem in the CodeRunner format."""
-    writers.coderunner(ejproblem,
-                       output_dir=args.output_dir,
-                       src_lang=args.answer_language,
-                       all_or_nothing=args.all_or_nothing,
-                       penalty_after=args.penalty)
+    cr = writers.CodeRunner()
+    cr.write(ejproblem,
+             output_dir=args.output_dir,
+             src_lang=args.answer_language,
+             all_or_nothing=args.all_or_nothing,
+             penalty_after=args.penalty)
 
 
 ###############################################################################
-def polygon_reader_add_arguments(parser):
+def Polygon_reader_add_arguments(parser):
     """Adds command line arguments for reading a problem in Polygon format."""
     parser.add_argument('-sl', '--statement-language',
                         dest='stmt_lang',
@@ -101,9 +99,10 @@ def polygon_reader_add_arguments(parser):
                         help='Set statement language')
 
 
-def polygon_read(file, args):
+def Polygon_read(file, args):
     """Reads the problem in the Polygon format."""
-    return readers.polygon(file, args.stmt_lang)
+    polygon = readers.Polygon(args.stmt_lang)
+    return polygon.read(file)
 
 
 ###############################################################################
@@ -137,12 +136,14 @@ def first_parsing():
     def list_readers():
         return sorted([m[0]
                        for m in inspect.getmembers(readers,
-                                                   inspect.isfunction)])
+                                                   inspect.isclass)
+                       if not inspect.isabstract(m[1])])
 
     def list_writers():
         return sorted([m[0]
                        for m in inspect.getmembers(writers,
-                                                   inspect.isfunction)])
+                                                   inspect.isclass)
+                       if not inspect.isabstract(m[1])])
 
     # If required, the standard "help" action is processed in the 1st parsing
     # step and then the program exits (as per argparse design), thus it would
