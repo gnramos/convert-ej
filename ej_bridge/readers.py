@@ -158,16 +158,6 @@ class BOCA(ZipReader):
 
 
 class Polygon(ZipReader):
-    def __init__(self, stmt_lang='english'):
-        """Reads a polygon problem from file and returns it as an EJudgeProblem.
-
-        Keyword arguments:
-        file -- the file containing the data for the problem
-        stmt_lang -- the language the statement of the problem is written in.
-        """
-        self.stmt_lang = stmt_lang
-        self.root = None
-
     def _get_root(self):
         if self.root is None:
             with self.pzip.open('problem.xml') as f:
@@ -279,3 +269,14 @@ class Polygon(ZipReader):
 
     def _read_tutorial(self):
         return self._read_stmt_tex('tutorial')
+
+    def read(self, file, stmt_lang='english'):
+        """Reads a polygon problem from file and returns it as an EJudgeProblem.
+
+        Keyword arguments:
+        file -- the file containing the data for the problem
+        stmt_lang -- the language the statement of the problem is written in.
+        """
+        self.stmt_lang = stmt_lang
+        self.root = None
+        return super().read(file)
