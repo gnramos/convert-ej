@@ -59,11 +59,10 @@ class BOCA(ZipReader):
 
     def _read_examples(self):
         examples = {}
-        files = self._get_in_zip('tex/examples.csv').split(',')
-        for file in files:
-            examples[file] = {}
-            examples[file]['in'] = self._get_in_zip(f'input/{file}')
-            examples[file]['out'] = self._get_in_zip(f'output/{file}')
+        for num in self._get_in_zip('tex/examples.csv').split(','):
+            examples[num] = {}
+            examples[num]['in'] = self._get_in_zip(f'input/{num}')
+            examples[num]['out'] = self._get_in_zip(f'output/{num}')
 
         return [examples[k] for k in sorted(examples.keys())]
 
