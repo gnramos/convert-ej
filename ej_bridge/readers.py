@@ -59,16 +59,11 @@ class BOCA(ZipReader):
 
     def _read_examples(self):
         examples = {}
-        for entry in self.pzip.namelist():
-            if entry.startswith('tex/') and not self.pzip.getinfo(entry).is_dir():
-                entry_name = os.path.split(entry)[-1].lower()
-                if entry_name == 'examples.csv':
-                    files = self._get_in_zip(entry).split(',')
-                    for file in files:
-                        examples[file] = {}
-                        examples[file]['in'] = self._get_in_zip(f'input/{file}')
-                        examples[file]['out'] = self._get_in_zip(f'output/{file}')
-                    break
+        files = self._get_in_zip('tex/examples.csv').split(',')
+        for file in files:
+            examples[file] = {}
+            examples[file]['in'] = self._get_in_zip(f'input/{file}')
+            examples[file]['out'] = self._get_in_zip(f'output/{file}')
 
         return [examples[k] for k in sorted(examples.keys())]
 
