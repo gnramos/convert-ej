@@ -143,17 +143,13 @@ def base_parser():
             return path
         raise ArgumentTypeError(f'{path} is not a directory')
 
-    def list_readers():
+    def list_formats(module):
         return sorted([m[0]
-                       for m in inspect.getmembers(readers,
+                       for m in inspect.getmembers(getattr(cur_module, module),
                                                    inspect.isclass)
                        if not inspect.isabstract(m[1])])
 
-    def list_writers():
-        return sorted([m[0]
-                       for m in inspect.getmembers(writers,
-                                                   inspect.isclass)
-                       if not inspect.isabstract(m[1])])
+    cur_module = sys.modules[__name__]
 
     # If required, the standard "help" action is processed in the 1st parsing
     # step and then the program exits (as per argparse design), thus it would
@@ -163,9 +159,9 @@ def base_parser():
                                add_help=False,
                                formatter_class=RawTextHelpFormatter)
 
-    parser.add_argument('reader', choices=list_readers(),
+    parser.add_argument('reader', choices=list_formats('readers'),
                         help='Input e-judge format')
-    parser.add_argument('writer', choices=list_writers(),
+    parser.add_argument('writer', choices=list_formats('writers'),
                         help='Output e-judge format')
     parser.add_argument('files', type=list_input,
                         help='Path of a file or a folder of files to convert'
