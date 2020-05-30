@@ -2,7 +2,7 @@
 
 import base64
 import os
-import problem
+import utils
 import re
 import shutil
 import subprocess
@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-class BOCA(problem.Writer):
+class BOCA(utils.Writer):
     """Writes an E-judge problem in BOCA format."""
     def _write(self, name, content, mode='w', ext='.tex'):
         # To temporary dir.
@@ -219,7 +219,7 @@ class BOCA(problem.Writer):
         print(f'\tCreated {problem_zip}.')
 
 
-class CodeRunner(problem.Writer):
+class CodeRunner(utils.Writer):
     """Writes an E-judge problem in CodeRunner format.
 
     https://coderunner.org.nz/
@@ -335,11 +335,11 @@ class CodeRunner(problem.Writer):
                 return ' '.join(o for o in opts)
 
             def check_file(file):
-                if file in problem.statement.aux_files:
+                if file in self.problem.statement.aux_files:
                     return file
 
                 # Extension may have been omitted
-                for img in problem.statement.aux_files:
+                for img in self.problem.statement.aux_files:
                     if img.startswith(f'{file}.'):
                         return img
 
@@ -352,7 +352,7 @@ class CodeRunner(problem.Writer):
 
                 pattern = f'\\\\includegraphics.*?{{{file}}}'
                 image = f'src="@@PLUGINFILE@@/{c_file}" {options}'
-                s = re.sub(pattern, html_tag(' ', 'img', image), s)
+                s = re.sub(pattern, self._html_tag(' ', 'img', image), s)
             return s
 
         def math(s):

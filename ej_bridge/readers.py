@@ -1,13 +1,13 @@
 #  -*- coding: utf-8 -*-
 
 import os
-import problem
+import utils
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 
 
-class ZipReader(problem.Reader):
+class ZipReader(utils.Reader):
     """Abstract file for reading an E-judge problem from a zip file."""
     def _get_in_zip(self, file):
         try:
