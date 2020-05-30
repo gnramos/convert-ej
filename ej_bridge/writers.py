@@ -387,7 +387,7 @@ class CodeRunner(utils.Writer):
                 img.set('path', '/')
                 img.set('encoding', 'base64')
                 img.text = str(base64.b64encode(data), 'utf-8')
-                self.question_text.append(img)
+                self.root.find('questiontext').append(img)
 
     def _write_description(self):
         def to_html(header, content):
