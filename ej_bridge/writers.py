@@ -85,10 +85,11 @@ class BOCA(utils.Writer):
 
                 time_sec = self.problem.evaluation.limits['time_sec']
                 memory_MB = self.problem.evaluation.limits['memory_MB']
+                maxfilesize_KB = self.problem.evaluation.limits['maxfilesize_KB']
                 limits[0] = f'echo {time_sec}'
                 # limits[1] = f'echo {num_repetitions}'
                 limits[2] = f'echo {memory_MB}'
-                # limits[3] = f'echo {max_file_size_KB}'
+                limits[3] = f'echo {maxfilesize_KB}'
 
                 self.pzip.writestr(f'limits/{entry.name}', '\n'.join(limits))
 
@@ -426,6 +427,7 @@ class CodeRunner(utils.Writer):
     def _write_limits(self):
         self._set_text('cputimelimitsecs', self.problem.evaluation.limits['time_sec'])
         self._set_text('memlimitmb', self.problem.evaluation.limits['memory_MB'])
+        self._set_text('maxfilesize', self.problem.evaluation.limits['maxfilesize_KB'])
 
     def _write_notes(self):
         # Done in _write_description

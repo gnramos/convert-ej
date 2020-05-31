@@ -80,9 +80,10 @@ class BOCA(ZipReader):
         def get_limits(file):
             limits = self._get_in_zip(f'limits/{file}')
             (time_sec, num_repetitions, memory_MB,
-             max_file_size_KB) = re.findall(r'echo (\d+)', limits)
+             maxfilesize_KB) = re.findall(r'echo (\d+)', limits)
             return {'time_sec': int(time_sec),
-                    'memory_MB': int(memory_MB)}
+                    'memory_MB': int(memory_MB),
+                    'maxfilesize_KB': int(maxfilesize_KB)}
 
         def try_for_python():
             for version in ['', '3', '2']:  # this order matters
@@ -205,9 +206,11 @@ class Polygon(ZipReader):
         testset = self._get_root().find('judging/testset')
         time_msec = int(testset.find('time-limit').text)
         memory_B = int(testset.find('memory-limit').text)
+        maxfilesize_KB = 64  # defaut value
 
         return {'time_sec': time_msec // 1000,
-                'memory_MB': memory_B // (2 ** 20)}
+                'memory_MB': memory_B // (2 ** 20),
+                'maxfilesize_KB': maxfilesize_KB}
 
     def _read_notes(self):
         return self._read_stmt_tex('notes')

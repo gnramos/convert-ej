@@ -78,6 +78,7 @@ class Evaluation():
         assert solutions[0] and isinstance(solutions[0], dict)
         assert limits['time_sec'] > 0
         assert limits['memory_MB'] > 0
+        assert limits['maxfilesize_KB'] > 0
 
 
 class EJudgeProblem():
