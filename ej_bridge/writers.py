@@ -468,7 +468,7 @@ class CodeRunner(Writer):
         def to_html(header, content):
             html = self._tex2html(content).strip()
             header = self._html_tag(header, 'b')
-            return f'<p>\n{header}\n{html}\n</p>\n'
+            return f'<p>\n{header}\n<br>\n{html}\n</p>\n'
 
         formats = [('description', ''),
                    ('input', 'Entrada'),
