@@ -86,7 +86,7 @@ class EJudgeParser(ArgumentParser):
         return sorted([m[0]
                        for m in inspect.getmembers(getattr(curr, module),
                                                    inspect.isclass)
-                       if not inspect.isabstract(m[1])])
+                       if not inspect.isabstract(m[1]) and m[0] != 'ABC'])
 
     def error(self, message):
         """Shows "help" in case of an error parsing."""
