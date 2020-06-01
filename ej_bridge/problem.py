@@ -11,7 +11,7 @@ class Statement():
     """
 
     def __init__(self, title, description, in_format, out_format, examples,
-                 images={}, tags=[], tutorial=None, notes=None):
+                 aux_files={}, tags=[], tutorial=None, notes=None):
         """Class constructor.
 
         Keyword arguments:
@@ -33,7 +33,7 @@ class Statement():
         self.input = in_format
         self.output = out_format
         self.examples = examples
-        self.images = images
+        self.aux_files = aux_files
         self.tags = tags
         self.tutorial = tutorial
         self.notes = notes
@@ -48,8 +48,8 @@ class Statement():
             assert ex['in']
             assert 'out' in ex
             assert ex['out']
-        if images:
-            assert isinstance(images, dict)
+        if aux_files:
+            assert isinstance(aux_files, dict)
 
 
 class Evaluation():
@@ -76,9 +76,10 @@ class Evaluation():
         assert solutions[0] and isinstance(solutions[0], dict)
         assert limits['time_sec'] > 0
         assert limits['memory_MB'] > 0
+        assert limits['maxfilesize_KB'] > 0
 
 
-class EJudgeProblem():
+class Problem():
     """Stores the information required to present and evaluate a problem."""
 
     def __init__(self, id, statement, evaluation):
