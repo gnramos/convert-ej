@@ -1,7 +1,5 @@
 #  -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-
 
 class Statement():
     """Stores the information required to state a problem.
@@ -81,7 +79,7 @@ class Evaluation():
         assert limits['maxfilesize_KB'] > 0
 
 
-class EJudgeProblem():
+class Problem():
     """Stores the information required to present and evaluate a problem."""
 
     def __init__(self, id, statement, evaluation):
@@ -100,148 +98,3 @@ class EJudgeProblem():
         assert id
         assert isinstance(statement, Statement)
         assert isinstance(evaluation, Evaluation)
-
-
-class Reader(ABC):
-    """Abstract class for reading an E-judge problem."""
-    @abstractmethod
-    def _read_aux_files(self):
-        pass
-
-    @abstractmethod
-    def _read_description(self):
-        pass
-
-    @abstractmethod
-    def _read_examples(self):
-        pass
-
-    @abstractmethod
-    def _read_id(self):
-        pass
-
-    @abstractmethod
-    def _read_input(self):
-        pass
-
-    @abstractmethod
-    def _read_output(self):
-        pass
-
-    @abstractmethod
-    def _read_limits(self):
-        pass
-
-    @abstractmethod
-    def _read_notes(self):
-        pass
-
-    @abstractmethod
-    def _read_solutions(self):
-        pass
-
-    @abstractmethod
-    def _read_tags(self):
-        pass
-
-    @abstractmethod
-    def _read_tests(self):
-        pass
-
-    @abstractmethod
-    def _read_title(self):
-        pass
-
-    @abstractmethod
-    def _read_tutorial(self):
-        pass
-
-    def read(self, file):
-        """Return an EJudgeProblem from the information in the given file."""
-        statement = Statement(self._read_title(),
-                              self._read_description(),
-                              self._read_input(),
-                              self._read_output(),
-                              self._read_examples(),
-                              self._read_aux_files(),
-                              self._read_tags(),
-                              self._read_tutorial(),
-                              self._read_notes())
-        evaluation = Evaluation(self._read_tests(),
-                                self._read_solutions(),
-                                self._read_limits())
-        return EJudgeProblem(self._read_id(), statement, evaluation)
-
-
-class Writer(ABC):
-    """Abstract class for writing an E-judge problem."""
-    @abstractmethod
-    def _write_aux_files(self):
-        pass
-
-    @abstractmethod
-    def _write_description(self):
-        pass
-
-    @abstractmethod
-    def _write_examples(self):
-        pass
-
-    @abstractmethod
-    def _write_id(self):
-        pass
-
-    @abstractmethod
-    def _write_input(self):
-        pass
-
-    @abstractmethod
-    def _write_output(self):
-        pass
-
-    @abstractmethod
-    def _write_limits(self):
-        pass
-
-    @abstractmethod
-    def _write_notes(self):
-        pass
-
-    @abstractmethod
-    def _write_solutions(self):
-        pass
-
-    @abstractmethod
-    def _write_tags(self):
-        pass
-
-    @abstractmethod
-    def _write_tests(self):
-        pass
-
-    @abstractmethod
-    def _write_title(self):
-        pass
-
-    @abstractmethod
-    def _write_tutorial(self):
-        pass
-
-    def write(self, problem, output_dir='./'):
-        """Writes an EJudgeProblem to a file."""
-        self.problem = problem
-        self.output_dir = output_dir
-
-        self._write_id()
-        self._write_title()
-        self._write_description()
-        self._write_input()
-        self._write_output()
-        self._write_examples()
-        self._write_aux_files()
-        self._write_tags()
-        self._write_tutorial()
-        self._write_notes()
-        self._write_tests()
-        self._write_solutions()
-        self._write_limits()

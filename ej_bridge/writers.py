@@ -1,8 +1,8 @@
 #  -*- coding: utf-8 -*-
 
+from abc import ABC, abstractmethod
 import base64
 import os
-import utils
 import re
 import shutil
 import subprocess
@@ -10,7 +10,81 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 
-class BOCA(utils.Writer):
+class Writer(ABC):
+    """Abstract class for writing an E-judge problem."""
+    @abstractmethod
+    def _write_aux_files(self):
+        pass
+
+    @abstractmethod
+    def _write_description(self):
+        pass
+
+    @abstractmethod
+    def _write_examples(self):
+        pass
+
+    @abstractmethod
+    def _write_id(self):
+        pass
+
+    @abstractmethod
+    def _write_input(self):
+        pass
+
+    @abstractmethod
+    def _write_output(self):
+        pass
+
+    @abstractmethod
+    def _write_limits(self):
+        pass
+
+    @abstractmethod
+    def _write_notes(self):
+        pass
+
+    @abstractmethod
+    def _write_solutions(self):
+        pass
+
+    @abstractmethod
+    def _write_tags(self):
+        pass
+
+    @abstractmethod
+    def _write_tests(self):
+        pass
+
+    @abstractmethod
+    def _write_title(self):
+        pass
+
+    @abstractmethod
+    def _write_tutorial(self):
+        pass
+
+    def write(self, problem, output_dir='./'):
+        """Writes an Problem to a file."""
+        self.problem = problem
+        self.output_dir = output_dir
+
+        self._write_id()
+        self._write_title()
+        self._write_description()
+        self._write_input()
+        self._write_output()
+        self._write_examples()
+        self._write_aux_files()
+        self._write_tags()
+        self._write_tutorial()
+        self._write_notes()
+        self._write_tests()
+        self._write_solutions()
+        self._write_limits()
+
+
+class BOCA(Writer):
     """Writes an E-judge problem in BOCA format."""
     def _write(self, name, content, mode='w', ext='.tex'):
         # To temporary dir.
@@ -162,7 +236,7 @@ class BOCA(utils.Writer):
 
     def write(self, problem, output_dir='./', tmp_dir='/tmp', add_notes=True,
               add_tutorial=False):
-        """Writes the given EJudgeProblem into a BOCA file.
+        """Writes the given Problem into a BOCA file.
 
         http://bombonera.org/
 
@@ -179,7 +253,7 @@ class BOCA(utils.Writer):
           files (like images) should be in that directory.
 
         Keyword arguments:
-        problem -- the EJudgeProblem containing the data for the problem
+        problem -- the Problem containing the data for the problem
         output_dir -- the directory to write the file created
         tmp_dir -- the directory to write temporary files, if necessary
         add_notes -- boolean to include (or not) the "notes" in the PDF file
@@ -220,7 +294,7 @@ class BOCA(utils.Writer):
         print(f'\tCreated {problem_zip}.')
 
 
-class CodeRunner(utils.Writer):
+class CodeRunner(Writer):
     """Writes an E-judge problem in CodeRunner format.
 
     https://coderunner.org.nz/
@@ -471,10 +545,10 @@ class CodeRunner(utils.Writer):
 
     def write(self, problem, output_dir='./', src_lang='all',
               all_or_nothing=False, penalty_after=2):
-        """Writes the given EJudgeProblem into a CodeRunner file.
+        """Writes the given Problem into a CodeRunner file.
 
         Keyword arguments:
-        problem -- the EJudgeProblem containing the data for the problem
+        problem -- the Problem containing the data for the problem
         output_dir -- the directory to write the file created
         src_lang -- the specific language to create a file
         all_or_nothing -- boolean defining the all-or-nothing marking behavior

@@ -1,13 +1,85 @@
 #  -*- coding: utf-8 -*-
 
+from abc import ABC, abstractmethod
+import problem
 import os
-import utils
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 
 
-class ZipReader(utils.Reader):
+class Reader(ABC):
+    """Abstract class for reading an E-judge problem."""
+    @abstractmethod
+    def _read_aux_files(self):
+        pass
+
+    @abstractmethod
+    def _read_description(self):
+        pass
+
+    @abstractmethod
+    def _read_examples(self):
+        pass
+
+    @abstractmethod
+    def _read_id(self):
+        pass
+
+    @abstractmethod
+    def _read_input(self):
+        pass
+
+    @abstractmethod
+    def _read_output(self):
+        pass
+
+    @abstractmethod
+    def _read_limits(self):
+        pass
+
+    @abstractmethod
+    def _read_notes(self):
+        pass
+
+    @abstractmethod
+    def _read_solutions(self):
+        pass
+
+    @abstractmethod
+    def _read_tags(self):
+        pass
+
+    @abstractmethod
+    def _read_tests(self):
+        pass
+
+    @abstractmethod
+    def _read_title(self):
+        pass
+
+    @abstractmethod
+    def _read_tutorial(self):
+        pass
+
+    def read(self, file):
+        """Return a Problem from the information in the given file."""
+        statement = problem.Statement(self._read_title(),
+                                      self._read_description(),
+                                      self._read_input(),
+                                      self._read_output(),
+                                      self._read_examples(),
+                                      self._read_aux_files(),
+                                      self._read_tags(),
+                                      self._read_tutorial(),
+                                      self._read_notes())
+        evaluation = problem.Evaluation(self._read_tests(),
+                                        self._read_solutions(),
+                                        self._read_limits())
+        return problem.Problem(self._read_id(), statement, evaluation)
+
+
+class ZipReader(Reader):
     """Abstract file for reading an E-judge problem from a zip file."""
     def _get_in_zip(self, file):
         try:
@@ -31,7 +103,7 @@ class ZipReader(utils.Reader):
 
 
 class BOCA(ZipReader):
-    """Reads a BOCA problem from file and returns it as an EJudgeProblem.
+    """Reads a BOCA problem from file and returns it as an Problem.
 
     http://bombonera.org/
 
@@ -268,7 +340,7 @@ class Polygon(ZipReader):
         return self._read_stmt_tex('tutorial')
 
     def read(self, file, stmt_lang='english'):
-        """Reads a polygon problem from file and returns it as an EJudgeProblem.
+        """Reads a polygon problem from file and returns it as an Problem.
 
         Keyword arguments:
         file -- the file containing the data for the problem
