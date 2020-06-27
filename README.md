@@ -11,28 +11,18 @@ pip install -i https://test.pypi.org/simple/ EJ-Bridge
 ```
 
 ## Usage
-
-## Codeforces to Coderunner
-
-Creating coderunner problems using a codeforces problems.
+The file can be translated by using the command line tool "ejbridge":
 ```
-ejbridge cf2cr files
-```
-Parameters:
-
-* files : name of the .zip file, or the name of a path with .zip files inside;
-* -p : string argument for penalties;
-* -an : boolean argument to activate the all-or-nothing parameter;
-* -l : string argument to create problems in a specific programming language. ('c', 'cpp' or 'python').
-
-## Codeforces to BOCA
-	
-Creating a BOCA contest using codeforces problems.
-
-```
-ejbridge cf2boca files
+ejbridge reader writer file_name
 ```
 
 Parameters:
 
-* files : name of the .zip files used to build the contest, in order.
+* reader : input format (Implemented: BOCA, Polygon);
+* writer : output format (Implemented: BOCA, CodeRunner);
+* name : name of the file or directory with the questions to be translated;
+
+More informations can be found in the help function:
+```
+ejbridge -h
+```
