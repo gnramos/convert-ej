@@ -18,9 +18,9 @@ ejbridge reader writer file_name
 
 Parameters:
 
-* reader : input format (Implemented: BOCA, Polygon);
-* writer : output format (Implemented: BOCA, CodeRunner);
-* name : name of the file or directory with the questions to be translated;
+* **reader**: input format (Implemented: BOCA, Polygon);
+* **writer**: output format (Implemented: BOCA, CodeRunner);
+* **name**: name of the file or directory with the questions to be translated;
 
 More informations can be found in the help function:
 ```
