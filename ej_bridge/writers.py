@@ -336,6 +336,9 @@ class CodeRunner(Writer):
         self._set_text('coderunnertype', CodeRunner.FILES['source'][src_lang])
 
     def _CDATA(self, content):
+        # Handle the CDEnd string "]]>".
+        content = re.sub(r']]>', r']]&gt;', content)
+        # Include the CDATA tag on the element.
         element = ET.Element('![CDATA[')
         element.text = content
         return element
