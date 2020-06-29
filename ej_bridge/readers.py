@@ -311,7 +311,7 @@ class Polygon(ZipReader):
         return ''
 
     def _read_tags(self):
-        return [e.attrib['value'] for e in self._get_root().findall('tags/tag')]
+        return [tag for tag in self._get_in_zip('tags').splitlines()]
 
     def _read_tests(self):
         test_files = [entry
