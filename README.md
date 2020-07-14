@@ -2,12 +2,12 @@
 
 Tools for converting different electronic judges question formats.
 
-[TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
+[TestPypi link](https://pypi.org/project/Convert-EJ/).
 
 ## Installation
 
 ```
-pip install -i https://test.pypi.org/simple/ EJ-Bridge
+pip install Convert-EJ
 ```
 
 ## Usage
@@ -25,4 +25,18 @@ Parameters:
 More informations can be found in the help function:
 ```
 convert-ej -h
+```
+
+## Example
+
+To convert a **Polygon** question named file.zip into a **CodeRunner** one, we can use:
+
+```
+convert-ej Polygon CodeRunner file.zip
+```
+
+The specific parameters for the formats used can be found using the help function:
+
+```
+convert-ej Polygon CodeRunner file.zip -h
 ```

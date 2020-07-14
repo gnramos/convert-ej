@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: Convert-EJ
-Version: 1.0.0
+Version: 1.0.1
 Summary: A Python package to translate questions                  between electronic judges
-Home-page: https://github.com/gnramos/ejtranslator
+Home-page: https://github.com/gnramos/convert-ej
 Author: Tiago de Souza Fernandes
 Author-email: tiagotsf2000@gmail.com
 License: GNU GENERAL PUBLIC LICENSE
@@ -10,12 +10,12 @@ Description: # Convert-EJ
         
         Tools for converting different electronic judges question formats.
         
-        [TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
+        [TestPypi link](https://pypi.org/project/Convert-EJ/).
         
         ## Installation
         
         ```
-        pip install -i https://test.pypi.org/simple/ EJ-Bridge
+        pip install Convert-EJ
         ```
         
         ## Usage
@@ -33,6 +33,20 @@ Description: # Convert-EJ
         More informations can be found in the help function:
         ```
         convert-ej -h
+        ```
+        
+        ## Example
+        
+        To convert a **Polygon** question named file.zip into a **CodeRunner** one, we can use:
+        
+        ```
+        convert-ej Polygon CodeRunner file.zip
+        ```
+        
+        The specific parameters for the formats used can be found using the help function:
+        
+        ```
+        convert-ej Polygon CodeRunner file.zip -h
         ```
 Platform: UNKNOWN
 Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)

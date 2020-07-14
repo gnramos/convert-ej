@@ -9,12 +9,12 @@ def readme():
 
 setup(
     name="Convert-EJ",
-    version="1.0.0",
+    version="1.0.1",
     description="A Python package to translate questions \
                  between electronic judges",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/gnramos/ejtranslator",
+    url="https://github.com/gnramos/convert-ej",
     author="Tiago de Souza Fernandes",
     author_email="tiagotsf2000@gmail.com",
     license="GNU GENERAL PUBLIC LICENSE",
