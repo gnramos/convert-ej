@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name="Convert-EJ",
-    version="1.0.1",
+    version="1.0.2",
     description="A Python package to translate questions \
                  between electronic judges",
     long_description=readme(),

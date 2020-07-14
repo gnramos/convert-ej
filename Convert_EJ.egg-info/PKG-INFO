@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Convert-EJ
-Version: 1.0.1
+Version: 1.0.2
 Summary: A Python package to translate questions                  between electronic judges
 Home-page: https://github.com/gnramos/convert-ej
 Author: Tiago de Souza Fernandes

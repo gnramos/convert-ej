@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
-recursive-include convert_ej/Boca_Templates *
-recursive-include convert_ej/CR_Templates *
+recursive-include convert_ej/templates/BOCA *
+recursive-include convert_ej/templates/CodeRunner *
