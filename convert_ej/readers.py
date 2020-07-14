@@ -1,7 +1,7 @@
 #  -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-import problem
+from . import problem
 import os
 import re
 import xml.etree.ElementTree as ET

@@ -1,0 +1,13 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+Convert_EJ.egg-info/PKG-INFO
+Convert_EJ.egg-info/SOURCES.txt
+Convert_EJ.egg-info/dependency_links.txt
+Convert_EJ.egg-info/entry_points.txt
+Convert_EJ.egg-info/top_level.txt
+convert_ej/convert.py
+convert_ej/problem.py
+convert_ej/readers.py
+convert_ej/writers.py

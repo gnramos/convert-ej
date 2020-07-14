@@ -1,0 +1,40 @@
+Metadata-Version: 2.1
+Name: Convert-EJ
+Version: 1.0.0
+Summary: A Python package to translate questions                  between electronic judges
+Home-page: https://github.com/gnramos/ejtranslator
+Author: Tiago de Souza Fernandes
+Author-email: tiagotsf2000@gmail.com
+License: GNU GENERAL PUBLIC LICENSE
+Description: # Convert-EJ
+        
+        Tools for converting different electronic judges question formats.
+        
+        [TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
+        
+        ## Installation
+        
+        ```
+        pip install -i https://test.pypi.org/simple/ EJ-Bridge
+        ```
+        
+        ## Usage
+        The file can be translated by using the command line tool "convert-ej":
+        ```
+        convert-ej reader writer file_name
+        ```
+        
+        Parameters:
+        
+        * **reader**: input format (Implemented: BOCA, Polygon);
+        * **writer**: output format (Implemented: BOCA, CodeRunner);
+        * **name**: name of the file or directory with the questions to be translated;
+        
+        More informations can be found in the help function:
+        ```
+        convert-ej -h
+        ```
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Programming Language :: Python :: 3.7
+Description-Content-Type: text/markdown

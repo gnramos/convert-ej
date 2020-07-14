@@ -8,8 +8,8 @@ def readme():
 
 
 setup(
-    name="EJ-Bridge",
-    version="1.2.0",
+    name="Convert-EJ",
+    version="1.0.0",
     description="A Python package to translate questions \
                  between electronic judges",
     long_description=readme(),
@@ -22,11 +22,11 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         "Programming Language :: Python :: 3.7",
     ],
-    packages=["ej_bridge"],
+    packages=["convert_ej"],
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "ejbridge=ej_bridge.convert:main",
+            "convert-ej=convert_ej.convert:main",
         ]
     },
 )

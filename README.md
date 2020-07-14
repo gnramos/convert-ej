@@ -1,6 +1,6 @@
-# ejbridge
+# Convert-EJ
 
-Tools for translating questions between electronic judges.
+Tools for converting different electronic judges question formats.
 
 [TestPypi link](https://test.pypi.org/project/EJ-Bridge/).
 
@@ -11,9 +11,9 @@ pip install -i https://test.pypi.org/simple/ EJ-Bridge
 ```
 
 ## Usage
-The file can be translated by using the command line tool "ejbridge":
+The file can be translated by using the command line tool "convert-ej":
 ```
-ejbridge reader writer file_name
+convert-ej reader writer file_name
 ```
 
 Parameters:
@@ -24,5 +24,5 @@ Parameters:
 
 More informations can be found in the help function:
 ```
-ejbridge -h
+convert-ej -h
 ```
