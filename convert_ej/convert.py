@@ -89,12 +89,12 @@ class EJudgeParser(ArgumentParser):
                        if not inspect.isabstract(m[1]) and m[0] != 'ABC'])
 
     def error(self, message):
-        """Shows "help" in case of an error parsing."""
-        self.print_help()
-        e_msg = f'error: {message}'
-        print('-' * len(e_msg))
-        print(e_msg)
-        sys.exit(2)
+        """Show "help" on error, if given as argument."""
+        if any(help_arg in sys.argv for help_arg in ('-h', '--help')):
+            self.print_help()
+            sys.exit(0)
+
+        super().error(message)
 
     def parse_args(self, args=None, namespace=None):
         """Overrides parse_args to add class instances to args."""
