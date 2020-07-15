@@ -1,13 +1,13 @@
-# Convert-EJ
+# convert-ej
 
 A software tool for converting problem files between electronic judges formats.
 
-[TestPypi link](https://pypi.org/project/Convert-EJ/).
+[TestPypi link](https://pypi.org/project/convert-ej/).
 
 ## Installation
 
 ```
-pip install Convert-EJ
+pip install convert-ej
 ```
 
 ## Usage

@@ -8,10 +8,9 @@ def readme():
 
 
 setup(
-    name="Convert-EJ",
-    version="1.0.2",
-    description="A Python package to translate questions \
-                 between electronic judges",
+    name="convert-ej",
+    version="1.0.1",
+    description="A software tool for converting problem files between electronic judges formats.",
     long_description=readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/gnramos/convert-ej",
@@ -19,7 +18,7 @@ setup(
     author_email="tiagotsf2000@gmail.com",
     license="GNU GENERAL PUBLIC LICENSE",
     classifiers=[
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Programming Language :: Python :: 3.7",
     ],
     packages=["convert_ej"],
