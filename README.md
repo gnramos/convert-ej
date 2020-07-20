@@ -2,7 +2,7 @@
 
 A software tool for converting problem files between electronic judges formats.
 
-[TestPypi link](https://pypi.org/project/convert-ej/).
+[Pypi link](https://pypi.org/project/convert-ej/).
 
 ## Installation
 

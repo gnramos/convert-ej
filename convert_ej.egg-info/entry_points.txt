@@ -1,3 +1,0 @@
-[console_scripts]
-convert-ej = convert_ej.convert:main
-
