@@ -1,12 +1,16 @@
 #  -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from . import problem
+
 import os
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 
+try:
+    import problem
+except:
+    from . import problem
 
 class Reader(ABC):
     """Abstract class for reading an E-judge problem."""

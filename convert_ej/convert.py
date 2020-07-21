@@ -6,8 +6,15 @@ from argparse import ArgumentParser, RawTextHelpFormatter, ArgumentTypeError
 import inspect
 import os
 import sys
-from . import readers
-from . import writers
+
+try:
+    import readers
+except:
+    from . import readers
+try:
+    import writers
+except:
+    from . import writers
 
 
 class EJudgeParser(ArgumentParser):
