@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name="convert-ej",
-    version="1.0.1",
+    version="1.1.5",
     description="A software tool for converting problem files between electronic judges formats.",
     long_description=readme(),
     long_description_content_type="text/markdown",
