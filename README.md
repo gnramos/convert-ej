@@ -4,8 +4,6 @@ A software tool for converting problem files between electronic judges formats.
 
 [**Pypi link**](https://pypi.org/project/convert-ej/)
 
-[**TestPypi link**](https://test.pypi.org/project/convert-ej/)
-
 ## Installation
 
 ```
