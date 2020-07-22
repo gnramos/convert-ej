@@ -17,11 +17,11 @@ convert-ej reader writer file
 ```
 
 The tool _reads_ a problem in _file_, structured in a specific format, and then _writes_ it into a different format. The user needs to provide the following command line arguments:
-* **reader**: the input format (e.g. _Polygon_).
-* **writer**: the output format (e.g. _BOCA_).
-* **file**: the path to the file (or directory) containing the problem in the _reader_ format.
+* **reader**: the input e-judge format.
+* **writer**: the output e-judge format.
+* **file**: the path to the file (or directory) containing the problem information, which must be structured according to the _reader_ format.
 
-Please mind the specificities of each format, as sometimes convertions might have issues. For example, CodeRunner has limits for I/O test case sizes while BOCA has to format the examples to a page.
+Please be mindful of the specificities of each e-judge format, since convertion might not be sucessful. For example, CodeRunner does not handle EPS images and BOCA may have issues creating the test sheet (usually a PDF file) dependng on the format the examples.
 
 ### Example
 
