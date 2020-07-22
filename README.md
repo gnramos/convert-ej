@@ -21,6 +21,8 @@ The tool _reads_ a problem in _file_, structured in a specific format, and then 
 * **writer**: the output format (e.g. _BOCA_).
 * **file**: the path to the file (or directory) containing the problem in the _reader_ format.
 
+Please mind the specificities of each format, as sometimes convertions might have issues. For example, CodeRunner has limits for I/O test case sizes while BOCA has to format the examples to a page.
+
 ### Example
 
 To convert a problem in **Polygon** format into a **CodeRunner** one, we can use:
