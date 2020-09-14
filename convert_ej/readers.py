@@ -1,16 +1,15 @@
-#  -*- coding: utf-8 -*-
-
 from abc import ABC, abstractmethod
-
 import os
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 
 try:
+    # works for using pypi or command line
     import problem
-except:
+except Exception:
     from . import problem
+
 
 class Reader(ABC):
     """Abstract class for reading an E-judge problem."""
@@ -122,7 +121,8 @@ class BOCA(ZipReader):
     def _read_aux_files(self):
         aux_files = {}
         for entry in self.pzip.namelist():
-            if entry.startswith('tex/') and not self.pzip.getinfo(entry).is_dir():
+            if (entry.startswith('tex/') and
+                    not self.pzip.getinfo(entry).is_dir()):
                 entry_name = os.path.split(entry)[-1].lower()
                 if not entry_name.endswith(('.tex', '.cls', 'examples.csv')):
                     with self.pzip.open(entry) as f:
@@ -172,7 +172,7 @@ class BOCA(ZipReader):
                 raise ValueError('Limits not found.')
 
         for entry in self.pzip.namelist():
-            if entry.lower().startswith(f'solutions/main'):
+            if entry.lower().startswith('solutions/main'):
                 _, ext = os.path.splitext(entry)
                 ext = ext[1:]  # remove leading '.'
                 return try_for_python() if ext == 'py' else get_limits(ext)
@@ -240,7 +240,8 @@ class Polygon(ZipReader):
         aux_files = {}
         path = os.path.join('statement-sections', self.stmt_lang)
         for entry in self.pzip.namelist():
-            if not self.pzip.getinfo(entry).is_dir() and entry.startswith(path):
+            if (not self.pzip.getinfo(entry).is_dir() and
+                    entry.startswith(path)):
                 entry_name = os.path.split(entry)[1].lower()
                 if not (entry_name.startswith('example.') or
                         entry_name.endswith('.tex')):
@@ -256,7 +257,8 @@ class Polygon(ZipReader):
         examples = {}
         path = os.path.join('statement-sections', self.stmt_lang)
         for entry in self.pzip.namelist():
-            if not self.pzip.getinfo(entry).is_dir() and entry.startswith(path):
+            if (not self.pzip.getinfo(entry).is_dir()
+                    and entry.startswith(path)):
                 entry_name = os.path.split(entry)[1]
                 if entry_name.startswith('example.'):
                     ex = entry_name.split('.')[1]
@@ -304,7 +306,8 @@ class Polygon(ZipReader):
         return [source('main'), source('accepted')]
 
     def _read_stmt_tex(self, name):
-        file = os.path.join('statement-sections', self.stmt_lang, f'{name}.tex')
+        file = os.path.join('statement-sections', self.stmt_lang,
+                            f'{name}.tex')
         try:
             return self._get_in_zip(file).strip()
         except Exception as e:

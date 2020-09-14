@@ -1,5 +1,3 @@
-#  -*- coding: utf-8 -*-
-
 from abc import ABC, abstractmethod
 import base64
 import os
@@ -107,7 +105,8 @@ class BOCA(Writer):
                     dir_name = os.path.split(dir_path)[-1]
                     for entry in it:
                         with open(entry.path, 'rb') as template:
-                            with self.pzip.open(f'{dir_name}/{entry.name}', 'w') as f:
+                            with self.pzip.open(f'{dir_name}/{entry.name}',
+                                                'w') as f:
                                 f.write(template.read())
 
             with os.scandir(self.template_dir) as it:
@@ -148,7 +147,8 @@ class BOCA(Writer):
         self._write('output', self.problem.statement.output)
 
     def _write_limits(self):
-        self._write('time_limit', str(self.problem.evaluation.limits['time_sec']))
+        self._write('time_limit',
+                    str(self.problem.evaluation.limits['time_sec']))
 
         with os.scandir(os.path.join(self.template_dir, 'limits')) as it:
             for entry in it:
@@ -159,7 +159,8 @@ class BOCA(Writer):
 
                 time_sec = self.problem.evaluation.limits['time_sec']
                 memory_MB = self.problem.evaluation.limits['memory_MB']
-                maxfilesize_KB = self.problem.evaluation.limits['maxfilesize_KB']
+                maxfilesize_KB = self.problem.evaluation.limits[
+                    'maxfilesize_KB']
                 limits[0] = f'echo {time_sec}'
                 # limits[1] = f'echo {num_repetitions}'
                 limits[2] = f'echo {memory_MB}'
@@ -190,7 +191,8 @@ class BOCA(Writer):
         def write_templates():
             with os.scandir(self.template_tex_dir) as it:
                 for entry in it:
-                    if entry.is_file and not entry.name.startswith(('.', 'main.tex')):
+                    if (entry.is_file
+                            and not entry.name.startswith(('.', 'main.tex'))):
                         with open(entry.path) as tmpl_file:
                             self._write(entry.name, tmpl_file.read(), ext='')
 
@@ -217,7 +219,8 @@ class BOCA(Writer):
 
     def _write_tags(self):
         self.pzip.writestr('description/tags.csv',
-                           ','.join(tag for tag in self.problem.statement.tags))
+                           ','.join(tag
+                                    for tag in self.problem.statement.tags))
 
     def _write_tests(self):
         num_tests = sum(len(tests)
@@ -226,7 +229,8 @@ class BOCA(Writer):
         for tests in self.problem.evaluation.tests.values():
             for name, files in tests.items():
                 for io, data in files.items():
-                    self.pzip.writestr(f'{io}put/{int(name):0{num_digits}}', data)
+                    self.pzip.writestr(f'{io}put/{int(name):0{num_digits}}',
+                                       data)
 
     def _write_title(self):
         self._write('title', self.problem.statement.title)
@@ -245,12 +249,13 @@ class BOCA(Writer):
           - Template values for most configurations are defined in "templates"
           directory.
           - This adds to the tree structure:
-            - "/description/tags.csv" for listing keywords describing the problem.
+            - "/description/tags.csv" for listing keywords describing the
+            problem.
             - "/solutions/" to store source code solutions to the problem; and
             - "/tex/" where Statement info split into separate files.
           - The composition of PDF is defined in main.tex file, "Notes" and
-          "Tutorial" are included in the class options. Any necessary auxililary
-          files (like images) should be in that directory.
+          "Tutorial" are included in the class options. Any necessary
+          auxililary files (like images) should be in that directory.
 
         Keyword arguments:
         problem -- the Problem containing the data for the problem
@@ -372,7 +377,8 @@ class CodeRunner(Writer):
                            self._html_tag('\\1', t), s)
 
             s = re.sub(f'\\\\begin{{center}}([.\s\S]*?)\\\\end{{center}}',
-                       self._html_tag('\\1', 'p', 'style="text-align: center;"'),
+                       self._html_tag('\\1', 'p',
+                                      'style="text-align: center;"'),
                        s)
 
             return s
@@ -384,7 +390,9 @@ class CodeRunner(Writer):
                     'texttt': 'tt',
                     't': 'tt'}  # This has issues with nested tags...
             for cmd, t in repl.items():
-                s = re.sub(f'\\\\{cmd}{{(.*?)}}', self._html_tag('\\1', tag=t), s)
+                s = re.sub(f'\\\\{cmd}{{(.*?)}}',
+                           self._html_tag('\\1', tag=t),
+                           s)
             return s
 
         def images(s):
@@ -502,9 +510,12 @@ class CodeRunner(Writer):
         pass
 
     def _write_limits(self):
-        self._set_text('cputimelimitsecs', self.problem.evaluation.limits['time_sec'])
-        self._set_text('memlimitmb', self.problem.evaluation.limits['memory_MB'])
-        self._set_text('maxfilesize', self.problem.evaluation.limits['maxfilesize_KB'])
+        self._set_text('cputimelimitsecs',
+                       self.problem.evaluation.limits['time_sec'])
+        self._set_text('memlimitmb',
+                       self.problem.evaluation.limits['memory_MB'])
+        self._set_text('maxfilesize',
+                       self.problem.evaluation.limits['maxfilesize_KB'])
 
     def _write_notes(self):
         # Done in _write_description
@@ -589,7 +600,8 @@ class CodeRunner(Writer):
 
         self._set_text('allornothing', 1 if all_or_nothing else 0)
 
-        penalty_regime = ', '.join((['0'] * penalty_after) + ['10', '20', '...'])
+        penalty_regime = ', '.join((['0'] * penalty_after) +
+                                   ['10', '20', '...'])
         self._set_text('penaltyregime', penalty_regime)
 
         for lang in languages:

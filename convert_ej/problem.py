@@ -1,6 +1,3 @@
-#  -*- coding: utf-8 -*-
-
-
 class Statement():
     """Stores the information required to state a problem.
 

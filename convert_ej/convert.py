@@ -8,12 +8,11 @@ import os
 import sys
 
 try:
+    # works for using pypi or command line
     import readers
-except:
-    from . import readers
-try:
     import writers
-except:
+except Exception:
+    from . import readers
     from . import writers
 
 
@@ -231,6 +230,8 @@ def main():
             print(f'Processing "{file}".')
             ejproblem = args.reader.read(file, args)
             args.writer.write(ejproblem, args)
+        except Exception as e:
+            print(e)
         except ValueError as e:
             print(f'\tError: {e}.')
             print(f'\tFAILED to process "{file}".\n')
