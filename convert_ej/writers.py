@@ -426,9 +426,8 @@ class CodeRunner(Writer):
 
                 # Extension may have been omitted
                 for img in self.problem.statement.aux_files:
-                    if img.startswith(f'{file}.'):
+                    if img.startswith(f'{file.lower()}'):
                         return img
-
                 raise ValueError(f'Cannot find {file} image')
 
             pattern = r'\\includegraphics([\[].*[\]])?{(.*?)}'
