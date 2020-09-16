@@ -429,7 +429,7 @@ class CodeRunner(Writer):
                     if img.startswith(f'{file}.'):
                         return img
 
-                raise ValueError('Cannot find {file} image')
+                raise ValueError(f'Cannot find {file} image')
 
             pattern = r'\\includegraphics([\[].*[\]])?{(.*?)}'
             for options, file in re.findall(pattern, s):
