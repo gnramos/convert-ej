@@ -7,7 +7,7 @@ A software tool for converting problem files between electronic judges formats.
 ## Installation
 
 ```
-pip install convert-ej
+pip3 install convert-ej
 ```
 
 ## Usage
