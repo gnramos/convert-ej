@@ -442,13 +442,14 @@ class CodeRunner(Writer):
             return s
 
         def math(s):
-            s = re.sub(r'\$\$(.*?)\$\$', '\\[\\1\\]', s)
+            s = re.sub(r'\$\$([.\s\S]*?)\$\$', '\\[\\1\\]', s)
             s = re.sub(r'\$([^\$]*)\$', '\\(\\1\\)', s)
             return s
 
         def text(s):
             s = re.sub(r'``(.*?)\'\'', '"\\1"', s)
             s = re.sub(r'`(.*?)\'', '\'\\1\'', s)
+            s = re.sub(r'\\mbox{(.*?)}', '\\1', s)
             s = re.sub(r'\n\n', '\n</p>\n<p>\n', s)
 
             no_math = re.sub(r'(\\[\(\[].*?\\[\)\]])', '', s)
