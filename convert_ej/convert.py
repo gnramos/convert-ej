@@ -77,6 +77,7 @@ class EJudgeParser(ArgumentParser):
                                 not entry.name.startswith('.')))
         else:
             raise ArgumentTypeError('Must provide a valid file/directory')
+
         return files
 
     def _check_dir(self, path):
