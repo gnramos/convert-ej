@@ -369,15 +369,15 @@ class CodeRunner(Writer):
     def _tex2html(self, s):
         def environments(s):
             # Process item before the environment, using \ as end delimiter.
-            s = re.sub(r'\\item ([.\s\S]*?)(?=\\)', r'<li>\1</li>\n', s)
+            s = re.sub(r'\\item ([.\s\S]*?)(?=\\item|\\end)', r'<li>\1</li>\n', s)
 
             repl = {'itemize': 'ul', 'enumerate': 'ol'}
             for env, t in repl.items():
                 s = re.sub(f'\\\\begin{{{env}}}([.\s\S]*?)\\\\end{{{env}}}',
-                           self._html_tag('\\1', t), s)
+                           self._html_tag(r'\1', t), s)
 
             s = re.sub(f'\\\\begin{{center}}([.\s\S]*?)\\\\end{{center}}',
-                       self._html_tag('\\1', 'p',
+                       self._html_tag(r'\1', 'p',
                                       'style="text-align: center;"'),
                        s)
 
