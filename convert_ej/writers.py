@@ -450,6 +450,8 @@ class CodeRunner(Writer):
             s = re.sub(r'`(.*?)\'', '\'\\1\'', s)
             s = re.sub(r'\\mbox{(.*?)}', '\\1', s)
             s = re.sub(r'\n\n', '\n</p>\n<p>\n', s)
+            s = re.sub(r'\\textbackslash', r'\\', s)
+
 
             no_math = re.sub(r'(\\[\(\[].*?\\[\)\]])', '', s)
             for cmd in re.findall(r'(\\\w+)', no_math):
