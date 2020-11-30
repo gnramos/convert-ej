@@ -452,7 +452,6 @@ class CodeRunner(Writer):
             s = re.sub(r'\n\n', '\n</p>\n<p>\n', s)
             s = re.sub(r'\\textbackslash', r'\\', s)
 
-
             no_math = re.sub(r'(\\[\(\[].*?\\[\)\]])', '', s)
             for cmd in re.findall(r'(\\\w+)', no_math):
                 print(f'\tPossible unformatted TeX command: {cmd}')
@@ -468,7 +467,54 @@ class CodeRunner(Writer):
         return s
 
     def _write_aux_files(self):
+        def convert_png(img_file, data, cmd):
+            if shutil.which(cmd[0]):
+                print(f'\tConverting {img_file} to PNG')
+                with open(img_file, 'wb') as f:
+                    f.write(data)
+                root, _ = os.path.splitext(img_file)
+                dest = f'{root}.png'
+                with open(os.devnull, 'w') as DEVNULL:
+                    try:
+                        subprocess.check_call(cmd, stdout=DEVNULL)
+                    except subprocess.CalledProcessError:
+                        if os.path.exists(img_file):
+                            os.remove(img_file)
+                        raise ValueError('Unable to create PNG'
+                                         f' from {img_file}')
+                        # try:
+                        #     # run again to show errors
+                        #     subprocess.check_call(cmd)
+                        # except Exception:
+                        #     raise ValueError('Unable to create PNG '
+                        #                      f'from {img_file}')
+
+                if os.path.exists(img_file):
+                    os.remove(img_file)
+
+                with open(dest, 'rb') as f:
+                    data = f.read()
+                if os.path.exists(dest):
+                    os.remove(dest)
+
+                return dest, data
+            else:
+                print(f'\tUnable to create PNG from {img_file}')
+
+            return img_file, data
+
         for name, data in self.problem.statement.aux_files.items():
+            root, ext = os.path.splitext(name)
+            if ext.lower() == '.pdf':
+                name, data = convert_png(name, data,
+                                         ['pdftoppm', name, root, '-png'])
+            elif ext.lower() == '.eps':
+                name, data = convert_png(name, data,
+                                         ['convert',
+                                          '-colorspace', 'RGB',
+                                          '-density', '600',
+                                          name, f'{root}.png'])
+
             if name.lower().endswith(CodeRunner.FILES['raster images']):
                 img = ET.Element('file')
                 img.set('name', name)
