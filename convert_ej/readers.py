@@ -318,7 +318,10 @@ class Polygon(ZipReader):
         return ''
 
     def _read_tags(self):
-        return [tag for tag in self._get_in_zip('tags').splitlines()]
+        try:
+            return [tag for tag in self._get_in_zip('tags').splitlines()]
+        except ValueError:
+            return []
 
     def _read_tests(self):
         test_files = [entry
