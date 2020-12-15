@@ -148,8 +148,8 @@ class BOCAWriter(Parsing, writers.BOCA):
         """Adds command line arguments for writing a problem in BOCA format."""
         parser.add_argument('--tmp', default='/tmp', dest='tmp_dir',
                             help='Directory for storing temporary files')
-        parser.add_argument('--notes', action='store_true',
-                            help='Include the notes in the PDF')
+        parser.add_argument('--hide-notes', action='store_false',
+                            help='Do not include the notes in the PDF')
         parser.add_argument('--tutorial', action='store_true',
                             help='Include the tutorial in the PDF')
 
@@ -158,7 +158,7 @@ class BOCAWriter(Parsing, writers.BOCA):
         super().write(ejproblem,
                       output_dir=args.output_dir,
                       tmp_dir=args.tmp_dir,
-                      add_notes=args.notes,
+                      add_notes=(not args.hide_notes),
                       add_tutorial=args.tutorial)
 
 
