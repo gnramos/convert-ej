@@ -223,14 +223,10 @@ class BOCA(Writer):
                                     for tag in self.problem.statement.tags))
 
     def _write_tests(self):
-        num_tests = sum(len(tests)
-                        for tests in self.problem.evaluation.tests.values())
-        num_digits = len(str(num_tests))
         for tests in self.problem.evaluation.tests.values():
             for name, files in tests.items():
                 for io, data in files.items():
-                    self.pzip.writestr(f'{io}put/{int(name):0{num_digits}}',
-                                       data)
+                    self.pzip.writestr(f'{io}put/{name}', data)
 
     def _write_title(self):
         self._write('title', self.problem.statement.title)
