@@ -9,6 +9,7 @@
 \LoadClass[12pt]{article}
 
 % Packages
+\usepackage{amsmath}%
 \usepackage{catchfile}%
 \usepackage[margin=0.5in]{geometry}%
 \usepackage{graphicx}%
@@ -79,6 +80,7 @@
 	\input{#1/output}%
 
 	\section*{Exemplos}%
+	\setcounter{@example}{0}%
 	\@tabelasDeExemplos{#1}%
 
 	\ifcsname notes@boca\endcsname
