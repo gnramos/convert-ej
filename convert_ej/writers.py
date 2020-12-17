@@ -179,14 +179,14 @@ class BOCA(Writer):
                     subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
                                           stdout=DEVNULL)
                 except subprocess.CalledProcessError:
-                    raise ValueError(f'Unable to create pdf'
-                                     f' from {tex_file}')
+                    # run again to show errors
                     # try:
-                    #     # run again to show errors
-                    #     subprocess.check_call(cmd, cwd=tmp_tex_dir)
+                    #     subprocess.check_call(cmd, cwd=self.tmp_tex_dir)
                     # except Exception:
                     #     raise ValueError(f'Unable to create pdf '
                     #                      f'from {tex_file}.tex')
+                    raise ValueError(f'Unable to create pdf'
+                                     f' from {tex_file}')
 
         def write_templates():
             with os.scandir(self.template_tex_dir) as it:
