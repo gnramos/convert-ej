@@ -65,7 +65,7 @@ if [ "$bocau" == "" -o "$bocag" == "" ]; then
 fi
 
 mkdir -p src
-if [ "${name##*.}" == "zip" -o "${name##*.}" == "ZIP" ]; then
+if [ "${name##*.}" == "zip" -a "${name##*.}" == "ZIP" ]; then
 	unzip "$name" -d src
     if [ "${name##*.}" == "zip" ]; then
 		name=`basename $name .zip`
@@ -94,12 +94,13 @@ else
   time=$3
 fi
 let "ttime = $time + 30"
-time=30
 
-maxm=512
-if [ "$4" != "" -a "$4" -gt "512" ]; then
+maxm=1024
+if [ "$4" != "" -a "$4" -gt "1024" ]; then
 maxm=$4
 fi
+
+maxms=100
 
 if [ "$2" == "" ]; then
   jarfile=run.jar
@@ -116,72 +117,32 @@ fi
 
 cat <<EOF > compileit.sh
 #!/bin/bash
-javac=`which javac`
-[ -x "\$javac" ] || javac=/usr/bin/javac
-if [ ! -x \$javac ]; then
-    echo "\$javac not found or it's not executable"
+kotlinc=/snap/kotlin/24/bin/kotlinc
+[ -x "\$kotlinc" ] || kotlinc=/snap/bin/kotlinc
+if [ ! -x \$kotlinc ]; then
+    echo "\$kotlinc not found or it's not executable"
     exit 47
 fi
-jar=`which jar`
-[ -x "\$jar" ] || jar=/usr/bin/jar
-if [ ! -x \$jar ]; then
-    echo "\$jar not found or it's not executable"
-    exit 47
-fi
-export CLASSPATH=.:\$CLASSPATH
 cd src
-if [ -r "$name" ]; then
-  \$javac "$name"
-  echo \$? > ../compileit.retcode
-fi
-find . -name "*.java" | while read lin; do
-  \$javac "\$lin"
-  echo \$? > ../compileit.retcode
-done
-rm -f ../$jarfile
-\$jar cvfe ../$jarfile $mainname *
+\$kotlinc -J-Xmx${maxm}M -J-Xss${maxms}M -J-Xms${maxm}M -d ../$jarfile -include-runtime $name
+echo \$? > ../compileit.retcode
+
 exit 0
 EOF
 chmod 755 compileit.sh
 
-echo $cdir | grep -q "/bocajail"
-if [ $? == 0 ]; then
-    cdir=`echo $cdir | sed "s/.*\/bocajail//"`
-    cat <<EOF > runit.sh
-#!/bin/bash
-cd "$cdir"
-[ -f /proc/cpuinfo ] || /bin/mount -t proc proc /proc
-#/bin/mount --bind /dev /dev
-[ -d /sys/kernel ] || /bin/mount -t sysfs sysfs /sys
-
-$sf -r1 -t$time -T$ttime -F256 -u256 -ostdout0 -estderr0 -U$bocau -G$bocag -n0 -C. -f20000 -d20000000 -m20000000 ./compileit.sh
-echo \$? > runit.retcode
-if [ ! -d /bocajail ]; then
-  /bin/umount /proc 2>/dev/null
-  #/bin/umount /dev
-  /bin/umount /sys 2>/dev/null
-fi
-EOF
-    chmod 755 runit.sh
-    chroot /bocajail "$cdir/runit.sh"
-    if [ -r runit.retcode ]; then
-    	ret=`cat runit.retcode`
-    else
-		ret=99
-    fi
-else
-	echo "COMPILATION IS NOT BEING CHROOTED -- THIS IS NOT AN IDEAL SETTING"
-#	$javac "$name"
-	$sf -r1 -t$time -T$ttime -F256 -u256 -U$bocau -G$bocag -ostdout0 -estderr0 -n0 -C. -d20000000 -m20000000 ./compileit.sh
-	ret=$?
-fi
+echo "COMPILATION IS NOT BEING CHROOTED -- THIS IS NOT AN IDEAL SETTING"
+#$kotlinc "$name"
+$sf -r1 -t20 -T32 -istdin0 -F512 -u512 -U$bocau -G$bocag -n0 -C. -d40000000000 -m40000000000 ./compileit.sh
+#./compileit.sh
+ret=$?
 if [ -f "stdout0" ]; then
 	cat "stdout0"
 fi
 if [ -f "stderr0" ]; then
 	cat "stderr0"
 fi
-rm -rf src/
+#rm -rf src/
 if [ "$ret" != "0" ]; then
 	echo "Compilation Error: $ret"
 	exit $ret
