@@ -22,10 +22,6 @@
 % Auxiliary settings
 \newlength{\@inputWidth}%
 \newlength{\@outputWidth}%
-\setlength{\@inputWidth}{.475\textwidth}%
-\setlength{\@outputWidth}{\@inputWidth}%
-% \setlength{\@outputWidth}{\textwidth}%
-% \addtolength{\@outputWidth}{-\@inputWidth}%
 
 % Auxiliary commands
 \newcommand{\@exampleCell}[1]{%
@@ -36,11 +32,17 @@
 
 \newcommand{\@iotable}[2]{%
 	\noindent%
-	\begin{tabular}[t]{p{\@inputWidth}|p{\@outputWidth}}%
+	\begin{tabular}[t]{p{.95\@inputWidth}|p{.95\@outputWidth}}%
 		\ifodd\the@example\rowcolor{gray!20}\fi%
 		#1 & #2%
 	\end{tabular}%
 
+}%
+
+\newcommand{\@setInputWidth}[1]{%
+	\setlength{\@inputWidth}{#1}%
+	\setlength{\@outputWidth}{\textwidth}%
+	\addtolength{\@outputWidth}{-#1}%
 }%
 
 % One table per example (verbatim input, highlighted rows)
@@ -58,39 +60,40 @@
 }%
 
 \newcounter{@problem}%
-\newcommand{\problem}[1]{%
+\newcommand{\problem}[2][.5\textwidth]{%
 	\stepcounter{@problem}%
 	\newpage%
-	\graphicspath{{#1/}}%
+	\graphicspath{{#2/}}%
 
 	\begin{center}%
 	\large{\textbf{Problema~\Alph{@problem}}}%
 	\\%
-	\LARGE{\textbf{\input{#1/title}}}%
+	\LARGE{\textbf{\input{#2/title}}}%
 	\\%
-	\footnotesize{Limite de tempo: \input{#1/time_limit}s}%
+	\footnotesize{Limite de tempo: \input{#2/time_limit}s}%
 	\end{center}%
 
-	\input{#1/description}%
+	\input{#2/description}%
 
 	\section*{Entrada}%
-	\input{#1/input}%
+	\input{#2/input}%
 
 	\section*{Saída}%
-	\input{#1/output}%
+	\input{#2/output}%
 
 	\section*{Exemplos}%
 	\setcounter{@example}{0}%
-	\@tabelasDeExemplos{#1}%
+	\@setInputWidth{#1}%
+	\@tabelasDeExemplos{#2}%
 
 	\ifcsname notes@boca\endcsname
 		\section*{Observações}%
-		\input{#1/notes}%
+		\input{#2/notes}%
 	\fi%
 
 	\ifcsname tutorial@boca\endcsname
 		\section*{Tutorial}%
-		\input{#1/tutorial}%
+		\input{#2/tutorial}%
 	\fi%
 }%
 
