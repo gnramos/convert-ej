@@ -337,9 +337,16 @@ class CodeRunner(Writer):
         self._set_text('coderunnertype', CodeRunner.FILES['source'][src_lang])
 
     def _add_flags(self, lang):
+        # CodeRunner uses -Wall and -Werror flags by default,
+        # the -w flag is used so it doesn't handle warnings as errors.
+        flags = ['-w']
+
         # Flag to link the math library.
         if(lang=='c'):
-            self._set_text('sandboxparams', '{"linkargs":["-lm"]}')
+            flags.append('-lm')
+
+        strflags = "[" + ", ".join( f'"{x}"' for x in flags) + "]"
+        self._set_text('sandboxparams', f'{{"linkargs":{strflags}}}')
 
     def _CDATA(self, content):
         # Handle the CDEnd string "]]>".
