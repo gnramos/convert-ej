@@ -37,7 +37,7 @@
     <grader></grader>
     <cputimelimitsecs></cputimelimitsecs>
     <memlimitmb></memlimitmb>
-    <sandboxparams>{"linkargs":["-lm"]}</sandboxparams>
+    <sandboxparams></sandboxparams>
     <templateparams></templateparams>
     <hoisttemplateparams>1</hoisttemplateparams>
     <twigall>0</twigall>

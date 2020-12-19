@@ -336,6 +336,11 @@ class CodeRunner(Writer):
         answer.append(self._CDATA(source))
         self._set_text('coderunnertype', CodeRunner.FILES['source'][src_lang])
 
+    def _add_flags(self, lang):
+        # Flag to link the math library.
+        if(lang=='c'):
+            self._set_text('sandboxparams', '{"linkargs":["-lm"]}')
+
     def _CDATA(self, content):
         # Handle the CDEnd string "]]>".
         content = re.sub(r']]>', r']]&gt;', content)
@@ -650,6 +655,7 @@ class CodeRunner(Writer):
 
         for lang in languages:
             self._add_solution(lang)
+            self._add_flags(lang)
 
             file = os.path.join(output_dir, f'{problem.id}-{lang}.xml')
             tree.write(file, 'UTF-8')
