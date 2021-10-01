@@ -377,17 +377,19 @@ class CodeRunner(Writer):
     def _tex2html(self, s):
         def environments(s):
             # Process item before the environment, using \ as end delimiter.
-            s = re.sub(r'\\item ([.\s\S]*?)(?=\\item|\\end)', r'<li>\1</li>\n', s)
-
+            s = re.sub(r'\\item ([.\s\S]*?)(?=\\item|\\end)', r'<li>\1</li>\n',
+                       s)
             repl = {'itemize': 'ul', 'enumerate': 'ol'}
             for env, t in repl.items():
                 s = re.sub(f'\\\\begin{{{env}}}([.\s\S]*?)\\\\end{{{env}}}',
                            self._html_tag(r'\1', t), s)
 
-            s = re.sub(f'\\\\begin{{center}}([.\s\S]*?)\\\\end{{center}}',
+            s = re.sub(r'\\begin{center}([.\s\S]*?)\\end{center}',
                        self._html_tag(r'\1', 'p',
                                       'style="text-align: center;"'),
                        s)
+            s = re.sub(r'\\begin{verbatim}([.\s\S]*?)\\end{verbatim}',
+                       self._html_tag(r'\1', 'pre', ''), s)
 
             return s
 
@@ -395,7 +397,7 @@ class CodeRunner(Writer):
             repl = {'textbf': 'b', 'bf': 'b',
                     'textit': 'i', 'it': 'i', 'emph': 'i',
                     'textrm': None,
-                    'texttt': 'tt',
+                    'texttt': 'tt', 'tt': 'tt',
                     't': 'tt'}  # This has issues with nested tags...
             for cmd, t in repl.items():
                 s = re.sub(f'\\\\{cmd}{{(.*?)}}',
