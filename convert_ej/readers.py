@@ -18,6 +18,10 @@ class Reader(ABC):
         pass
 
     @abstractmethod
+    def _read_checker(self):
+        pass
+
+    @abstractmethod
     def _read_description(self):
         pass
 
@@ -78,7 +82,8 @@ class Reader(ABC):
                                       self._read_notes())
         evaluation = problem.Evaluation(self._read_tests(),
                                         self._read_solutions(),
-                                        self._read_limits())
+                                        self._read_limits(),
+                                        self._read_checker())
         return problem.Problem(self._read_id(), statement, evaluation)
 
 
@@ -249,6 +254,10 @@ class Polygon(ZipReader):
                         aux_files[entry_name] = f.read()
 
         return aux_files
+
+    def _read_checker(self):
+        path = 'check.cpp'
+        return self._get_in_zip(path)
 
     def _read_description(self):
         return self._read_stmt_tex('legend')

@@ -1,0 +1,47 @@
+<HTML><HEAD><META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <META content="no-cache" http-equiv="pragma">
+    <META content="-1" http-equiv="expires">
+    <META content="text/html;charset=UTF-8" http-equiv="content-type">
+    <LINK href="problem-statement.css" rel="stylesheet" type="text/css">
+    <TITLE>Laser do L&eacute;o</TITLE>
+    <SCRIPT type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {inlineMath: [['$$$','$$$']], displayMath: [['$$$$$$','$$$$$$']]}
+        });
+        </SCRIPT>
+        <SCRIPT async="" src="https://polygon.codeforces.com/lib/MathJax/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript">
+    </SCRIPT>
+</HEAD><BODY>
+    <DIV class="problem-statement"><DIV class="header"><DIV class="title">Laser do L&eacute;o</DIV><DIV class="time-limit"><DIV class="property-title">time limit per test</DIV>2 seconds</DIV><DIV class="memory-limit"><DIV class="property-title">memory limit per test</DIV>256 megabytes</DIV><DIV class="input-file"><DIV class="property-title">input</DIV>standard input</DIV><DIV class="output-file"><DIV class="property-title">output</DIV>standard output</DIV></DIV><DIV class="legend"><P>Leonardo acaba de comprar um laser e decidiu trollar Alberto, um de seus amigos, ao apontar seu laser para ele. Ambos est&atilde;o na mesma sala, ent&atilde;o para que n&atilde;o fique &oacute;bvio quem est&aacute; com o laser, ele decidiu n&atilde;o apontar diretamente, mas atrav&eacute;s de um espelho. A sala pode ser considerada como um plano cartesiano 2D infinito, em que Leonardo e Alberto s&atilde;o os pontos com coordenadas $$$(x_L, y_L)$$$ e $$$(x_A, y_A)$$$, respectivamente, e o espelho, que reflete para ambos os lados, &eacute; representado por um segmento de reta unindo os pontos $$$(x_{E1}, y_{E1})$$$ e $$$(x_{E2}, y_{E2})$$$.</P><P></P><CENTER> <IMG class="tex-graphics" height="359px" src="924da990474959460c90f9969070d58810ee1fc4.png" width="454px"><P></P><P>Imagem do primeiro caso de teste. </P></CENTER><P></P><P>Leonardo &eacute; estudioso e sabe que o espelho em quest&atilde;o respeita as leis da f&iacute;sica, ou seja, o &acirc;ngulo de incid&ecirc;ncia &eacute; sempre igual ao &acirc;ngulo de reflex&atilde;o ($$$\theta_i = \theta_r$$$).</P><P>O espelho divide o plano em dois semi-planos. &Eacute; garantido que Leonardo e Alberto est&atilde;o localizados no mesmo semi-plano e que nenhum dos dois est&aacute; em posi&ccedil;&atilde;o colinear com o espelho, e &eacute; poss&iacute;vel desconsiderar Alberto e Leonardo como obst&aacute;culos, ou seja, o laser simplesmente os atravessa.</P><P>Ajude Leonardo a saber se &eacute; poss&iacute;vel atingir Alberto com o laser atrav&eacute;s do espelho.</P></DIV><P></P><P></P><DIV class="input-specification"><DIV class="section-title">Input</DIV><P></P><P>A primeira linha da entrada cont&eacute;m um inteiro $$$T$$$ ($$$1 \le T \le 10^4$$$) indicando o n&uacute;mero de casos de testes.</P><P>A primeira linha de cada caso de teste cont&eacute;m quatro inteiros $$$x_L, y_L, x_A, y_A$$$ ($$$-500 \le x_L, y_L, x_A, y_A \le 500$$$), representando as coordenadas de Leonardo e Alberto, respectivamente.</P><P>A segunda linha cont&eacute;m outros quatro inteiros $$$x_{E1}$$$, $$$y_{E1}$$$, $$$x_{E2}$$$, $$$y_{E2}$$$ ($$$-500 \le x_{E1}, y_{E1}, x_{E2}, y_{E2} \le 500$$$), representando as coordenadas dos extremos do espelho.</P><P>&Eacute; garantido que nenhum dos quatro pontos $$$L$$$, $$$A$$$, $$$E1$$$ e $$$E2$$$ ocupam a mesma posi&ccedil;&atilde;o no espa&ccedil;o.</P></DIV><P></P><P></P><DIV class="output-specification"><DIV class="section-title">Output</DIV><P></P><P>Para cada caso de teste, imprima "De onde veio isso?" caso Leonardo consiga acertar Alberto com o laser atrav&eacute;s do espelho, e "Leo, eu estou te vendo..." caso contr&aacute;rio.</P></DIV><P></P><P></P><DIV class="sample-tests"><DIV class="section-title">Examples</DIV><P></P><P></P><DIV class="sample-test"><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+2
+0 0 8 5
+1 4 5 6
+0 0 9 7
+1 4 5 6
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+De onde veio isso?
+Leo, eu estou te vendo...
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+1
+3 3 1 3
+1 1 3 1
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+De onde veio isso?
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+2
+5 5 5 10
+0 0 10 0
+5 10 5 5
+0 0 10 0
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+De onde veio isso?
+De onde veio isso?
+</PRE></DIV><DIV class="input"><DIV class="title">Input</DIV><PRE class="content">
+1
+1 1 1 -1
+0 0 0 10
+</PRE></DIV><DIV class="output"><DIV class="title">Output</DIV><PRE class="content">
+De onde veio isso?
+</PRE></DIV></DIV></DIV><P></P><P></P><DIV class="note"><DIV class="section-title">Note</DIV><P></P><P>No segundo caso de teste, &eacute; poss&iacute;vel acertar Alberto com o laser, como pode ser visto na imagem abaixo:</P><P></P><CENTER> <IMG class="tex-graphics" height="359px" src="f4d1ac5b0ff8504394476c0b824c4f08db26b17b.png" width="359px"> </CENTER><P></P><P>No terceiro caso de teste, tamb&eacute;m &eacute; poss&iacute;vel acertar Alberto com o laser, pois de acordo com o enunciado, Leonardo e Alberto n&atilde;o s&atilde;o considerados obst&aacute;culos pelo laser.</P></DIV></DIV><P></P><P>  </P>
+
+</BODY></HTML>
