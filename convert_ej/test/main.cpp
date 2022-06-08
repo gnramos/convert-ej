@@ -4,6 +4,9 @@
 using namespace std;
 
 typedef ll cod;
+
+
+
 struct point{
     // struct de ponto
     cod x, y;

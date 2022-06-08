@@ -1,10 +1,34 @@
 #!/bin/bash
 
-path=$(pwd)
+path=$( dirname -- "$0"; )
 
-chmod +x $path/compare/bin
+FILE=$path/py2
+if test -f "$FILE"; then
+    echo "$FILE exists."
+fi
+FILE=$path/c
+if test -f "$FILE"; then
+    echo "$FILE exists."
+fi
+FILE=$path/cc
+if test -f "$FILE"; then
+    echo "$FILE exists."
+fi
+FILE=/compare/cc
+if test -f "$FILE"; then
+    echo "$FILE exists."
+fi
+FILE=/compare/cc
+if test -f "$FILE"; then
+    echo "$FILE exists."
+fi
 
-$path/compare/bin $3 $2 $1
+echo "ls"
+ls
+
+chmod u+x $path/py2
+
+$path/py2 $3 $2 $1
 
 if [ "$?" == "0" ]
 then
