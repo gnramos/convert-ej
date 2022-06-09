@@ -293,7 +293,7 @@ class Polygon(ZipReader):
         testset = self._get_root().find('judging/testset')
         time_msec = int(testset.find('time-limit').text)
         memory_B = int(testset.find('memory-limit').text)
-        maxfilesize_KB = 64  # defaut value
+        maxfilesize_KB = 1024  # defaut value
 
         return {'time_sec': time_msec // 1000,
                 'memory_MB': memory_B // (2 ** 20),

@@ -125,26 +125,6 @@ class BOCA(Writer):
     def _write_checker(self):
         checker_file = self.problem.evaluation.checker
         if checker_file:
-            # self.pzip.writestr('compare/checker', checker_file)
-
-            # print(checker_file)
-            # print(checker_file.find('main'))
-            
-            # Adjust checker interface by swapping the arguments.
-            # The swap must be the first line of code in the main function.
-            # The parse will identify the line with a string 'main(',
-            # check if there is an '{' to the right or under this line,
-            # and add a swap to adjust the chcker interface.
-            # Don't write a checker without this pattern!
-            # lines = checker_file.split("\n")
-            # for id, line in enumerate(lines):
-            #     if 'main(' in lines[id]:
-            #         if lines[id+1].startswith('{'):
-            #             id += 1
-            #         lines.insert(id+1, '    swap(argv[1], argv[3]);')
-            
-            # checker_file = '\n'.join(lines)
-
             checker_path = os.path.join(self.tmp_dir, 'checker.cpp')
             with open(checker_path, 'w') as f:
                 f.write(checker_file)
@@ -156,20 +136,16 @@ class BOCA(Writer):
 
             # Compile checker.
             bin_path = os.path.join(self.tmp_dir, 'bin')
-            os.system(f'g++ {checker_path} -o {bin_path}')
+            os.system(f'g++ -static -DBOCA_SUPPORT {checker_path} -o {bin_path}')
 
             # Add the binary files to the compile directory.
-            languages = ['c', 'cc', 'cpp', 'java', 'kt', 'py2', 'py3']
+            languages = ['c', 'cc', 'cpp', 'kt', 'java', 'py2', 'py3']
 
             # shutil.copy(bin_path, 'bin2')
-
-            bash_path = os.path.join(self.template_dir, 'bash')
             with open(bin_path, 'rb') as f:
-                self.pzip.writestr('compare/bin', f.read())
-            with open(bash_path, 'r') as f:
-                bash_file = f.read()
+                bin_file = f.read()
                 for ext in languages:
-                    self.pzip.writestr(f'compare/{ext}', bash_file)
+                    self.pzip.writestr(f'compare/{ext}', bin_file)
             
 
     def _write_description(self):
