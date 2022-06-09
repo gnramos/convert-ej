@@ -15,6 +15,10 @@ class Writer(ABC):
         pass
 
     @abstractmethod
+    def _write_checker(self):
+        pass
+
+    @abstractmethod
     def _write_description(self):
         pass
 
@@ -69,6 +73,7 @@ class Writer(ABC):
 
         self._write_id()
         self._write_title()
+        self._write_checker()
         self._write_description()
         self._write_input()
         self._write_output()
@@ -112,9 +117,36 @@ class BOCA(Writer):
             with os.scandir(self.template_dir) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in ['limits', 'tex']:
-                        write_tmpl(entry.path)
+                        if (entry.name != 'compare' or self.problem.evaluation.checker == None):
+                            write_tmpl(entry.path)
         aux_files()
         template_dirs()
+ 
+    def _write_checker(self):
+        checker_file = self.problem.evaluation.checker
+        if checker_file:
+            checker_path = os.path.join(self.tmp_dir, 'checker.cpp')
+            with open(checker_path, 'w') as f:
+                f.write(checker_file)
+
+            # Copy testlib.h to tmp directory.
+            testlib_path = os.path.join(self.template_dir, 'testlib.h')
+            compile_path = os.path.join(self.tmp_dir, 'testlib.h')
+            shutil.copy(testlib_path, compile_path)
+
+            # Compile checker.
+            bin_path = os.path.join(self.tmp_dir, 'bin')
+            os.system(f'g++ -static -DBOCA_SUPPORT {checker_path} -o {bin_path}')
+
+            # Add the binary files to the compile directory.
+            languages = ['c', 'cc', 'cpp', 'kt', 'java', 'py2', 'py3']
+
+            # shutil.copy(bin_path, 'bin2')
+            with open(bin_path, 'rb') as f:
+                bin_file = f.read()
+                for ext in languages:
+                    self.pzip.writestr(f'compare/{ext}', bin_file)
+            
 
     def _write_description(self):
         self._write('description', self.problem.statement.description)

@@ -18,6 +18,10 @@ class Reader(ABC):
         pass
 
     @abstractmethod
+    def _read_checker(self):
+        pass
+
+    @abstractmethod
     def _read_description(self):
         pass
 
@@ -78,7 +82,8 @@ class Reader(ABC):
                                       self._read_notes())
         evaluation = problem.Evaluation(self._read_tests(),
                                         self._read_solutions(),
-                                        self._read_limits())
+                                        self._read_limits(),
+                                        self._read_checker())
         return problem.Problem(self._read_id(), statement, evaluation)
 
 
@@ -250,6 +255,10 @@ class Polygon(ZipReader):
 
         return aux_files
 
+    def _read_checker(self):
+        path = 'check.cpp'
+        return self._get_in_zip(path)
+
     def _read_description(self):
         return self._read_stmt_tex('legend')
 
@@ -284,7 +293,7 @@ class Polygon(ZipReader):
         testset = self._get_root().find('judging/testset')
         time_msec = int(testset.find('time-limit').text)
         memory_B = int(testset.find('memory-limit').text)
-        maxfilesize_KB = 64  # defaut value
+        maxfilesize_KB = 1024  # defaut value
 
         return {'time_sec': time_msec // 1000,
                 'memory_MB': memory_B // (2 ** 20),

@@ -52,21 +52,22 @@ class Statement():
 class Evaluation():
     """Stores the information required to evaluate a problem."""
 
-    def __init__(self, tests, solutions, limits):
+    def __init__(self, tests, solutions, limits, checker=None):
         """Class constructor.
 
         Keyword arguments:
-        tests -- dict of 'examples' and 'hidden' test cases, each case has a
-                      dict of 'in' (input) data and its expected 'out'
-                      (output).
+        tests     -- dict of 'examples' and 'hidden' test cases, each case has a
+                     dict of 'in' (input) data and its expected 'out' (output).
         solutions -- list of solutions dicts, in the preferred order, where
                      each entry is {file_extension: source_code}.
-        limits -- dict of 'time_sec' and 'memory_MB' limits for evaluation a
-                  solution.
+        limits    -- dict of 'time_sec' and 'memory_MB' limits for evaluation a
+                     solution.
+        checker   -- source code for the checker file, used to evaluate the answer
         """
         self.tests = tests
         self.solutions = solutions
         self.limits = limits
+        self.checker = checker
 
         assert tests['examples'] or tests['hidden']
         assert solutions
