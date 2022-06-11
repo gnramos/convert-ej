@@ -316,7 +316,7 @@ class BOCA(Writer):
         self.template_dir = os.path.join(cwd, 'templates', 'BOCA')
         self.template_tex_dir = os.path.join(self.template_dir, 'tex')
 
-        with zipfile.ZipFile(problem_zip, 'w') as pzip:
+        with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as pzip:
             self.pzip = pzip
             super().write(problem, output_dir=output_dir)
             self._write_pdf(','.join(class_options))
