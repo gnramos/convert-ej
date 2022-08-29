@@ -167,10 +167,13 @@ class BOCA(Writer):
         self._write('examples', ','.join(examples), ext='.csv')
 
     def _write_id(self):
+        # provisional solution: just remove all special characters
+        # for the future tiago: you should also change the pdfname in _write_pdf later
+        title = re.sub('\W+','', self.problem.statement.title).lower()
         self.pzip.writestr('description/problem.info',
-                           f'basename={self.problem.id}\n'
-                           f'fullname={self.problem.statement.title}\n'
-                           f'descfile={self.problem.id}.pdf\n')
+                           f'basename={title}\n'
+                           f'fullname={title}\n'
+                           f'descfile={title}.pdf\n')
 
     def _write_input(self):
         self._write('input', self.problem.statement.input)
@@ -239,7 +242,9 @@ class BOCA(Writer):
         write_main()
         call_pdflatex(os.path.join(self.tmp_tex_dir, 'main.tex'))
         with open(os.path.join(self.tmp_tex_dir, 'main.pdf'), 'rb') as f:
-            self.pzip.writestr(f'description/{self.problem.id}.pdf',
+
+            title = re.sub('\W+','', self.problem.statement.title).lower()
+            self.pzip.writestr(f'description/{title}.pdf',
                                f.read())
 
     def _write_solutions(self):
