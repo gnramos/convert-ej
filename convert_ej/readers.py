@@ -123,6 +123,7 @@ class BOCA(ZipReader):
     Keyword arguments:
     file -- the file containing the data for the problem
     """
+
     def _read_aux_files(self):
         aux_files = {}
         for entry in self.pzip.namelist():
@@ -134,6 +135,9 @@ class BOCA(ZipReader):
                         aux_files[entry_name] = f.read()
 
         return aux_files
+
+    def _read_checker(self):
+        pass
 
     def _read_description(self):
         return self._read_stmt_tex('description')

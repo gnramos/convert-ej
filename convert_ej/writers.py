@@ -570,6 +570,9 @@ class CodeRunner(Writer):
                 img.text = str(base64.b64encode(data), 'utf-8')
                 self.root.find('questiontext').append(img)
 
+    def _write_checker(self):
+        pass
+
     def _write_description(self):
         def to_html(header, content):
             html = self._tex2html(content).strip()
