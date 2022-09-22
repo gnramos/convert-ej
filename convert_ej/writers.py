@@ -121,7 +121,7 @@ class BOCA(Writer):
                             write_tmpl(entry.path)
         aux_files()
         template_dirs()
- 
+
     def _write_checker(self):
         checker_file = self.problem.evaluation.checker
         if checker_file:
@@ -146,7 +146,6 @@ class BOCA(Writer):
                 bin_file = f.read()
                 for ext in languages:
                     self.pzip.writestr(f'compare/{ext}', bin_file)
-            
 
     def _write_description(self):
         self._write('description', self.problem.statement.description)
@@ -206,7 +205,7 @@ class BOCA(Writer):
     def _write_notes(self):
         self._write('notes', self.problem.statement.notes)
 
-    def _write_pdf(self, options):
+    def _write_pdf(self, options, pdf_front=''):
         def call_pdflatex(tex_file):
             cmd = ['pdflatex', '-halt-on-error', tex_file]
             with open(os.devnull, 'w') as DEVNULL:
@@ -220,8 +219,16 @@ class BOCA(Writer):
                     # except Exception:
                     #     raise ValueError(f'Unable to create pdf '
                     #                      f'from {tex_file}.tex')
-                    raise ValueError(f'Unable to create pdf'
-                                     f' from {tex_file}')
+                    raise ValueError(f'Unable to create pdf from {tex_file}')
+
+        def call_pdfunite(dest, *origins):
+            cmd = ['pdfunite'] + list(origins) + [dest]
+            with open(os.devnull, 'w') as DEVNULL:
+                try:
+                    subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
+                                          stdout=DEVNULL)
+                except subprocess.CalledProcessError:
+                    raise ValueError(f'Unable to join pdfs into {dest}.')
 
         def write_templates():
             with os.scandir(self.template_tex_dir) as it:
@@ -241,8 +248,12 @@ class BOCA(Writer):
         write_templates()
         write_main()
         call_pdflatex(os.path.join(self.tmp_tex_dir, 'main.tex'))
-        with open(os.path.join(self.tmp_tex_dir, 'main.pdf'), 'rb') as f:
+        pdf_file = os.path.join(self.tmp_tex_dir, 'main.pdf')
+        if pdf_front:
+            call_pdfunite(f'{pdf_file}.tmp', pdf_front, pdf_file)
+            shutil.copy(f'{pdf_file}.tmp', pdf_file)
 
+        with open(pdf_file, 'rb') as f:
             title = re.sub('\W+','', self.problem.statement.title).lower()
             self.pzip.writestr(f'description/{title}.pdf',
                                f.read())
@@ -272,7 +283,7 @@ class BOCA(Writer):
         self._write('tutorial', self.problem.statement.tutorial)
 
     def write(self, problem, output_dir='./', tmp_dir='/tmp', add_notes=True,
-              add_tutorial=False):
+              add_tutorial=False, pdf_front=''):
         """Writes the given Problem into a BOCA file.
 
         http://bombonera.org/
@@ -324,7 +335,7 @@ class BOCA(Writer):
         with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as pzip:
             self.pzip = pzip
             super().write(problem, output_dir=output_dir)
-            self._write_pdf(','.join(class_options))
+            self._write_pdf(','.join(class_options), os.path.join(cwd, pdf_front))
 
         # Cleanup
         shutil.rmtree(self.tmp_dir)

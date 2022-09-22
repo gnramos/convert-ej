@@ -152,14 +152,12 @@ class BOCAWriter(Parsing, writers.BOCA):
                             help='Do not include the notes in the PDF')
         parser.add_argument('--tutorial', action='store_true',
                             help='Include the tutorial in the PDF')
+        parser.add_argument('-f', '--front', help='PDF front page')
 
     def write(self, ejproblem, args):
         """Writes the problem in the BOCA format."""
-        super().write(ejproblem,
-                      output_dir=args.output_dir,
-                      tmp_dir=args.tmp_dir,
-                      add_notes=(not args.hide_notes),
-                      add_tutorial=args.tutorial)
+        super().write(ejproblem, args.output_dir, args.tmp_dir,
+                      not args.hide_notes, args.tutorial, args.front)
 
 
 ###############################################################################
