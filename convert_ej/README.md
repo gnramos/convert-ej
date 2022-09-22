@@ -1,10 +1,3 @@
-# Files
+# Source Code
 
-* **convert.py**: Main file with the parsers;
-* **problem.py**: Contains the classes used in the intermediate structure (**Problem**, **Statement** and **Evaluation**);
-* **readers.py**: Classes for reading each format;
-* **writers.py**: Classes for writing each format;
-
-# Directories
-
-* **templates**: Stores the templates used in the **write** methods;
+Usage is simple, a [reader](readers.py) gets the problem information from a specific file format and stores it as a generic [problem](problem.py) data structure which can then be used to [write](writers.py) it into a specific file format using the provided [templates](templates) (if necessary). [convert.py](convert.py) contains parsers for interfacing via command line.
