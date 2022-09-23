@@ -117,35 +117,39 @@ class BOCA(Writer):
             with os.scandir(self.template_dir) as it:
                 for entry in it:
                     if entry.is_dir() and entry.name not in ['limits', 'tex']:
-                        if (entry.name != 'compare' or self.problem.evaluation.checker == None):
+                        if (entry.name != 'compare' or self.problem.evaluation.checker is None):
                             write_tmpl(entry.path)
         aux_files()
         template_dirs()
 
     def _write_checker(self):
-        checker_file = self.problem.evaluation.checker
-        if checker_file:
-            checker_path = os.path.join(self.tmp_dir, 'checker.cpp')
-            with open(checker_path, 'w') as f:
-                f.write(checker_file)
-
-            # Copy testlib.h to tmp directory.
+        def compile_checker():
             testlib_path = os.path.join(self.template_dir, 'testlib.h')
             compile_path = os.path.join(self.tmp_dir, 'testlib.h')
             shutil.copy(testlib_path, compile_path)
 
-            # Compile checker.
-            bin_path = os.path.join(self.tmp_dir, 'bin')
-            os.system(f'g++ -static -DBOCA_SUPPORT {checker_path} -o {bin_path}')
+            cmd = ['g++', '-static', '-DBOCA_SUPPORT', checker_path, '-o',
+                   checker_binary_path]
+            with open(os.devnull, 'w') as DEVNULL:
+                try:
+                    subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
+                                          stdout=DEVNULL)
+                except subprocess.CalledProcessError:
+                    raise ValueError('Unable to compile checker.')
 
-            # Add the binary files to the compile directory.
-            languages = ['c', 'cc', 'cpp', 'kt', 'java', 'py2', 'py3']
-
-            # shutil.copy(bin_path, 'bin2')
-            with open(bin_path, 'rb') as f:
+        def write_checker_to_zip():
+            with open(checker_binary_path, 'rb') as f:
                 bin_file = f.read()
-                for ext in languages:
-                    self.pzip.writestr(f'compare/{ext}', bin_file)
+            for ext in ('c', 'cc', 'cpp', 'kt', 'java', 'py2', 'py3'):
+                self.pzip.writestr(f'compare/{ext}', bin_file)
+
+        if checker_file := self.problem.evaluation.checker:
+            checker_path = os.path.join(self.tmp_dir, 'checker.cpp')
+            checker_binary_path = os.path.join(self.tmp_dir, 'bin')
+            with open(checker_path, 'w') as f:
+                f.write(checker_file)
+            compile_checker()
+            write_checker_to_zip()
 
     def _write_description(self):
         self._write('description', self.problem.statement.description)
