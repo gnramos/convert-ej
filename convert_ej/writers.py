@@ -258,9 +258,8 @@ class BOCA(Writer):
             shutil.copy(f'{pdf_file}.tmp', pdf_file)
 
         with open(pdf_file, 'rb') as f:
-            title = re.sub('\W+','', self.problem.statement.title).lower()
-            self.pzip.writestr(f'description/{title}.pdf',
-                               f.read())
+            title = re.sub('\W+', '', self.problem.statement.title).lower()
+            self.pzip.writestr(f'description/{title}.pdf', f.read())
 
     def _write_solutions(self):
         sol = self.problem.evaluation.solutions
@@ -312,6 +311,8 @@ class BOCA(Writer):
         add_notes -- boolean to include (or not) the "notes" in the PDF file
         add_tutorial -- boolean to include (or not) the "tutorial" in the PDF
                         file
+        pdf_front -- path to a PDF file to be used as front matter (cover) of
+                     the problem's PDF file
         """
         # Setup
         if not os.path.isdir(tmp_dir):
