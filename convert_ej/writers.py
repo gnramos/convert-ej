@@ -340,7 +340,9 @@ class BOCA(Writer):
         with zipfile.ZipFile(problem_zip, 'w', zipfile.ZIP_DEFLATED) as pzip:
             self.pzip = pzip
             super().write(problem, output_dir=output_dir)
-            self._write_pdf(','.join(class_options), os.path.join(cwd, pdf_front))
+            if pdf_front:
+                pdf_front = os.path.join(cwd, pdf_front)
+            self._write_pdf(','.join(class_options), pdf_front)
 
         # Cleanup
         shutil.rmtree(self.tmp_dir)
