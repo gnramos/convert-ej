@@ -172,7 +172,7 @@ class BOCA(Writer):
     def _write_id(self):
         # provisional solution: just remove all special characters
         # for the future tiago: you should also change the pdfname in _write_pdf later
-        title = re.sub('\W+','', self.problem.statement.title).lower()
+        title = re.sub(r'\W+', '', self.problem.statement.title).lower()
         self.pzip.writestr('description/problem.info',
                            f'basename={title}\n'
                            f'fullname={title}\n'
@@ -209,15 +209,15 @@ class BOCA(Writer):
     def _write_notes(self):
         self._write('notes', self.problem.statement.notes)
 
-    def _write_pdf(self, options, pdf_front=''):
+    def _write_pdf(self, options, pdf_front='', index=0):
         def call_pdflatex(tex_file):
             cmd = ['pdflatex', '-halt-on-error', tex_file]
             with open(os.devnull, 'w') as DEVNULL:
                 try:
                     subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
                                           stdout=DEVNULL)
-                except subprocess.CalledProcessError:
-                    # run again to show errors
+                except subprocess.CalledProcessError as e:
+                    # # run again to show errors
                     # try:
                     #     subprocess.check_call(cmd, cwd=self.tmp_tex_dir)
                     # except Exception:
@@ -242,15 +242,18 @@ class BOCA(Writer):
                         with open(entry.path) as tmpl_file:
                             self._write(entry.name, tmpl_file.read(), ext='')
 
-        def write_main():
+        def write_main(start):
             with open(os.path.join(self.template_tex_dir, 'main.tex')) as f:
                 main = f.read()
                 main = main.replace('documentclass',
                                     f'documentclass[{options}]')
+                main = main.replace(r'\setcounter{problemCounter}{0}%',
+                                    f'\\setcounter{{problemCounter}}{{{start}}}%')
+                print(main)
                 self._write('main', main)
 
         write_templates()
-        write_main()
+        write_main(index)
         call_pdflatex(os.path.join(self.tmp_tex_dir, 'main.tex'))
         pdf_file = os.path.join(self.tmp_tex_dir, 'main.pdf')
         if pdf_front:
@@ -258,7 +261,7 @@ class BOCA(Writer):
             shutil.copy(f'{pdf_file}.tmp', pdf_file)
 
         with open(pdf_file, 'rb') as f:
-            title = re.sub('\W+', '', self.problem.statement.title).lower()
+            title = re.sub(r'\W+', '', self.problem.statement.title).lower()
             self.pzip.writestr(f'description/{title}.pdf', f.read())
 
     def _write_solutions(self):
@@ -286,7 +289,7 @@ class BOCA(Writer):
         self._write('tutorial', self.problem.statement.tutorial)
 
     def write(self, problem, output_dir='./', tmp_dir='/tmp', add_notes=True,
-              add_tutorial=False, pdf_front=''):
+              add_tutorial=False, pdf_front='', index=0):
         """Writes the given Problem into a BOCA file.
 
         http://bombonera.org/
@@ -342,7 +345,7 @@ class BOCA(Writer):
             super().write(problem, output_dir=output_dir)
             if pdf_front:
                 pdf_front = os.path.join(cwd, pdf_front)
-            self._write_pdf(','.join(class_options), pdf_front)
+            self._write_pdf(','.join(class_options), pdf_front, index)
 
         # Cleanup
         shutil.rmtree(self.tmp_dir)

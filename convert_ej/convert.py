@@ -35,7 +35,7 @@ class EJudgeParser(ArgumentParser):
                           help='Input e-judge format')
         self.add_argument('writer', choices=self._list_formats('writers'),
                           help='Output e-judge format')
-        self.add_argument('files', type=self._list_input,
+        self.add_argument('files', type=self._check_file, nargs='+',
                           help='Path of a file or folder of files to convert'
                           ' from reader to writer formats')
         self.add_argument('-o', '--output_dir', type=self._check_dir,
@@ -61,30 +61,17 @@ class EJudgeParser(ArgumentParser):
         self.add_argument('-h', '--help', action='help',
                           help='show this help message and exit')
 
-    def _list_input(self, path):
-        """Returns a list of the input files.
-
-        Returns all the files inside path, in case it's a directory,
-        otherwise returns the single file path.
-        """
-        files = set()
-        if os.path.isfile(path):
-            files.add(path)
-        elif os.path.isdir(path):
-            with os.scandir(path) as it:
-                files = set(entry.path for entry in it
-                            if (entry.is_file() and
-                                not entry.name.startswith('.')))
-        else:
-            raise ArgumentTypeError('Must provide a valid file/directory')
-
-        return files
-
     def _check_dir(self, path):
-        """Check if the given path is of a directory."""
+        """Check if the given path is a directory."""
         if os.path.isdir(path):
             return path
         raise ArgumentTypeError(f'{path} is not a directory')
+
+    def _check_file(self, path):
+        """Check if the given path is a file."""
+        if os.path.isfile(path):
+            return path
+        raise ArgumentTypeError(f'{path} is not a file')
 
     def _list_formats(self, module):
         """Return a list of names of classes that can be instantiated from the
@@ -157,7 +144,7 @@ class BOCAWriter(Parsing, writers.BOCA):
     def write(self, ejproblem, args):
         """Writes the problem in the BOCA format."""
         super().write(ejproblem, args.output_dir, args.tmp_dir,
-                      not args.hide_notes, args.tutorial, args.front)
+                      not args.hide_notes, args.tutorial, args.front, args.index)
 
 
 ###############################################################################
@@ -224,16 +211,19 @@ def main():
     parser = EJudgeParser()
     args = parser.parse_args()
 
-    for file in args.files:
+    for index, file in enumerate(args.files):
+        print(f'Processing "{file}".')
         try:
             print(f'Processing "{file}".')
             ejproblem = args.reader.read(file, args)
+            args.index = index
             args.writer.write(ejproblem, args)
-        except Exception as e:
-            print(e)
         except ValueError as e:
             print(f'\tError: {e}.')
             print(f'\tFAILED to process "{file}".\n')
+        except Exception as e:
+            raise e
+            print(e)
 
 
 if __name__ == "__main__":

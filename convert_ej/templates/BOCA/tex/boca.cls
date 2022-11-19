@@ -59,14 +59,14 @@
 	}
 }%
 
-\newcounter{@problem}%
+\newcounter{problemCounter}%
 \newcommand{\problem}[2][.5\textwidth]{%
-	\stepcounter{@problem}%
+	\stepcounter{problemCounter}%
 	\newpage%
 	\graphicspath{{#2/}}%
 
 	\begin{center}%
-	\large{\textbf{Problema~\Alph{@problem}}}%
+	\large{\textbf{Problema~\Alph{problemCounter}}}%
 	\\%
 	\LARGE{\textbf{\input{#2/title}}}%
 	\\%
