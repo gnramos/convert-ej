@@ -212,7 +212,6 @@ def main():
     args = parser.parse_args()
 
     for index, file in enumerate(args.files):
-        print(f'Processing "{file}".')
         try:
             print(f'Processing "{file}".')
             ejproblem = args.reader.read(file, args)
