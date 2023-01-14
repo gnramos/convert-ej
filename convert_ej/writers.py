@@ -211,7 +211,7 @@ class BOCA(Writer):
 
     def _write_pdf(self, options, pdf_front='', index=0):
         def call_pdflatex(tex_file):
-            cmd = ['pdflatex', '-halt-on-error', tex_file]
+            cmd = ['pdflatex', '-interaction=nonstopmode', '-halt-on-error', tex_file]
             with open(os.devnull, 'w') as DEVNULL:
                 try:
                     subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
