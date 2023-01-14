@@ -249,7 +249,6 @@ class BOCA(Writer):
                                     f'documentclass[{options}]')
                 main = main.replace(r'\setcounter{problemCounter}{0}%',
                                     f'\\setcounter{{problemCounter}}{{{start}}}%')
-                print(main)
                 self._write('main', main)
 
         write_templates()
