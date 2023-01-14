@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 import zipfile
+from unidecode import unidecode
 
 
 class Writer(ABC):
@@ -170,9 +171,10 @@ class BOCA(Writer):
         self._write('examples', ','.join(examples), ext='.csv')
 
     def _write_id(self):
-        # provisional solution: just remove all special characters
-        # for the future tiago: you should also change the pdfname in _write_pdf later
-        title = re.sub(r'\W+', '', self.problem.statement.title).lower()
+        # Remove all special characters and accents (same process done in _write_pdf)
+        title = self.problem.statement.title
+        title = unidecode(title.lower())
+        title = ''.join(c for c in title if c.isalnum())
         self.pzip.writestr('description/problem.info',
                            f'basename={title}\n'
                            f'fullname={title}\n'
@@ -211,7 +213,10 @@ class BOCA(Writer):
 
     def _write_pdf(self, options, pdf_front='', index=0):
         def call_pdflatex(tex_file):
-            cmd = ['pdflatex', '-interaction=nonstopmode', '-halt-on-error', tex_file]
+            cmd = [
+                'pdflatex', '-interaction=nonstopmode', '-halt-on-error',
+                tex_file
+            ]
             with open(os.devnull, 'w') as DEVNULL:
                 try:
                     subprocess.check_call(cmd, cwd=self.tmp_tex_dir,
@@ -260,7 +265,11 @@ class BOCA(Writer):
             shutil.copy(f'{pdf_file}.tmp', pdf_file)
 
         with open(pdf_file, 'rb') as f:
-            title = re.sub(r'\W+', '', self.problem.statement.title).lower()
+            # Remove all special characters and accents
+            # (same process done in _write_id)
+            title = self.problem.statement.title
+            title = unidecode(title.lower())
+            title = ''.join(c for c in title if c.isalnum())
             self.pzip.writestr(f'description/{title}.pdf', f.read())
 
     def _write_solutions(self):
